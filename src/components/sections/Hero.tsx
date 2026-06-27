@@ -161,7 +161,7 @@ export default function Hero() {
             </Magnetic>
           </div>
 
-          <div className="hero-scroll flex items-center gap-2.5 mt-2">
+          <div className="hero-scroll flex items-center gap-2.5 mt-2" data-gravity>
             <div
               style={{
                 width: 1, height: 46,

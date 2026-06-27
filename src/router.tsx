@@ -3,6 +3,8 @@ import { AnimatePresence } from 'framer-motion'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
 import PageTransition from '@/components/animations/PageTransition'
+import Terminal from '@/components/animations/Terminal'
+import SignatureTransition from '@/components/animations/SignatureTransition'
 import Home from '@/pages/Home'
 import AboutPage from '@/pages/AboutPage'
 import ProjectsPage from '@/pages/ProjectsPage'
@@ -23,6 +25,9 @@ function RootLayout() {
         </PageTransition>
       </AnimatePresence>
       <Footer />
+      {/* Global overlays that need router context */}
+      <Terminal />
+      <SignatureTransition />
     </>
   )
 }
@@ -32,13 +37,13 @@ export const router = createBrowserRouter([
     path: '/',
     element: <RootLayout />,
     children: [
-      { index: true, element: <Home /> },
-      { path: 'about', element: <AboutPage /> },
-      { path: 'projects', element: <ProjectsPage /> },
-      { path: 'projects/:slug', element: <ProjectDetail /> },
-      { path: 'services', element: <ServicesPage /> },
-      { path: 'contact', element: <ContactPage /> },
-      { path: '*', element: <NotFound /> },
+      { index: true,              element: <Home />         },
+      { path: 'about',            element: <AboutPage />    },
+      { path: 'projects',         element: <ProjectsPage /> },
+      { path: 'projects/:slug',   element: <ProjectDetail />},
+      { path: 'services',         element: <ServicesPage /> },
+      { path: 'contact',          element: <ContactPage />  },
+      { path: '*',                element: <NotFound />     },
     ],
   },
 ])
