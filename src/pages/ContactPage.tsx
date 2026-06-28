@@ -185,11 +185,11 @@ const SLOTS   = ['09:00', '10:00', '11:00', '14:00', '15:00', '16:00', '17:00']
 
 type SlotStatus = 'free' | 'busy'
 const AVAIL: Record<string, Record<string, SlotStatus>> = {
-  'Segunda': { '09:00':'free',  '10:00':'busy', '11:00':'free', '14:00':'free', '15:00':'busy', '16:00':'free', '17:00':'free' },
-  'Terça':   { '09:00':'free',  '10:00':'free', '11:00':'busy', '14:00':'busy', '15:00':'free', '16:00':'free', '17:00':'busy' },
-  'Quarta':  { '09:00':'busy',  '10:00':'free', '11:00':'free', '14:00':'free', '15:00':'busy', '16:00':'free', '17:00':'free' },
-  'Quinta':  { '09:00':'free',  '10:00':'free', '11:00':'busy', '14:00':'free', '15:00':'free', '16:00':'busy', '17:00':'free' },
-  'Sexta':   { '09:00':'free',  '10:00':'busy', '11:00':'free', '14:00':'free', '15:00':'free', '16:00':'free', '17:00':'busy' },
+  'Segunda': { '09:00':'free', '10:00':'free', '11:00':'free', '14:00':'free', '15:00':'free', '16:00':'free', '17:00':'free' },
+  'Terça':   { '09:00':'free', '10:00':'free', '11:00':'free', '14:00':'free', '15:00':'free', '16:00':'free', '17:00':'free' },
+  'Quarta':  { '09:00':'free', '10:00':'free', '11:00':'free', '14:00':'free', '15:00':'free', '16:00':'free', '17:00':'free' },
+  'Quinta':  { '09:00':'free', '10:00':'free', '11:00':'free', '14:00':'free', '15:00':'free', '16:00':'free', '17:00':'free' },
+  'Sexta':   { '09:00':'free', '10:00':'free', '11:00':'free', '14:00':'free', '15:00':'free', '16:00':'free', '17:00':'free' },
 }
 
 function useClock() {
