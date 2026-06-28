@@ -336,9 +336,8 @@ function Bubble({ from, text }: { from: 'caio' | 'user'; text: string }) {
     <motion.div initial={{ opacity: 0, y: 10, scale: 0.96 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ duration: 0.3, ease: E }}
       style={{ display: 'flex', justifyContent: isCaio ? 'flex-start' : 'flex-end', marginBottom: '0.5rem' }}>
       {isCaio && (
-        <div style={{ width: 26, height: 26, borderRadius: '50%', background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)', flexShrink: 0, marginRight: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', alignSelf: 'flex-end', fontSize: '0.6rem', fontWeight: 700, color: 'rgba(255,255,255,0.5)' }}>
-          C
-        </div>
+        <img src="/assets/minha-foto-1.png" alt="Caio"
+          style={{ width: 28, height: 28, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, marginRight: 8, alignSelf: 'flex-end', border: '1px solid rgba(255,255,255,0.12)' }} />
       )}
       <div style={{
         maxWidth: '76%', padding: '0.6rem 0.95rem',
