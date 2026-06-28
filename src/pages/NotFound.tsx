@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { ArrowLeft } from 'lucide-react'
 import { SITE } from '@/lib/constants'
 
 const W = 640, H = 240
@@ -325,7 +326,7 @@ export default function NotFound() {
         onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.7)' }}
         onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.25)' }}
       >
-        ← Voltar ao portfólio
+        <ArrowLeft size={13} /> Voltar ao portfólio
       </Link>
     </main>
   )

@@ -3,6 +3,7 @@ import { Github, Linkedin } from 'lucide-react'
 import { useT } from '@/hooks/useTranslation'
 import { NAV_LINKS, SITE } from '@/lib/constants'
 import { useCursorStore } from '@/store/useCursorStore'
+import { usePresentationStore } from '@/store/usePresentationStore'
 
 function TikTokIcon({ size = 16 }: { size?: number }) {
   return (
@@ -19,9 +20,12 @@ const socials = [
 ]
 
 export default function Footer() {
-  const t         = useT()
-  const setCursor = useCursorStore((s) => s.setState)
-  const year      = new Date().getFullYear()
+  const t           = useT()
+  const setCursor   = useCursorStore((s) => s.setState)
+  const presenting  = usePresentationStore((s) => s.active)
+  const year        = new Date().getFullYear()
+
+  if (presenting) return null
 
   const navLabels: Record<string, string> = {
     home:     t.nav.home,

@@ -56,47 +56,11 @@ export default function WeatherBackground() {
       particles.push({ x: Math.random() * canvas.width, y: Math.random() * canvas.height * 0.6, vx: 0.15, vy: 0, size: 80 + Math.random() * 120, alpha: 0.025, life: 1 })
     }
 
-    /* ── Draw sun rays ── */
-    function drawSun() {
-      const cx = canvas.width * 0.72
-      const cy = -80
-      const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, canvas.height * 0.7)
-      grad.addColorStop(0,   'rgba(255,240,180,0.04)')
-      grad.addColorStop(0.4, 'rgba(255,220,120,0.02)')
-      grad.addColorStop(1,   'rgba(255,200,80,0)')
-      ctx.fillStyle = grad
-      ctx.fillRect(0, 0, canvas.width, canvas.height)
-      /* light shafts */
-      for (let i = 0; i < 6; i++) {
-        const angle = (i / 6) * 0.5 - 0.25 + 0.4
-        ctx.save()
-        ctx.translate(cx, cy)
-        ctx.rotate(angle)
-        const g2 = ctx.createLinearGradient(0, 0, 0, canvas.height)
-        g2.addColorStop(0,   'rgba(255,240,160,0.04)')
-        g2.addColorStop(0.6, 'rgba(255,240,160,0.008)')
-        g2.addColorStop(1,   'rgba(255,240,160,0)')
-        ctx.fillStyle = g2
-        ctx.beginPath()
-        ctx.moveTo(-20, 0)
-        ctx.lineTo(20, 0)
-        ctx.lineTo(60, canvas.height)
-        ctx.lineTo(-60, canvas.height)
-        ctx.fill()
-        ctx.restore()
-      }
-    }
-
     let frame = 0
     function tick() {
       raf = requestAnimationFrame(tick)
       frame++
       ctx.clearRect(0, 0, canvas.width, canvas.height)
-
-      if (type === 'clear') {
-        if (frame % 3 === 0) drawSun()
-        else drawSun()
-      }
 
       if (type === 'fog' && frame % 80 === 0 && particles.length < 12) spawnFog()
 

@@ -1,95 +1,231 @@
 import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, NavLink } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Menu } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useT } from '@/hooks/useTranslation'
 import { useLanguageStore } from '@/store/useLanguageStore'
 import { useCursorStore } from '@/store/useCursorStore'
-import Navigation from './Navigation'
-import { SITE } from '@/lib/constants'
+import { usePresentationStore } from '@/store/usePresentationStore'
+import { NAV_LINKS, SITE } from '@/lib/constants'
 
 export default function Header() {
-  const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [glowing, setGlowing] = useState(false)
   const { toggle, lang } = useLanguageStore()
+  const t = useT()
   const setCursor = useCursorStore((s) => s.setState)
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 60)
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
-  }, [])
+  const { active: presenting, toggle: togglePresentation } = usePresentationStore()
 
   useEffect(() => {
     document.body.style.overflow = mobileOpen ? 'hidden' : ''
     return () => { document.body.style.overflow = '' }
   }, [mobileOpen])
 
+  if (presenting) return null
+
+  const navLabels: Record<string, string> = {
+    home:     t.nav.home,
+    about:    t.nav.about,
+    projects: t.nav.projects,
+    services: t.nav.services,
+    contact:  t.nav.contact,
+  }
+
+  function handleToggle() {
+    toggle()
+    setGlowing(true)
+    setTimeout(() => setGlowing(false), 650)
+  }
+
   return (
     <>
+      {/* ─── Floating pill header ─── */}
       <header
-        className={cn(
-          'fixed top-0 left-0 right-0 z-50 transition-all duration-500',
-          scrolled ? 'py-4 border-b border-white/[0.06]' : 'py-6'
-        )}
-        style={{
-          background: scrolled ? 'rgba(13,13,13,0.9)' : 'transparent',
-          backdropFilter: scrolled ? 'blur(16px)' : 'none',
-        }}
+        className="fixed top-0 left-0 right-0 z-50 flex justify-center"
+        style={{ padding: '1.25rem 1rem', pointerEvents: 'none' }}
       >
-        <div className="container-custom flex items-center justify-between gap-8">
-          {/* Logo */}
+        <div
+          className="flex items-center"
+          style={{
+            pointerEvents:        'auto',
+            background:           'rgba(10,10,10,0.88)',
+            backdropFilter:       'blur(24px)',
+            WebkitBackdropFilter: 'blur(24px)',
+            border:               '1px solid rgba(255,255,255,0.1)',
+            borderRadius:         '999px',
+            padding:              '0.5rem 0.5rem 0.5rem 1rem',
+            width:                'min(920px, calc(100vw - 2rem))',
+            gap:                  '0.25rem',
+          }}
+        >
+          {/* Logo — double-click activates presentation mode */}
           <Link
             to="/"
-            className="font-black text-white text-base tracking-[-0.03em] select-none flex-shrink-0"
+            className="flex items-center gap-2 flex-shrink-0"
             onMouseEnter={() => setCursor('pointer')}
             onMouseLeave={() => setCursor('default')}
+            onDoubleClick={() => togglePresentation()}
+            style={{ marginRight: '0.375rem' }}
           >
-            Caio Diniz
+            <img
+              src="/icon.svg"
+              width={28}
+              height={28}
+              alt="CD"
+              style={{ borderRadius: '7px', flexShrink: 0 }}
+            />
+            <span style={{
+              fontWeight:    700,
+              fontSize:      '0.875rem',
+              letterSpacing: '-0.02em',
+              color:         '#ffffff',
+              whiteSpace:    'nowrap',
+            }}>
+              Caio Diniz
+            </span>
           </Link>
 
-          {/* Center: nav */}
-          <div className="hidden lg:flex items-center">
-            <Navigation />
-          </div>
+          {/* Separator */}
+          <div style={{
+            width:      1,
+            height:     18,
+            background: 'rgba(255,255,255,0.1)',
+            flexShrink: 0,
+            margin:     '0 0.625rem',
+          }} />
 
-          {/* Right: email + lang */}
-          <div className="hidden lg:flex items-center gap-6">
-            <a
-              href={`mailto:${SITE.email}`}
-              className="text-[0.6875rem] font-medium text-white/30 hover:text-white/70 uppercase tracking-[0.08em] transition-colors duration-200"
-              onMouseEnter={() => setCursor('pointer')}
-              onMouseLeave={() => setCursor('default')}
-            >
-              {SITE.email}
-            </a>
+          {/* Nav links — desktop only */}
+          <nav className="hidden lg:flex items-center justify-center flex-1">
+            {NAV_LINKS.map((link) => (
+              <NavLink
+                key={link.path}
+                to={link.path}
+                end={link.path === '/'}
+                onMouseEnter={() => setCursor('pointer')}
+                onMouseLeave={() => setCursor('default')}
+                className={({ isActive }) =>
+                  cn(
+                    'px-3.5 py-2 text-[0.65rem] font-semibold uppercase tracking-[0.08em] rounded-full transition-colors duration-200 whitespace-nowrap',
+                    isActive
+                      ? 'text-white bg-white/[0.07]'
+                      : 'text-white/40 hover:text-white/75'
+                  )
+                }
+              >
+                {navLabels[link.label]}
+              </NavLink>
+            ))}
+          </nav>
+
+          {/* Right side */}
+          <div className="flex items-center gap-2 ml-auto">
+
+            {/* Language toggle with shimmer glow */}
             <button
-              onClick={toggle}
-              className="text-[0.6875rem] font-semibold text-white/30 hover:text-white uppercase tracking-[0.12em] transition-colors duration-200"
+              onClick={handleToggle}
               onMouseEnter={() => setCursor('pointer')}
               onMouseLeave={() => setCursor('default')}
+              className="hidden lg:flex relative overflow-hidden items-center justify-center"
+              style={{
+                height:        '2.25rem',
+                padding:       '0 0.875rem',
+                borderRadius:  '999px',
+                border:        '1px solid rgba(255,255,255,0.12)',
+                background:    'rgba(255,255,255,0.04)',
+                color:         'rgba(255,255,255,0.5)',
+                fontSize:      '0.6rem',
+                fontWeight:    700,
+                letterSpacing: '0.12em',
+                textTransform: 'uppercase',
+                cursor:        'pointer',
+                transition:    'color 0.25s, border-color 0.25s',
+                flexShrink:    0,
+              }}
+            >
+              {glowing && (
+                <motion.span
+                  key={String(glowing)}
+                  initial={{ x: '-120%' }}
+                  animate={{ x: '220%' }}
+                  transition={{ duration: 0.55, ease: 'easeOut' }}
+                  style={{
+                    position:   'absolute',
+                    inset:      0,
+                    background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.45) 50%, transparent 100%)',
+                    borderRadius: 'inherit',
+                  }}
+                />
+              )}
+              <AnimatePresence mode="wait">
+                <motion.span
+                  key={lang}
+                  initial={{ opacity: 0, y: 4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -4 }}
+                  transition={{ duration: 0.18 }}
+                  className="relative z-10"
+                >
+                  {lang === 'en' ? 'PT' : 'EN'}
+                </motion.span>
+              </AnimatePresence>
+            </button>
+
+            {/* CTA — "Let's talk" / "Vamos conversar" */}
+            <Link
+              to="/contact"
+              onMouseEnter={() => setCursor('pointer')}
+              onMouseLeave={() => setCursor('default')}
+              className="hidden lg:flex items-center gap-1.5 flex-shrink-0"
+              style={{
+                padding:       '0.625rem 1.125rem',
+                borderRadius:  '999px',
+                background:    '#ffffff',
+                color:         '#0d0d0d',
+                fontSize:      '0.675rem',
+                fontWeight:    700,
+                letterSpacing: '0.04em',
+                textDecoration:'none',
+                whiteSpace:    'nowrap',
+                transition:    'background 0.25s, opacity 0.25s',
+              }}
+            >
+              <AnimatePresence mode="wait">
+                <motion.span
+                  key={lang}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  {lang === 'en' ? "Let's talk" : 'Vamos conversar'}
+                </motion.span>
+              </AnimatePresence>
+              <span aria-hidden>↗</span>
+            </Link>
+
+            {/* Language toggle on mobile (hamburger replaced by bottom nav) */}
+            <button
+              onClick={handleToggle}
+              onMouseEnter={() => setCursor('pointer')}
+              onMouseLeave={() => setCursor('default')}
+              className="flex lg:hidden relative overflow-hidden items-center justify-center"
+              style={{
+                height:        '2.25rem',
+                padding:       '0 0.875rem',
+                borderRadius:  '999px',
+                border:        '1px solid rgba(255,255,255,0.12)',
+                background:    'rgba(255,255,255,0.04)',
+                color:         'rgba(255,255,255,0.5)',
+                fontSize:      '0.6rem',
+                fontWeight:    700,
+                letterSpacing: '0.12em',
+                textTransform: 'uppercase',
+                cursor:        'pointer',
+                flexShrink:    0,
+              }}
             >
               {lang === 'en' ? 'PT' : 'EN'}
-            </button>
-          </div>
-
-          {/* Mobile */}
-          <div className="flex lg:hidden items-center gap-5">
-            <button
-              onClick={toggle}
-              className="text-[0.6875rem] font-semibold text-white/30 uppercase tracking-[0.12em]"
-            >
-              {lang === 'en' ? 'PT' : 'EN'}
-            </button>
-            <button
-              onClick={() => setMobileOpen(true)}
-              aria-label="Open menu"
-              className="text-white/50 hover:text-white transition-colors"
-              onMouseEnter={() => setCursor('pointer')}
-              onMouseLeave={() => setCursor('default')}
-            >
-              <Menu size={22} strokeWidth={1.5} />
             </button>
           </div>
         </div>
@@ -108,9 +244,14 @@ export default function Header() {
           >
             {/* Top bar */}
             <div className="flex justify-between items-center px-6 py-5 border-b border-white/[0.07]">
-              <span className="font-black text-white text-base tracking-[-0.03em]">
-                Caio Diniz
-              </span>
+              <Link
+                to="/"
+                onClick={() => setMobileOpen(false)}
+                className="flex items-center gap-2.5"
+              >
+                <img src="/icon.svg" width={28} height={28} style={{ borderRadius: '7px' }} alt="CD" />
+                <span className="font-black text-white text-base tracking-[-0.03em]">Caio Diniz</span>
+              </Link>
               <button
                 onClick={() => setMobileOpen(false)}
                 aria-label="Close"
@@ -122,7 +263,31 @@ export default function Header() {
 
             {/* Links */}
             <div className="flex-1 flex flex-col justify-center px-6">
-              <Navigation mobile onClose={() => setMobileOpen(false)} />
+              <ul className="flex flex-col">
+                {NAV_LINKS.map((link, i) => (
+                  <motion.li
+                    key={link.path}
+                    initial={{ opacity: 0, y: 28 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.07 + i * 0.07, duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
+                    className="border-b border-white/[0.07] overflow-hidden"
+                  >
+                    <NavLink
+                      to={link.path}
+                      end={link.path === '/'}
+                      onClick={() => setMobileOpen(false)}
+                      className={({ isActive }) =>
+                        cn(
+                          'block py-5 text-5xl font-black tracking-[-0.03em] transition-colors duration-200',
+                          isActive ? 'text-white' : 'text-white/25 hover:text-white'
+                        )
+                      }
+                    >
+                      {navLabels[link.label]}
+                    </NavLink>
+                  </motion.li>
+                ))}
+              </ul>
             </div>
 
             {/* Bottom */}
@@ -136,7 +301,7 @@ export default function Header() {
                 {SITE.email}
               </a>
               <button
-                onClick={toggle}
+                onClick={handleToggle}
                 className="text-xs font-semibold uppercase tracking-widest text-white/25"
               >
                 {lang === 'en' ? 'PT' : 'EN'}

@@ -1,275 +1,478 @@
-import { useEffect } from 'react'
-import { motion } from 'framer-motion'
+import { useEffect, useState, useMemo } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import {
   Zap, Building2, Monitor, Server, Sparkles, Rocket,
-  Check, MessageCircle
+  Check, MessageCircle, Calculator, ChevronRight, ArrowUpRight
 } from 'lucide-react'
-import { useT } from '@/hooks/useTranslation'
 import { useLanguageStore } from '@/store/useLanguageStore'
-import { services } from '@/data/services'
-import Badge from '@/components/ui/Badge'
-import Button from '@/components/ui/Button'
-import Magnetic from '@/components/animations/Magnetic'
-import CTASection from '@/components/sections/CTASection'
-import { staggerContainer, staggerItem } from '@/lib/animations'
-import { SITE } from '@/lib/constants'
 import { useCursorStore } from '@/store/useCursorStore'
+import { SITE } from '@/lib/constants'
+import type { CursorState } from '@/store/useCursorStore'
 
-const iconMap: Record<string, typeof Zap> = {
-  Zap, Building2, Monitor, Server, Sparkles, Rocket,
-}
-
-const packages = [
+/* ── Data ── */
+const SERVICES_DATA = [
   {
-    nameEn: 'Starter Website',
-    namePt: 'Site Básico',
+    Icon: Monitor,
+    titleEn: 'Landing Pages',       titlePt: 'Landing Pages',
+    descEn:  'High-converting, fast landing pages designed to turn visitors into clients.',
+    descPt:  'Landing pages rápidas e focadas em conversão, transformando visitantes em clientes.',
+  },
+  {
+    Icon: Building2,
+    titleEn: 'Business Websites',   titlePt: 'Sites Institucionais',
+    descEn:  'Professional multi-page websites that communicate authority and trust.',
+    descPt:  'Sites profissionais de múltiplas páginas que transmitem autoridade e confiança.',
+  },
+  {
+    Icon: Zap,
+    titleEn: 'Web Applications',    titlePt: 'Aplicações Web',
+    descEn:  'Full-stack React + Node.js apps with auth, database and real-time features.',
+    descPt:  'Apps full-stack com React + Node.js, autenticação, banco de dados e tempo real.',
+  },
+  {
+    Icon: Server,
+    titleEn: 'APIs & Backends',     titlePt: 'APIs & Backends',
+    descEn:  'REST APIs, database modeling, authentication systems and server architecture.',
+    descPt:  'APIs REST, modelagem de banco, sistemas de autenticação e arquitetura de servidor.',
+  },
+  {
+    Icon: Sparkles,
+    titleEn: 'UI/UX & Animations',  titlePt: 'UI/UX & Animações',
+    descEn:  'Motion design with GSAP and Framer Motion — interfaces that feel alive.',
+    descPt:  'Motion design com GSAP e Framer Motion — interfaces que parecem vivas.',
+  },
+  {
+    Icon: Rocket,
+    titleEn: 'Performance & SEO',   titlePt: 'Performance & SEO',
+    descEn:  'Core Web Vitals optimization, Lighthouse 100, structured data and more.',
+    descPt:  'Otimização de Core Web Vitals, Lighthouse 100, dados estruturados e mais.',
+  },
+]
+
+const PACKAGES = [
+  {
+    nameEn: 'Starter',       namePt: 'Básico',
     descEn: 'Clean, fast landing page or simple institutional website.',
     descPt: 'Landing page limpa e rápida ou site institucional simples.',
     price: 'R$ 500+',
-    features: ['Up to 3 pages', 'Mobile responsive', 'Contact form', 'Basic SEO', 'Vercel deploy'],
-    featuresPt: ['Até 3 páginas', 'Responsivo', 'Formulário de contato', 'SEO básico', 'Deploy na Vercel'],
+    featuresEn: ['Up to 3 pages', 'Mobile responsive', 'Contact form', 'Basic SEO', 'Vercel deploy'],
+    featuresPt: ['Até 3 páginas',   'Responsivo',         'Formulário de contato', 'SEO básico', 'Deploy na Vercel'],
     highlight: false,
   },
   {
-    nameEn: 'Professional Website',
-    namePt: 'Site Profissional',
+    nameEn: 'Professional',  namePt: 'Profissional',
     descEn: 'Premium website with animations, custom design and advanced features.',
     descPt: 'Site premium com animações, design personalizado e recursos avançados.',
     price: 'R$ 1.500+',
-    features: ['Up to 6 pages', 'Custom animations', 'Premium UI design', 'Performance optimized', 'Analytics setup'],
-    featuresPt: ['Até 6 páginas', 'Animações customizadas', 'Design premium', 'Performance otimizada', 'Configuração de Analytics'],
+    featuresEn: ['Up to 6 pages', 'Custom animations', 'Premium UI design', 'Performance optimized', 'Analytics setup'],
+    featuresPt: ['Até 6 páginas',  'Animações customizadas', 'Design premium', 'Performance otimizada', 'Analytics'],
     highlight: true,
   },
   {
-    nameEn: 'Web App / System',
-    namePt: 'App Web / Sistema',
+    nameEn: 'Web App / System', namePt: 'App Web / Sistema',
     descEn: 'Full-stack web application with backend, database and authentication.',
     descPt: 'Aplicação web completa com backend, banco de dados e autenticação.',
     price: 'R$ 3.000+',
-    features: ['Custom features', 'Backend API', 'Database design', 'Authentication', 'Admin dashboard'],
+    featuresEn: ['Custom features', 'Backend API', 'Database design', 'Authentication', 'Admin dashboard'],
     featuresPt: ['Funcionalidades customizadas', 'API Backend', 'Design de banco', 'Autenticação', 'Dashboard admin'],
     highlight: false,
   },
 ]
 
-const faq = [
+const FAQ = [
   {
-    q: 'How long does a project take?',
+    qEn: 'How long does a project take?',
     qPt: 'Quanto tempo leva um projeto?',
-    a: 'Landing pages take 3-7 days. Business websites take 1-2 weeks. Web apps take 2-6 weeks depending on complexity.',
-    aPt: 'Landing pages levam 3-7 dias. Sites institucionais levam 1-2 semanas. Apps web levam 2-6 semanas dependendo da complexidade.',
+    aEn: 'Landing pages take 3–7 days. Business websites take 1–2 weeks. Web apps take 2–6 weeks depending on complexity.',
+    aPt: 'Landing pages levam 3–7 dias. Sites institucionais levam 1–2 semanas. Apps web levam 2–6 semanas.',
   },
   {
-    q: 'Do you provide ongoing support after launch?',
+    qEn: 'Do you provide support after launch?',
     qPt: 'Você oferece suporte após o lançamento?',
-    a: 'Yes! I offer 30 days of free support after every project launch for bug fixes and minor adjustments.',
-    aPt: 'Sim! Ofereço 30 dias de suporte gratuito após o lançamento de cada projeto para correção de bugs e ajustes menores.',
+    aEn: 'Yes — 30 days of free support after every project launch for bug fixes and minor adjustments.',
+    aPt: 'Sim — 30 dias de suporte gratuito após o lançamento para correções e ajustes menores.',
   },
   {
-    q: 'What technologies do you use?',
+    qEn: 'What technologies do you use?',
     qPt: 'Quais tecnologias você usa?',
-    a: 'React, TypeScript, Node.js, Prisma, PostgreSQL, Tailwind CSS, GSAP and Vercel for deployment.',
+    aEn: 'React, TypeScript, Node.js, Prisma, PostgreSQL, Tailwind CSS, GSAP and Vercel for deployment.',
     aPt: 'React, TypeScript, Node.js, Prisma, PostgreSQL, Tailwind CSS, GSAP e Vercel para deploy.',
   },
   {
-    q: 'Can I see the source code?',
+    qEn: 'Do I own the source code?',
     qPt: 'Posso ver o código-fonte?',
-    a: 'Absolutely. You own the code. I deliver everything organized, documented and on a private GitHub repo.',
-    aPt: 'Com certeza. Você é dono do código. Entrego tudo organizado, documentado e em um repositório privado no GitHub.',
+    aEn: 'Absolutely. You own 100% of the code, delivered organized, documented on a private GitHub repo.',
+    aPt: 'Com certeza. Você é dono do código, entregue organizado e documentado em repositório privado.',
   },
 ]
 
-export default function ServicesPage() {
-  const t = useT()
-  const lang = useLanguageStore((s) => s.lang)
-  const setCursor = useCursorStore((s) => s.setState)
+/* ── Budget Calculator ── */
+const PROJECT_TYPES = [
+  { id: 'landing', labelEn: 'Landing Page',   labelPt: 'Landing Page',   min: 500,  max: 1500, daysMin: 3,  daysMax: 7  },
+  { id: 'website', labelEn: 'Website',         labelPt: 'Website',         min: 1500, max: 3500, daysMin: 7,  daysMax: 21 },
+  { id: 'webapp',  labelEn: 'Web App',          labelPt: 'Web App',         min: 3000, max: 8000, daysMin: 14, daysMax: 42 },
+  { id: 'api',     labelEn: 'API / Backend',    labelPt: 'API / Backend',   min: 2000, max: 5000, daysMin: 10, daysMax: 30 },
+]
+const FEATURES = [
+  { id: 'animations', labelEn: 'Custom animations', labelPt: 'Animações customizadas', addMin: 400,  addMax: 800  },
+  { id: 'cms',        labelEn: 'CMS / Blog',         labelPt: 'CMS / Blog',              addMin: 600,  addMax: 1000 },
+  { id: 'auth',       labelEn: 'Authentication',      labelPt: 'Autenticação',            addMin: 500,  addMax: 900  },
+  { id: 'ecommerce',  labelEn: 'E-commerce',          labelPt: 'E-commerce',              addMin: 1200, addMax: 2500 },
+  { id: 'dashboard',  labelEn: 'Admin dashboard',     labelPt: 'Dashboard admin',         addMin: 900,  addMax: 1800 },
+  { id: 'seo',        labelEn: 'Advanced SEO',        labelPt: 'SEO avançado',            addMin: 300,  addMax: 600  },
+]
+const TIMELINES = [
+  { id: 'flexible', labelEn: 'Flexible', labelPt: 'Flexível', multiplier: 1    },
+  { id: 'normal',   labelEn: 'Normal',   labelPt: 'Normal',   multiplier: 1    },
+  { id: 'urgent',   labelEn: 'Rush',     labelPt: 'Urgente',  multiplier: 1.35 },
+]
 
-  useEffect(() => {
-    document.title = `Services — ${SITE.name}`
-  }, [])
+function fmt(n: number) { return 'R$ ' + Math.round(n / 100) * 100 + '+' }
+
+function pill(selected: boolean): React.CSSProperties {
+  return {
+    padding: '0.5rem 1rem', borderRadius: 999,
+    border: `1px solid ${selected ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,0.1)'}`,
+    background: selected ? 'rgba(255,255,255,0.1)' : 'transparent',
+    color: selected ? '#fff' : 'rgba(255,255,255,0.38)',
+    fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s',
+  }
+}
+
+function BudgetCalculator({ lang, setCursor }: { lang: string; setCursor: (s: CursorState) => void }) {
+  const [projectType,       setProjectType]       = useState('')
+  const [selectedFeatures,  setSelectedFeatures]  = useState<Set<string>>(new Set())
+  const [timeline,          setTimeline]          = useState('normal')
+
+  function toggleFeature(id: string) {
+    setSelectedFeatures(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n })
+  }
+
+  const estimate = useMemo(() => {
+    if (!projectType) return null
+    const base = PROJECT_TYPES.find(p => p.id === projectType)!
+    const tl   = TIMELINES.find(t => t.id === timeline)!
+    let addMin = 0, addMax = 0, addDays = 0
+    for (const fid of selectedFeatures) {
+      const f = FEATURES.find(f => f.id === fid)!
+      addMin += f.addMin; addMax += f.addMax; addDays += 3
+    }
+    return {
+      priceMin: Math.round((base.min + addMin) * tl.multiplier),
+      priceMax: Math.round((base.max + addMax) * tl.multiplier),
+      dMin: base.daysMin + addDays,
+      dMax: base.daysMax + addDays,
+    }
+  }, [projectType, selectedFeatures, timeline])
 
   return (
-    <main className="pt-28">
-      {/* Hero */}
-      <section className="section-padding hero-bg-gradient">
-        <div className="container-custom">
-          <motion.div
-            initial="hidden"
-            animate="visible"
-            variants={staggerContainer}
-            className="flex flex-col gap-8 max-w-3xl"
-          >
-            <motion.div variants={staggerItem}>
-              <Badge variant="purple">{t.services.badge}</Badge>
-            </motion.div>
-            <motion.h1 variants={staggerItem} className="text-hero font-black text-white tracking-tight">
-              {lang === 'en'
-                ? 'Websites and digital products that make your business look professional.'
-                : 'Sites e produtos digitais que fazem o seu negócio parecer profissional.'}
-            </motion.h1>
-            <motion.p variants={staggerItem} className="text-slate-text text-lg leading-relaxed">
-              {lang === 'en'
-                ? 'I help businesses, creators and professionals build a strong digital presence through professional websites, landing pages, web applications and custom systems.'
-                : 'Ajudo empresas, criadores e profissionais a construir uma presença digital forte através de sites profissionais, landing pages, aplicações web e sistemas personalizados.'}
-            </motion.p>
-            <motion.div variants={staggerItem}>
-              <Magnetic strength={0.25}>
-                <a
-                  href={`https://wa.me/${SITE.whatsapp.replace(/\D/g, '')}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <Button variant="primary" size="lg">
-                    <MessageCircle size={16} />
-                    {lang === 'en' ? 'Start via WhatsApp' : 'Iniciar pelo WhatsApp'}
-                  </Button>
-                </a>
-              </Magnetic>
-            </motion.div>
-          </motion.div>
+    <section style={{ background: '#0d0d0d', borderTop: '1px solid rgba(255,255,255,0.06)', padding: 'clamp(4rem,8vw,6rem) clamp(1.5rem,5vw,5rem)' }}>
+      <motion.div initial={{ opacity: 0, y: 28 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-60px' }} transition={{ duration: 0.7, ease: [0.16,1,0.3,1] }}
+        style={{ maxWidth: 860, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+            <Calculator size={14} style={{ color: 'rgba(255,255,255,0.3)' }} />
+            <span style={{ fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.25)' }}>
+              {lang === 'en' ? 'Budget calculator' : 'Calculadora de orçamento'}
+            </span>
+          </div>
+          <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 900, fontSize: 'clamp(2rem,5vw,3.5rem)', letterSpacing: '-0.05em', lineHeight: 1, color: '#fff', margin: 0 }}>
+            {lang === 'en' ? 'Estimate your project.' : 'Estime seu projeto.'}
+          </h2>
+          <p style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.3)', lineHeight: 1.7 }}>
+            {lang === 'en' ? 'Select type, features and timeline for a real-time price estimate.' : 'Selecione o tipo, recursos e prazo para uma estimativa de preço em tempo real.'}
+          </p>
         </div>
-      </section>
 
-      {/* Services */}
-      <section className="section-padding bg-navy-950">
-        <div className="container-custom">
-          <div className="flex flex-col gap-14">
-            <div className="flex flex-col gap-4">
-              <Badge variant="purple">{t.services.badge}</Badge>
-              <h2 className="text-section font-black text-white">{t.services.headline}</h2>
-            </div>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-              {services.map((service, i) => {
-                const Icon = iconMap[service.icon] ?? Zap
-                const title = lang === 'en' ? service.titleEn : service.titlePt
-                const description = lang === 'en' ? service.descriptionEn : service.descriptionPt
-
-                return (
-                  <motion.div
-                    key={service.id}
-                    initial={{ opacity: 0, y: 30 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, margin: '-40px' }}
-                    transition={{ duration: 0.6, delay: i * 0.07 }}
-                    className="glass-card rounded-2xl p-6 flex flex-col gap-4"
-                  >
-                    <div className="w-12 h-12 rounded-xl bg-purple/10 border border-purple/20 flex items-center justify-center">
-                      <Icon size={20} className="text-purple-light" />
-                    </div>
-                    <div>
-                      <h3 className="font-bold text-white mb-2">{title}</h3>
-                      <p className="text-sm text-slate-text leading-relaxed">{description}</p>
-                    </div>
-                  </motion.div>
-                )
-              })}
+        {[
+          { label: lang === 'en' ? '01 — Project type' : '01 — Tipo de projeto', items: PROJECT_TYPES.map(p => ({ id: p.id, label: lang === 'en' ? p.labelEn : p.labelPt, sel: projectType === p.id, onClick: () => setProjectType(p.id), extra: '' })) },
+          { label: lang === 'en' ? '02 — Additional features' : '02 — Recursos adicionais', items: FEATURES.map(f => ({ id: f.id, label: lang === 'en' ? f.labelEn : f.labelPt, sel: selectedFeatures.has(f.id), onClick: () => toggleFeature(f.id), extra: '' })) },
+          { label: lang === 'en' ? '03 — Timeline' : '03 — Prazo', items: TIMELINES.map(t => ({ id: t.id, label: lang === 'en' ? t.labelEn : t.labelPt, sel: timeline === t.id, onClick: () => setTimeline(t.id), extra: t.id === 'urgent' ? '+35%' : '' })) },
+        ].map(group => (
+          <div key={group.label} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            <p style={{ fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.2)' }}>{group.label}</p>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+              {group.items.map(item => (
+                <button key={item.id} onClick={item.onClick} style={pill(item.sel)}
+                  onMouseEnter={() => setCursor('pointer')} onMouseLeave={() => setCursor('default')}>
+                  {item.label}{item.extra && <span style={{ marginLeft: 5, fontSize: '0.62rem', opacity: 0.55 }}>{item.extra}</span>}
+                </button>
+              ))}
             </div>
           </div>
-        </div>
-      </section>
+        ))}
 
-      {/* Packages */}
-      <section className="section-padding">
-        <div className="container-custom">
-          <div className="flex flex-col gap-14">
-            <div className="text-center flex flex-col items-center gap-4">
-              <Badge variant="purple">{lang === 'en' ? 'Packages' : 'Pacotes'}</Badge>
-              <h2 className="text-section font-black text-white">
-                {lang === 'en' ? 'Simple, transparent pricing' : 'Preços simples e transparentes'}
-              </h2>
-            </div>
-            <div className="grid md:grid-cols-3 gap-6">
-              {packages.map((pkg, i) => (
-                <motion.div
-                  key={pkg.nameEn}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: i * 0.1 }}
-                  className={`rounded-2xl p-8 flex flex-col gap-6 ${
-                    pkg.highlight
-                      ? 'bg-purple/10 border border-purple/40 shadow-[0_0_60px_rgba(255,255,255,0.06)]'
-                      : 'glass-card'
-                  }`}
-                >
-                  {pkg.highlight && (
-                    <span className="text-xs font-bold text-purple uppercase tracking-widest">
-                      {lang === 'en' ? 'Most Popular' : 'Mais Popular'}
-                    </span>
-                  )}
-                  <div>
-                    <h3 className="text-lg font-black text-white">
-                      {lang === 'en' ? pkg.nameEn : pkg.namePt}
-                    </h3>
-                    <p className="text-sm text-slate-text mt-1">
-                      {lang === 'en' ? pkg.descEn : pkg.descPt}
+        <div style={{ height: 1, background: 'rgba(255,255,255,0.07)' }} />
+
+        <AnimatePresence mode="wait">
+          {estimate ? (
+            <motion.div key="result" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.35, ease: [0.16,1,0.3,1] }}
+              style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(200px,100%),1fr))', gap: '1.5rem' }}>
+                {[
+                  { label: lang === 'en' ? 'Estimated price' : 'Estimativa de preço', main: fmt(estimate.priceMin), sub: `– ${fmt(estimate.priceMax)}` },
+                  { label: lang === 'en' ? 'Delivery time' : 'Tempo de entrega', main: `${estimate.dMin}`, sub: `–${estimate.dMax} ${lang === 'en' ? 'days' : 'dias'}` },
+                ].map(card => (
+                  <div key={card.label} style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                    <p style={{ fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.2)' }}>{card.label}</p>
+                    <p style={{ fontFamily: 'Syne, sans-serif', fontWeight: 900, fontSize: 'clamp(1.6rem,3.5vw,2.4rem)', letterSpacing: '-0.04em', color: '#fff', lineHeight: 1 }}>
+                      {card.main}<span style={{ fontSize: '0.52em', color: 'rgba(255,255,255,0.25)', fontWeight: 600 }}> {card.sub}</span>
                     </p>
                   </div>
-                  <div className="text-3xl font-black text-white">{pkg.price}</div>
-                  <ul className="flex flex-col gap-2.5">
-                    {(lang === 'en' ? pkg.features : pkg.featuresPt).map((f) => (
-                      <li key={f} className="flex items-center gap-2 text-sm text-slate-text">
-                        <Check size={14} className="text-green-accent flex-shrink-0" />
-                        {f}
-                      </li>
-                    ))}
-                  </ul>
-                  <a
-                    href={`https://wa.me/${SITE.whatsapp.replace(/\D/g, '')}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onMouseEnter={() => setCursor('pointer')}
-                    onMouseLeave={() => setCursor('default')}
-                  >
-                    <Button
-                      variant={pkg.highlight ? 'primary' : 'secondary'}
-                      size="md"
-                      className="w-full"
-                    >
-                      {lang === 'en' ? 'Get Started' : 'Começar'}
-                    </Button>
-                  </a>
-                </motion.div>
-              ))}
+                ))}
+              </div>
+              <p style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.2)', lineHeight: 1.6 }}>
+                {lang === 'en' ? 'Rough estimate. Send a message for a tailored proposal.' : 'Estimativa aproximada. Envie uma mensagem para uma proposta detalhada.'}
+              </p>
+              <a href={`https://wa.me/${SITE.whatsapp.replace(/\D/g,'')}?text=${encodeURIComponent(lang === 'en' ? 'Hi Caio! I used the budget calculator and would like a detailed proposal.' : 'Oi Caio! Usei a calculadora de orçamento e gostaria de uma proposta detalhada.')}`}
+                target="_blank" rel="noopener noreferrer"
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '0.75rem 1.6rem', borderRadius: 999, background: '#ffffff', color: '#0d0d0d', fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.09em', textTransform: 'uppercase', textDecoration: 'none', width: 'fit-content', transition: 'opacity 0.2s' }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.opacity = '0.82'; setCursor('pointer') }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.opacity = '1'; setCursor('default') }}>
+                {lang === 'en' ? 'Request a proposal' : 'Solicitar proposta'} <ChevronRight size={13} />
+              </a>
+            </motion.div>
+          ) : (
+            <motion.p key="hint" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.15)', fontStyle: 'italic' }}>
+              {lang === 'en' ? 'Select a project type above to see the estimate.' : 'Selecione o tipo de projeto acima para ver a estimativa.'}
+            </motion.p>
+          )}
+        </AnimatePresence>
+      </motion.div>
+    </section>
+  )
+}
+
+/* ── Main Page ── */
+export default function ServicesPage() {
+  const lang      = useLanguageStore((s) => s.lang)
+  const setCursor = useCursorStore((s) => s.setState)
+  const [openFaq, setOpenFaq] = useState<number | null>(null)
+
+  useEffect(() => { document.title = `Services — ${SITE.name}` }, [])
+
+  const waUrl = `https://wa.me/${SITE.whatsapp.replace(/\D/g, '')}`
+
+  return (
+    <main style={{ paddingTop: '7rem', background: '#0d0d0d', minHeight: '100vh' }}>
+
+      {/* ── Hero ── */}
+      <section style={{ padding: 'clamp(3rem,7vw,6rem) clamp(1.5rem,5vw,5rem) clamp(2.5rem,5vw,4rem)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+        <div style={{ maxWidth: 1280, margin: '0 auto', display: 'grid', gridTemplateColumns: '1fr 32%', gap: 'clamp(2rem,4vw,3.5rem)', alignItems: 'stretch' }}
+          className="svc-hero-grid">
+          {/* Left: text */}
+          <motion.div
+            initial={{ opacity: 0, y: 28 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, ease: [0.16,1,0.3,1] }}
+            style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10 }}>
+              <span style={{ display: 'inline-block', width: 18, height: 1, background: 'rgba(255,255,255,0.15)' }} />
+              <span style={{ fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.25)' }}>
+                {lang === 'en' ? 'Services' : 'Serviços'}
+              </span>
             </div>
+            <h1 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 900, fontSize: 'clamp(2.8rem,5.5vw,5.5rem)', letterSpacing: '-0.055em', lineHeight: '0.9', color: '#fff', margin: 0, paddingBottom: '0.15em' }}>
+              {lang === 'en'
+                ? (<>Websites &amp;<br /><span style={{ color: 'rgba(255,255,255,0.22)' }}>digital products.</span></>)
+                : (<>Sites e<br /><span style={{ color: 'rgba(255,255,255,0.22)' }}>produtos digitais.</span></>)}
+            </h1>
+            <p style={{ fontSize: '0.875rem', color: 'rgba(255,255,255,0.32)', lineHeight: 1.75, maxWidth: 480 }}>
+              {lang === 'en'
+                ? 'I help businesses, creators and professionals build a strong digital presence through professional websites, landing pages and custom web applications.'
+                : 'Ajudo empresas, criadores e profissionais a construir uma presença digital forte através de sites profissionais, landing pages e aplicações web.'}
+            </p>
+            <div>
+              <a href={waUrl} target="_blank" rel="noopener noreferrer"
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '0.8rem 1.8rem', borderRadius: 999, background: '#fff', color: '#0d0d0d', fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', textDecoration: 'none', transition: 'opacity 0.25s' }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.opacity = '0.82'; setCursor('pointer') }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.opacity = '1'; setCursor('default') }}>
+                <MessageCircle size={14} />
+                {lang === 'en' ? 'Start via WhatsApp' : 'Iniciar pelo WhatsApp'}
+              </a>
+            </div>
+          </motion.div>
+
+          {/* Right: video — matches text column height via grid stretch */}
+          <motion.div
+            initial={{ opacity: 0, x: 40 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.85, ease: [0.16,1,0.3,1], delay: 0.15 }}
+            style={{ borderRadius: 'clamp(12px,2vw,20px)', overflow: 'hidden', position: 'relative', background: '#111', minHeight: 200 }}>
+            <video
+              src="/video-service.mp4"
+              autoPlay muted loop playsInline
+              style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+            />
+            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(13,13,13,0.1) 0%, rgba(13,13,13,0.35) 100%)', pointerEvents: 'none' }} />
+          </motion.div>
+        </div>
+
+        <style>{`@media (max-width: 860px) { .svc-hero-grid { grid-template-columns: 1fr !important; } }`}</style>
+      </section>
+
+      {/* ── Services Grid ── */}
+      <section style={{ padding: 'clamp(4rem,8vw,6rem) clamp(1.5rem,5vw,5rem)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+        <div style={{ maxWidth: 1200, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '3rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            <span style={{ fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.22)', display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ display: 'inline-block', width: 18, height: 1, background: 'rgba(255,255,255,0.15)' }} />
+              {lang === 'en' ? 'What I do' : 'O que faço'}
+            </span>
+            <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 900, fontSize: 'clamp(2rem,4.5vw,3.5rem)', letterSpacing: '-0.045em', lineHeight: 0.95, color: '#fff', margin: 0 }}>
+              {lang === 'en' ? 'Services.' : 'Serviços.'}
+            </h2>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(320px,100%), 1fr))', gap: '1px', border: '1px solid rgba(255,255,255,0.06)' }}>
+            {SERVICES_DATA.map(({ Icon, titleEn, titlePt, descEn, descPt }, i) => (
+              <motion.div key={titleEn} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-30px' }} transition={{ duration: 0.55, delay: i * 0.06, ease: [0.16,1,0.3,1] }}
+                style={{ padding: '2rem', background: 'rgba(255,255,255,0.02)', borderRight: '1px solid rgba(255,255,255,0.06)', display: 'flex', flexDirection: 'column', gap: '1rem', transition: 'background 0.3s' }}
+                onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.04)')}
+                onMouseLeave={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.02)')}>
+                <div style={{ width: 42, height: 42, borderRadius: 10, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Icon size={19} style={{ color: 'rgba(255,255,255,0.6)' }} />
+                </div>
+                <div>
+                  <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#fff', marginBottom: '0.4rem' }}>{lang === 'en' ? titleEn : titlePt}</h3>
+                  <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.35)', lineHeight: 1.7 }}>{lang === 'en' ? descEn : descPt}</p>
+                </div>
+              </motion.div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* FAQ */}
-      <section className="section-padding bg-navy-950">
-        <div className="container-custom">
-          <div className="flex flex-col gap-12 max-w-3xl mx-auto">
-            <div className="text-center flex flex-col items-center gap-4">
-              <Badge variant="purple">FAQ</Badge>
-              <h2 className="text-section font-black text-white">
-                {lang === 'en' ? 'Common questions' : 'Perguntas comuns'}
-              </h2>
-            </div>
-            <div className="flex flex-col gap-4">
-              {faq.map((item, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: i * 0.07 }}
-                  className="glass-card rounded-2xl p-6"
-                >
-                  <h3 className="font-bold text-white mb-2">
-                    {lang === 'en' ? item.q : item.qPt}
+      {/* ── Packages ── */}
+      <section style={{ padding: 'clamp(4rem,8vw,6rem) clamp(1.5rem,5vw,5rem)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+        <div style={{ maxWidth: 1100, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '3rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', textAlign: 'center', alignItems: 'center' }}>
+            <span style={{ fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.22)', display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ display: 'inline-block', width: 18, height: 1, background: 'rgba(255,255,255,0.15)' }} />
+              {lang === 'en' ? 'Pricing' : 'Preços'}
+              <span style={{ display: 'inline-block', width: 18, height: 1, background: 'rgba(255,255,255,0.15)' }} />
+            </span>
+            <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 900, fontSize: 'clamp(2rem,4.5vw,3.5rem)', letterSpacing: '-0.045em', lineHeight: 0.95, color: '#fff', margin: 0 }}>
+              {lang === 'en' ? 'Simple, transparent pricing.' : 'Preços simples e transparentes.'}
+            </h2>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(280px,100%), 1fr))', gap: '1.25rem' }}>
+            {PACKAGES.map((pkg, i) => (
+              <motion.div key={pkg.nameEn} initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6, delay: i * 0.1, ease: [0.16,1,0.3,1] }}
+                style={{
+                  padding: '2rem', borderRadius: '1.25rem',
+                  background: pkg.highlight ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.02)',
+                  border: `1px solid ${pkg.highlight ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.07)'}`,
+                  display: 'flex', flexDirection: 'column', gap: '1.5rem',
+                  boxShadow: pkg.highlight ? '0 0 60px rgba(255,255,255,0.04)' : 'none',
+                }}>
+                {pkg.highlight && (
+                  <span style={{ fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.5)' }}>
+                    {lang === 'en' ? 'Most Popular' : 'Mais Popular'}
+                  </span>
+                )}
+                <div>
+                  <h3 style={{ fontFamily: 'Syne, sans-serif', fontSize: '1.1rem', fontWeight: 800, color: '#fff', marginBottom: '0.35rem' }}>
+                    {lang === 'en' ? pkg.nameEn : pkg.namePt}
                   </h3>
-                  <p className="text-slate-text text-sm leading-relaxed">
-                    {lang === 'en' ? item.a : item.aPt}
-                  </p>
-                </motion.div>
-              ))}
-            </div>
+                  <p style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.32)', lineHeight: 1.6 }}>{lang === 'en' ? pkg.descEn : pkg.descPt}</p>
+                </div>
+                <p style={{ fontFamily: 'Syne, sans-serif', fontWeight: 900, fontSize: '2.2rem', letterSpacing: '-0.04em', color: '#fff', lineHeight: 1 }}>{pkg.price}</p>
+                <ul style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                  {(lang === 'en' ? pkg.featuresEn : pkg.featuresPt).map(f => (
+                    <li key={f} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)' }}>
+                      <Check size={13} style={{ color: 'rgba(255,255,255,0.6)', flexShrink: 0 }} />
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+                <a href={waUrl} target="_blank" rel="noopener noreferrer"
+                  style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                    padding: '0.7rem 0', borderRadius: 999,
+                    background: pkg.highlight ? '#fff' : 'transparent',
+                    border: pkg.highlight ? 'none' : '1px solid rgba(255,255,255,0.14)',
+                    color: pkg.highlight ? '#0d0d0d' : 'rgba(255,255,255,0.5)',
+                    fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase',
+                    textDecoration: 'none', transition: 'all 0.25s', marginTop: 'auto',
+                  }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.opacity = '0.8'; setCursor('pointer') }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.opacity = '1'; setCursor('default') }}>
+                  {lang === 'en' ? 'Get started' : 'Começar'} <ArrowUpRight size={12} />
+                </a>
+              </motion.div>
+            ))}
           </div>
         </div>
       </section>
 
-      <CTASection />
+      {/* ── Budget Calculator ── */}
+      <BudgetCalculator lang={lang} setCursor={setCursor} />
+
+      {/* ── FAQ ── */}
+      <section style={{ padding: 'clamp(4rem,8vw,6rem) clamp(1.5rem,5vw,5rem)', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+        <div style={{ maxWidth: 720, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            <span style={{ fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.22)', display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ display: 'inline-block', width: 18, height: 1, background: 'rgba(255,255,255,0.15)' }} />
+              FAQ
+            </span>
+            <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 900, fontSize: 'clamp(2rem,4.5vw,3rem)', letterSpacing: '-0.045em', lineHeight: 0.95, color: '#fff', margin: 0 }}>
+              {lang === 'en' ? 'Common questions.' : 'Perguntas comuns.'}
+            </h2>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            {FAQ.map((item, i) => (
+              <motion.div key={i} initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: i * 0.07, ease: [0.16,1,0.3,1] }}
+                style={{ borderTop: '1px solid rgba(255,255,255,0.07)' }}>
+                <button
+                  onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                  style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1.4rem 0', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', gap: '1rem' }}
+                  onMouseEnter={() => setCursor('pointer')}
+                  onMouseLeave={() => setCursor('default')}>
+                  <span style={{ fontSize: '0.9rem', fontWeight: 600, color: '#fff', lineHeight: 1.4 }}>
+                    {lang === 'en' ? item.qEn : item.qPt}
+                  </span>
+                  <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: '1.1rem', flexShrink: 0, transform: openFaq === i ? 'rotate(45deg)' : 'rotate(0deg)', transition: 'transform 0.3s ease', lineHeight: 1 }}>+</span>
+                </button>
+                <AnimatePresence>
+                  {openFaq === i && (
+                    <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.3, ease: [0.16,1,0.3,1] }} style={{ overflow: 'hidden' }}>
+                      <p style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.35)', lineHeight: 1.75, paddingBottom: '1.4rem' }}>
+                        {lang === 'en' ? item.aEn : item.aPt}
+                      </p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
+            ))}
+            <div style={{ borderTop: '1px solid rgba(255,255,255,0.07)' }} />
+          </div>
+        </div>
+      </section>
+
+      {/* ── CTA ── */}
+      <section style={{ padding: 'clamp(4rem,8vw,6rem) clamp(1.5rem,5vw,5rem)', borderTop: '1px solid rgba(255,255,255,0.06)', textAlign: 'center' }}>
+        <motion.div initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.7, ease: [0.16,1,0.3,1] }}
+          style={{ maxWidth: 640, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '1.5rem', alignItems: 'center' }}>
+          <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 900, fontSize: 'clamp(2.5rem,6vw,4.5rem)', letterSpacing: '-0.05em', lineHeight: 0.9, color: '#fff', margin: 0 }}>
+            {lang === 'en' ? "Let's build something great." : 'Vamos construir algo incrível.'}
+          </h2>
+          <p style={{ fontSize: '0.875rem', color: 'rgba(255,255,255,0.3)', lineHeight: 1.7 }}>
+            {lang === 'en' ? 'Send a message and let\'s talk about your project.' : 'Envie uma mensagem e vamos conversar sobre o seu projeto.'}
+          </p>
+          <a href={waUrl} target="_blank" rel="noopener noreferrer"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '0.9rem 2rem', borderRadius: 999, background: '#fff', color: '#0d0d0d', fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', textDecoration: 'none', transition: 'opacity 0.25s' }}
+            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.opacity = '0.82'; setCursor('pointer') }}
+            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.opacity = '1'; setCursor('default') }}>
+            <MessageCircle size={14} />
+            {lang === 'en' ? 'Start a project' : 'Iniciar um projeto'}
+          </a>
+        </motion.div>
+      </section>
+
     </main>
   )
 }

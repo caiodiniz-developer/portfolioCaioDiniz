@@ -1,229 +1,185 @@
 import { useRef, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { ArrowLeft, ExternalLink, Github, ArrowRight } from 'lucide-react'
+import { ArrowLeft, ExternalLink, Github, ArrowRight, Check } from 'lucide-react'
 import gsap from 'gsap'
 import ScrollTrigger from 'gsap/ScrollTrigger'
 import type { Project } from '@/data/projects'
-import { useT } from '@/hooks/useTranslation'
 import { useLanguageStore } from '@/store/useLanguageStore'
 import { useCursorStore } from '@/store/useCursorStore'
-import Button from '@/components/ui/Button'
-import Badge from '@/components/ui/Badge'
-import Magnetic from '@/components/animations/Magnetic'
-import { staggerContainer, staggerItem } from '@/lib/animations'
+import { useT } from '@/hooks/useTranslation'
 
 gsap.registerPlugin(ScrollTrigger)
 
-interface CaseStudyLayoutProps {
-  project: Project
-  nextProject?: Project
-}
+interface Props { project: Project; nextProject?: Project }
 
-export default function CaseStudyLayout({ project, nextProject }: CaseStudyLayoutProps) {
+export default function CaseStudyLayout({ project, nextProject }: Props) {
   const t         = useT()
   const lang      = useLanguageStore((s) => s.lang)
   const setCursor = useCursorStore((s) => s.setState)
   const galleryRef = useRef<HTMLDivElement>(null)
-
   const galleryImages = project.gallery.slice(1)
+  const isLive = project.liveUrl && project.liveUrl !== '#'
 
   useEffect(() => {
     if (!galleryRef.current || galleryImages.length === 0) return
     const ctx = gsap.context(() => {
       gsap.set('.cs-gallery-item', { y: 30, opacity: 0 })
       gsap.to('.cs-gallery-item', {
-        y: 0,
-        opacity: 1,
-        duration: 0.75,
-        stagger: 0.12,
-        ease: 'power3.out',
-        scrollTrigger: { trigger: galleryRef.current!, start: 'top 82%', once: true },
+        y: 0, opacity: 1, duration: 0.75, stagger: 0.12, ease: 'power3.out',
+        scrollTrigger: { trigger: galleryRef.current!, start: 'top 85%', once: true },
       })
     }, galleryRef)
     return () => ctx.revert()
   }, [galleryImages.length])
 
-  const isLive = project.liveUrl && project.liveUrl !== '#'
+  const S: Record<string, React.CSSProperties> = {
+    wrap:     { paddingTop: 'clamp(5rem,10vw,7rem)', paddingBottom: 'clamp(3rem,6vw,5rem)', minHeight: '100vh', background: '#0d0d0d' },
+    inner:    { maxWidth: 1200, margin: '0 auto', padding: '0 clamp(1.25rem,4vw,4rem)' },
+    tag:      { display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: '0.72rem', fontWeight: 600, color: 'rgba(255,255,255,0.35)', textDecoration: 'none', letterSpacing: '0.04em', padding: '0.4rem 0', transition: 'color 0.25s' },
+    badge:    { display: 'inline-block', fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 999, padding: '0.3rem 0.9rem', marginBottom: '0.75rem' },
+    h1:       { fontFamily: 'Syne, sans-serif', fontWeight: 900, fontSize: 'clamp(2.2rem,6vw,5.5rem)', letterSpacing: '-0.05em', lineHeight: '0.9', color: '#fff', margin: 0 },
+    desc:     { fontSize: 'clamp(0.85rem,1.5vw,1rem)', color: 'rgba(255,255,255,0.35)', lineHeight: 1.75, maxWidth: 640 },
+    metaRow:  { display: 'flex', flexWrap: 'wrap', gap: 'clamp(1rem,3vw,2rem)', padding: 'clamp(1rem,2.5vw,1.5rem) 0', borderTop: '1px solid rgba(255,255,255,0.07)', borderBottom: '1px solid rgba(255,255,255,0.07)' },
+    metaKey:  { fontSize: '0.55rem', fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.2)', marginBottom: 4 },
+    metaVal:  { fontSize: '0.82rem', fontWeight: 600, color: '#fff' },
+    techPill: { fontSize: '0.65rem', padding: '0.25rem 0.7rem', borderRadius: 999, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.45)' },
+    btn:      { display: 'inline-flex', alignItems: 'center', gap: 7, padding: '0.7rem 1.4rem', borderRadius: 999, fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', textDecoration: 'none', transition: 'all 0.25s', cursor: 'pointer' },
+    divider:  { height: 1, background: 'rgba(255,255,255,0.07)', margin: 'clamp(2rem,5vw,3.5rem) 0' },
+  }
 
   return (
-    <main className="pt-28 pb-24">
-      {/* Back link */}
-      <div className="container-custom mb-12">
-        <Link
-          to="/projects"
-          className="inline-flex items-center gap-2 text-slate-text hover:text-white transition-colors text-sm group"
-          onMouseEnter={() => setCursor('pointer')}
-          onMouseLeave={() => setCursor('default')}
-        >
-          <ArrowLeft size={16} className="transition-transform group-hover:-translate-x-1" />
-          {t.common.allProjects}
-        </Link>
-      </div>
+    <main style={S.wrap}>
+      <div style={S.inner}>
 
-      {/* Hero meta */}
-      <section className="container-custom mb-20">
-        <motion.div
-          initial="hidden"
-          animate="visible"
-          variants={staggerContainer}
-          className="flex flex-col gap-8"
-        >
-          <motion.div variants={staggerItem} className="flex flex-col gap-4">
-            <Badge variant="purple">{project.category}</Badge>
-            <h1 className="text-hero font-black text-white tracking-tight leading-tight">
-              {project.title}
-            </h1>
-            <p className="text-slate-text text-lg max-w-2xl leading-relaxed">
-              {project.description}
-            </p>
-          </motion.div>
+        {/* Back */}
+        <Link to="/projects" style={S.tag}
+          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = '#fff'; setCursor('pointer') }}
+          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.35)'; setCursor('default') }}>
+          <ArrowLeft size={14} /> {t.common.allProjects}
+        </Link>
+
+        <div style={{ height: 'clamp(1.5rem,3vw,2.5rem)' }} />
+
+        {/* Hero meta — no initial:0 so it renders on first navigation, PageTransition handles entrance */}
+        <motion.div initial={{ opacity: 1 }} animate={{ opacity: 1 }}
+          style={{ display: 'flex', flexDirection: 'column', gap: 'clamp(1rem,2vw,1.5rem)' }}>
+          <span style={S.badge}>{project.category}</span>
+          <h1 style={S.h1}>{project.title}</h1>
+          <p style={S.desc}>{project.description}</p>
 
           {/* Meta row */}
-          <motion.div variants={staggerItem} className="flex flex-wrap gap-6 pt-4 border-t border-white/[0.06]">
+          <div style={S.metaRow}>
             <div>
-              <span className="text-xs text-white/30 uppercase tracking-widest block mb-1">{t.common.year}</span>
-              <span className="text-sm font-semibold text-white">{project.year}</span>
+              <p style={S.metaKey}>{t.common.year}</p>
+              <p style={S.metaVal}>{project.year}</p>
             </div>
             <div>
-              <span className="text-xs text-white/30 uppercase tracking-widest block mb-1">{t.common.role}</span>
-              <span className="text-sm font-semibold text-white">{project.role}</span>
+              <p style={S.metaKey}>{t.common.role}</p>
+              <p style={S.metaVal}>{project.role}</p>
             </div>
             <div>
-              <span className="text-xs text-white/30 uppercase tracking-widest block mb-1">{t.common.tech}</span>
-              <div className="flex flex-wrap gap-1.5">
-                {project.stack.map((tech) => (
-                  <span key={tech} className="text-xs px-2.5 py-1 rounded-full bg-white/[0.04] border border-white/[0.07] text-slate-text">
-                    {tech}
-                  </span>
-                ))}
+              <p style={S.metaKey}>{t.common.tech}</p>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem', marginTop: 4 }}>
+                {project.stack.map(tech => <span key={tech} style={S.techPill}>{tech}</span>)}
               </div>
             </div>
-          </motion.div>
+          </div>
 
           {/* Action buttons */}
-          <motion.div variants={staggerItem} className="flex gap-4">
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
             {isLive && (
-              <Magnetic strength={0.2}>
-                <a
-                  href={project.liveUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onMouseEnter={() => setCursor('pointer')}
-                  onMouseLeave={() => setCursor('default')}
-                >
-                  <Button variant="primary" size="md">
-                    <ExternalLink size={15} />
-                    {t.common.live}
-                  </Button>
-                </a>
-              </Magnetic>
-            )}
-            {project.githubUrl && project.githubUrl !== '#' && (
-              <a
-                href={project.githubUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                onMouseEnter={() => setCursor('pointer')}
-                onMouseLeave={() => setCursor('default')}
-              >
-                <Button variant="secondary" size="md">
-                  <Github size={15} />
-                  {t.common.github}
-                </Button>
+              <a href={project.liveUrl} target="_blank" rel="noopener noreferrer"
+                style={{ ...S.btn, background: '#fff', color: '#0d0d0d' }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.opacity = '0.85'; setCursor('pointer') }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.opacity = '1'; setCursor('default') }}>
+                <ExternalLink size={13} /> {t.common.live}
               </a>
             )}
-          </motion.div>
-        </motion.div>
-      </section>
-
-      {/* Hero image — clickable when live URL is available */}
-      <div className="container-custom mb-20">
-        {isLive ? (
-          <a
-            href={project.liveUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="block rounded-3xl overflow-hidden aspect-video group relative"
-            onMouseEnter={() => setCursor('view')}
-            onMouseLeave={() => setCursor('default')}
-          >
-            <img
-              src={project.image}
-              alt={project.title}
-              className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.025]"
-              loading="eager"
-            />
-            {/* Hover overlay with "Visit" label */}
-            <div className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/30 transition-colors duration-500">
-              <span
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-white border border-white/30 backdrop-blur-md bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-400"
-                style={{ transform: 'translateY(6px)', transition: 'opacity 0.35s, transform 0.35s' }}
-              >
-                <ExternalLink size={11} />
-                {lang === 'en' ? 'Visit project' : 'Ver projeto'}
-              </span>
-            </div>
-          </a>
-        ) : (
-          <div className="rounded-3xl overflow-hidden aspect-video">
-            <img
-              src={project.image}
-              alt={project.title}
-              className="w-full h-full object-cover"
-              loading="eager"
-            />
+            {project.githubUrl && project.githubUrl !== '#' && (
+              <a href={project.githubUrl} target="_blank" rel="noopener noreferrer"
+                style={{ ...S.btn, background: 'transparent', color: 'rgba(255,255,255,0.55)', border: '1px solid rgba(255,255,255,0.14)' }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = '#fff'; (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.35)'; setCursor('pointer') }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.55)'; (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.14)'; setCursor('default') }}>
+                <Github size={13} /> {t.common.github}
+              </a>
+            )}
           </div>
-        )}
-      </div>
+        </motion.div>
 
-      {/* Case study content */}
-      <div className="container-custom">
-        <div className="grid lg:grid-cols-3 gap-16">
-          {/* Main content */}
-          <div className="lg:col-span-2 flex flex-col gap-14">
-            <section>
-              <h2 className="text-2xl font-black text-white mb-4">{t.common.overview}</h2>
-              <p className="text-slate-text leading-relaxed">{project.longDescription}</p>
-            </section>
+        <div style={S.divider} />
 
-            <section>
-              <h2 className="text-2xl font-black text-white mb-4">{t.common.problem}</h2>
-              <p className="text-slate-text leading-relaxed">{project.problem}</p>
-            </section>
+        {/* Hero image — clickable, with persistent "Visit site" badge */}
+        <div style={{ borderRadius: 'clamp(12px,2vw,20px)', overflow: 'hidden', aspectRatio: '16/9', position: 'relative', marginBottom: 'clamp(2.5rem,5vw,4rem)' }}>
+          {isLive ? (
+            <a href={project.liveUrl} target="_blank" rel="noopener noreferrer" style={{ display: 'block', width: '100%', height: '100%', position: 'relative' }}
+              onMouseEnter={() => setCursor('view')} onMouseLeave={() => setCursor('default')}>
+              <img src={project.image} alt={project.title} loading="eager"
+                style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.7s ease', display: 'block' }}
+                onMouseEnter={e => (e.currentTarget.style.transform = 'scale(1.025)')}
+                onMouseLeave={e => (e.currentTarget.style.transform = 'scale(1)')} />
 
-            <section>
-              <h2 className="text-2xl font-black text-white mb-4">{t.common.solution}</h2>
-              <p className="text-slate-text leading-relaxed">{project.solution}</p>
-            </section>
+              {/* Persistent "Visit site" badge — always visible */}
+              <div style={{
+                position: 'absolute', bottom: 'clamp(10px,2vw,18px)', left: 'clamp(10px,2vw,18px)',
+                display: 'flex', alignItems: 'center', gap: 6,
+                padding: '0.5rem 1rem', borderRadius: 999,
+                background: 'rgba(0,0,0,0.72)', backdropFilter: 'blur(10px)',
+                border: '1px solid rgba(255,255,255,0.18)',
+                color: '#fff', fontSize: '0.68rem', fontWeight: 700,
+                letterSpacing: '0.1em', textTransform: 'uppercase',
+                pointerEvents: 'none',
+              }}>
+                <ExternalLink size={10} />
+                {lang === 'en' ? 'Visit site' : 'Visitar site'}
+              </div>
+
+              {/* Hover overlay */}
+              <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0)', transition: 'background 0.4s' }}
+                onMouseEnter={e => (e.currentTarget.style.background = 'rgba(0,0,0,0.18)')}
+                onMouseLeave={e => (e.currentTarget.style.background = 'rgba(0,0,0,0)')} />
+            </a>
+          ) : (
+            <img src={project.image} alt={project.title} loading="eager"
+              style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+          )}
+        </div>
+
+        {/* Two-column content */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(340px,100%), 1fr))', gap: 'clamp(2rem,5vw,4rem)', alignItems: 'start' }}>
+
+          {/* Main */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'clamp(2rem,4vw,3rem)' }}>
+            {[
+              { head: t.common.overview, body: project.longDescription },
+              { head: t.common.problem,  body: project.problem },
+              { head: t.common.solution, body: project.solution },
+            ].map(({ head, body }) => (
+              <section key={head}>
+                <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 'clamp(1.2rem,2.5vw,1.6rem)', color: '#fff', letterSpacing: '-0.03em', marginBottom: '0.75rem' }}>{head}</h2>
+                <p style={{ fontSize: '0.875rem', color: 'rgba(255,255,255,0.38)', lineHeight: 1.8 }}>{body}</p>
+              </section>
+            ))}
 
             {/* Gallery */}
             {galleryImages.length > 0 && (
               <section ref={galleryRef}>
-                <h2 className="text-2xl font-black text-white mb-6">
+                <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 'clamp(1.2rem,2.5vw,1.6rem)', color: '#fff', letterSpacing: '-0.03em', marginBottom: '1rem' }}>
                   {lang === 'en' ? 'Gallery' : 'Galeria'}
                 </h2>
-                <div className="flex flex-col gap-4">
-                  {/* First gallery image — full width */}
-                  <div className="cs-gallery-item rounded-2xl overflow-hidden aspect-video group">
-                    <img
-                      src={galleryImages[0]}
-                      alt={`${project.title} — screenshot 1`}
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
-                      loading="lazy"
-                    />
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                  <div className="cs-gallery-item" style={{ borderRadius: 12, overflow: 'hidden', aspectRatio: '16/9' }}>
+                    <img src={galleryImages[0]} alt={`${project.title} 1`} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', transition: 'transform 0.6s ease' }}
+                      onMouseEnter={e => (e.currentTarget.style.transform = 'scale(1.03)')}
+                      onMouseLeave={e => (e.currentTarget.style.transform = 'scale(1)')} />
                   </div>
-                  {/* Remaining images — 2-column grid */}
                   {galleryImages.length > 1 && (
-                    <div className="grid sm:grid-cols-2 gap-4">
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(220px,100%),1fr))', gap: '0.75rem' }}>
                       {galleryImages.slice(1).map((img, i) => (
-                        <div key={i} className="cs-gallery-item rounded-2xl overflow-hidden aspect-video group">
-                          <img
-                            src={img}
-                            alt={`${project.title} — screenshot ${i + 2}`}
-                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
-                            loading="lazy"
-                          />
+                        <div key={i} className="cs-gallery-item" style={{ borderRadius: 12, overflow: 'hidden', aspectRatio: '16/9' }}>
+                          <img src={img} alt={`${project.title} ${i + 2}`} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', transition: 'transform 0.6s ease' }}
+                            onMouseEnter={e => (e.currentTarget.style.transform = 'scale(1.03)')}
+                            onMouseLeave={e => (e.currentTarget.style.transform = 'scale(1)')} />
                         </div>
                       ))}
                     </div>
@@ -234,14 +190,15 @@ export default function CaseStudyLayout({ project, nextProject }: CaseStudyLayou
           </div>
 
           {/* Sidebar */}
-          <div className="flex flex-col gap-8">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', position: 'sticky', top: '7rem' }}>
+
             {/* Features */}
-            <div className="glass-card rounded-2xl p-6">
-              <h3 className="text-sm font-bold text-white mb-4 uppercase tracking-widest">{t.common.features}</h3>
-              <ul className="flex flex-col gap-2">
-                {project.features.map((f) => (
-                  <li key={f} className="flex items-start gap-2 text-sm text-slate-text">
-                    <span className="w-1.5 h-1.5 rounded-full bg-purple mt-1.5 flex-shrink-0" />
+            <div style={{ borderRadius: 16, padding: 'clamp(1.25rem,2.5vw,1.75rem)', background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.07)' }}>
+              <h3 style={{ fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.25)', marginBottom: '1rem' }}>{t.common.features}</h3>
+              <ul style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                {project.features.map(f => (
+                  <li key={f} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', lineHeight: 1.5 }}>
+                    <span style={{ width: 5, height: 5, borderRadius: '50%', background: 'rgba(255,255,255,0.35)', flexShrink: 0, marginTop: 5 }} />
                     {f}
                   </li>
                 ))}
@@ -249,61 +206,54 @@ export default function CaseStudyLayout({ project, nextProject }: CaseStudyLayou
             </div>
 
             {/* Results */}
-            <div className="glass-card rounded-2xl p-6">
-              <h3 className="text-sm font-bold text-white mb-4 uppercase tracking-widest">{t.common.results}</h3>
-              <ul className="flex flex-col gap-3">
-                {project.results.map((r) => (
-                  <li key={r} className="text-sm font-semibold text-white flex items-start gap-2">
-                    <span className="text-purple mt-0.5">✓</span>
+            <div style={{ borderRadius: 16, padding: 'clamp(1.25rem,2.5vw,1.75rem)', background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.07)' }}>
+              <h3 style={{ fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.25)', marginBottom: '1rem' }}>{t.common.results}</h3>
+              <ul style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                {project.results.map(r => (
+                  <li key={r} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: '0.8rem', fontWeight: 600, color: 'rgba(255,255,255,0.7)', lineHeight: 1.5 }}>
+                    <Check size={12} style={{ color: 'rgba(255,255,255,0.5)', flexShrink: 0, marginTop: 2 }} />
                     {r}
                   </li>
                 ))}
               </ul>
             </div>
 
-            {/* Live link in sidebar */}
+            {/* Live link */}
             {isLive && (
-              <a
-                href={project.liveUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-between px-5 py-4 rounded-2xl border border-white/10 bg-white/[0.03] hover:bg-white/[0.07] hover:border-white/20 transition-all duration-300 group"
-                onMouseEnter={() => setCursor('pointer')}
-                onMouseLeave={() => setCursor('default')}
-              >
-                <span className="text-xs font-semibold uppercase tracking-[0.1em] text-white/50 group-hover:text-white transition-colors">
-                  {lang === 'en' ? 'View live project' : 'Ver projeto online'}
+              <a href={project.liveUrl} target="_blank" rel="noopener noreferrer"
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1rem 1.25rem', borderRadius: 12, border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.03)', textDecoration: 'none', transition: 'all 0.25s' }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.07)'; (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.22)'; setCursor('pointer') }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.03)'; (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.1)'; setCursor('default') }}>
+                <span style={{ fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.09em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.5)', transition: 'color 0.25s' }}
+                  onMouseEnter={e => (e.currentTarget.style.color = '#fff')}
+                  onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.5)')}>
+                  {lang === 'en' ? 'Visit the site' : 'Visitar o site'}
                 </span>
-                <ExternalLink size={14} className="text-white/30 group-hover:text-white transition-colors" />
+                <ExternalLink size={13} style={{ color: 'rgba(255,255,255,0.25)' }} />
               </a>
             )}
           </div>
         </div>
-      </div>
 
-      {/* Next project */}
-      {nextProject && (
-        <div className="container-custom mt-24 pt-12 border-t border-white/[0.06]">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
-            <div>
-              <span className="text-xs text-white/30 uppercase tracking-widest block mb-2">
-                {t.common.nextProject}
-              </span>
-              <h3 className="text-2xl font-black text-white">{nextProject.title}</h3>
+        {/* Next project */}
+        {nextProject && (
+          <>
+            <div style={{ ...S.divider, marginTop: 'clamp(3rem,6vw,5rem)' }} />
+            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '1.5rem' }}>
+              <div>
+                <p style={{ fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.2)', marginBottom: '0.5rem' }}>{t.common.nextProject}</p>
+                <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 900, fontSize: 'clamp(1.4rem,3vw,2.2rem)', letterSpacing: '-0.04em', color: '#fff' }}>{nextProject.title}</h3>
+              </div>
+              <Link to={`/projects/${nextProject.slug}`}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '0.7rem 1.4rem', borderRadius: 999, border: '1px solid rgba(255,255,255,0.14)', color: 'rgba(255,255,255,0.55)', fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', textDecoration: 'none', transition: 'all 0.25s' }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = '#fff'; (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.35)'; setCursor('pointer') }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.55)'; (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.14)'; setCursor('default') }}>
+                {t.common.view} <ArrowRight size={13} />
+              </Link>
             </div>
-            <Link
-              to={`/projects/${nextProject.slug}`}
-              onMouseEnter={() => setCursor('pointer')}
-              onMouseLeave={() => setCursor('default')}
-            >
-              <Button variant="secondary" size="md">
-                {t.common.view}
-                <ArrowRight size={15} />
-              </Button>
-            </Link>
-          </div>
-        </div>
-      )}
+          </>
+        )}
+      </div>
     </main>
   )
 }

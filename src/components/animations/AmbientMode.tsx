@@ -1,161 +1,183 @@
-import { useState, useRef, useEffect, useCallback } from 'react'
+import { useState, useRef } from 'react'
+import { Music, Volume1, Volume2, VolumeX } from 'lucide-react'
 
 export default function AmbientMode() {
   const [active, setActive] = useState(false)
-  const ctxRef   = useRef<AudioContext | null>(null)
-  const nodesRef = useRef<AudioNode[]>([])
-  const canvasRef= useRef<HTMLCanvasElement>(null)
-  const rafRef   = useRef<number>(0)
-
-  /* ── Start ambient audio ── */
-  const startAudio = useCallback(() => {
-    const ac = new AudioContext()
-    ctxRef.current = ac
-
-    const master = ac.createGain()
-    master.gain.setValueAtTime(0, ac.currentTime)
-    master.gain.linearRampToValueAtTime(0.06, ac.currentTime + 2)
-    master.connect(ac.destination)
-
-    const defs = [
-      { freq: 55,    type: 'sine'     as OscillatorType, gain: 0.5  },
-      { freq: 82.4,  type: 'sine'     as OscillatorType, gain: 0.35 },
-      { freq: 110,   type: 'sine'     as OscillatorType, gain: 0.2  },
-      { freq: 220,   type: 'triangle' as OscillatorType, gain: 0.1  },
-    ]
-
-    const delay = ac.createDelay(2)
-    delay.delayTime.value = 0.45
-    const fb = ac.createGain(); fb.gain.value = 0.28
-    const filter = ac.createBiquadFilter()
-    filter.type = 'lowpass'; filter.frequency.value = 900
-    delay.connect(fb); fb.connect(delay); delay.connect(filter); filter.connect(master)
-
-    defs.forEach(({ freq, type, gain: g }) => {
-      const osc  = ac.createOscillator()
-      const gain = ac.createGain()
-      osc.type      = type
-      osc.frequency.value = freq
-      gain.gain.value     = g
-      osc.connect(gain)
-      gain.connect(master)
-      gain.connect(delay)
-      osc.start()
-      nodesRef.current.push(osc, gain)
-    })
-
-    nodesRef.current.push(master, delay, fb, filter)
-  }, [])
-
-  const stopAudio = useCallback(() => {
-    const ac = ctxRef.current
-    if (!ac) return
-    nodesRef.current.forEach(n => { try { (n as OscillatorNode).stop?.() } catch {} })
-    nodesRef.current = []
-    ac.close()
-    ctxRef.current = null
-  }, [])
-
-  /* ── Floating particles canvas ── */
-  useEffect(() => {
-    if (!active) { cancelAnimationFrame(rafRef.current); return }
-    const canvas = canvasRef.current!
-    const ctx    = canvas.getContext('2d')!
-    canvas.width = window.innerWidth; canvas.height = window.innerHeight
-
-    type P = { x:number; y:number; vy:number; size:number; alpha:number; life:number; decay:number }
-    const pts: P[] = []
-    let frame = 0
-
-    function tick() {
-      rafRef.current = requestAnimationFrame(tick)
-      frame++
-      ctx.clearRect(0, 0, canvas.width, canvas.height)
-
-      if (frame % 12 === 0) {
-        pts.push({
-          x: Math.random() * canvas.width,
-          y: canvas.height + 10,
-          vy: -(0.3 + Math.random() * 0.7),
-          size: 1 + Math.random() * 2,
-          alpha: 0.2 + Math.random() * 0.2,
-          life: 1,
-          decay: 0.003 + Math.random() * 0.003,
-        })
-      }
-
-      pts.forEach((p, i) => {
-        p.y   += p.vy
-        p.life -= p.decay
-        if (p.life <= 0) { pts.splice(i, 1); return }
-        ctx.save()
-        ctx.beginPath()
-        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2)
-        ctx.fillStyle = `rgba(255,255,255,${p.alpha * p.life})`
-        ctx.shadowBlur = 6
-        ctx.shadowColor = 'rgba(200,220,255,0.6)'
-        ctx.fill()
-        ctx.restore()
-      })
-    }
-    tick()
-
-    function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight }
-    window.addEventListener('resize', resize)
-    return () => { cancelAnimationFrame(rafRef.current); window.removeEventListener('resize', resize) }
-  }, [active])
+  const [volume, setVolume] = useState(0.5)
+  const audioRef = useRef<HTMLAudioElement | null>(null)
 
   function toggle() {
-    if (!active) { startAudio(); setActive(true); document.body.setAttribute('data-ambient', 'true') }
-    else         { stopAudio();  setActive(false); document.body.removeAttribute('data-ambient') }
+    if (!active) {
+      if (!audioRef.current) {
+        const audio = new Audio('/musica.mp3')
+        audio.loop    = true
+        audio.volume  = volume
+        audioRef.current = audio
+      }
+      audioRef.current.volume = volume
+      audioRef.current.play().catch(() => {})
+      document.body.setAttribute('data-ambient', 'true')
+      setActive(true)
+    } else {
+      audioRef.current?.pause()
+      document.body.removeAttribute('data-ambient')
+      setActive(false)
+    }
   }
 
+  function handleVolume(e: React.ChangeEvent<HTMLInputElement>) {
+    const v = parseFloat(e.target.value)
+    setVolume(v)
+    if (audioRef.current) audioRef.current.volume = v
+  }
+
+  const VolumeIcon = volume === 0 ? VolumeX : volume < 0.5 ? Volume1 : Volume2
+
   return (
-    <>
-      {/* Particle canvas — only rendered when active */}
-      <canvas
-        ref={canvasRef}
-        style={{
-          position: 'fixed', inset: 0,
-          width: '100%', height: '100%',
-          pointerEvents: 'none',
-          zIndex: 4,
-          opacity: active ? 1 : 0,
-          transition: 'opacity 1.5s',
-        }}
-      />
+    <div
+      style={{
+        position:        'fixed',
+        bottom:          76,
+        left:            24,
+        zIndex:          200,
+        display:         'flex',
+        flexDirection:   'column',
+        alignItems:      'flex-start',
+        gap:             6,
+      }}
+    >
+      {/* Volume panel — only when active */}
+      {active && (
+        <div
+          style={{
+            background:     'rgba(10,10,12,0.96)',
+            border:         '1px solid rgba(255,255,255,0.1)',
+            borderRadius:   12,
+            padding:        '12px 14px',
+            backdropFilter: 'blur(20px)',
+            display:        'flex',
+            flexDirection:  'column',
+            gap:            10,
+            minWidth:       150,
+            animation:      'ambientIn 0.22s cubic-bezier(0.16,1,0.3,1)',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <span style={{ fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.28)' }}>
+              Volume
+            </span>
+            <VolumeIcon size={12} color="rgba(255,255,255,0.35)" />
+          </div>
+
+          {/* Slider */}
+          <div style={{ position: 'relative' }}>
+            <input
+              type="range"
+              min={0}
+              max={1}
+              step={0.01}
+              value={volume}
+              onChange={handleVolume}
+              className="ambient-slider"
+            />
+          </div>
+
+          {/* Level indicator */}
+          <div style={{ display: 'flex', gap: 3, alignItems: 'flex-end', height: 14 }}>
+            {Array.from({ length: 12 }).map((_, i) => {
+              const threshold = (i + 1) / 12
+              return (
+                <div
+                  key={i}
+                  style={{
+                    flex:       1,
+                    height:     `${40 + i * 5}%`,
+                    borderRadius: 1,
+                    background: volume >= threshold
+                      ? `rgba(255,255,255,${0.35 + i * 0.045})`
+                      : 'rgba(255,255,255,0.08)',
+                    transition: 'background 0.1s',
+                  }}
+                />
+              )
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Toggle button */}
       <button
         onClick={toggle}
-        title={active ? 'Desativar modo ambiente' : 'Ativar modo ambiente'}
+        title={active ? 'Pausar música' : 'Tocar música ambiente'}
         style={{
-          position: 'fixed', bottom: 76, left: 24, zIndex: 200,
-          width: 40, height: 40, borderRadius: '50%',
-          background: active ? 'rgba(255,255,255,0.14)' : 'rgba(255,255,255,0.06)',
-          border: `1px solid ${active ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.1)'}`,
-          color: active ? '#ffffff' : 'rgba(255,255,255,0.4)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          cursor: 'pointer', fontSize: '1rem',
-          transition: 'all 0.3s', backdropFilter: 'blur(8px)',
-          animation: active ? 'ambientPulse 3s ease-in-out infinite' : 'none',
+          width:          40,
+          height:         40,
+          borderRadius:   '50%',
+          background:     active ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.06)',
+          border:         `1px solid ${active ? 'rgba(255,255,255,0.28)' : 'rgba(255,255,255,0.1)'}`,
+          color:          active ? '#ffffff' : 'rgba(255,255,255,0.4)',
+          display:        'flex',
+          alignItems:     'center',
+          justifyContent: 'center',
+          cursor:         'pointer',
+          backdropFilter: 'blur(8px)',
+          transition:     'all 0.3s ease',
+          animation:      active ? 'ambientPulse 3.5s ease-in-out infinite' : 'none',
         }}
-        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = '#fff' }}
-        onMouseLeave={e => { if (!active) (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.4)' }}
+        onMouseEnter={e => {
+          const el = e.currentTarget as HTMLElement
+          el.style.color = '#fff'
+          el.style.borderColor = 'rgba(255,255,255,0.25)'
+        }}
+        onMouseLeave={e => {
+          const el = e.currentTarget as HTMLElement
+          if (!active) { el.style.color = 'rgba(255,255,255,0.4)'; el.style.borderColor = 'rgba(255,255,255,0.1)' }
+        }}
       >
-        {active ? '🔊' : '🔇'}
+        {active ? <Volume2 size={16} /> : <Music size={16} />}
       </button>
 
       <style>{`
         @keyframes ambientPulse {
-          0%, 100% { box-shadow: 0 0 0 0 rgba(255,255,255,0.1); }
-          50%       { box-shadow: 0 0 0 8px rgba(255,255,255,0); }
+          0%,100% { box-shadow: 0 0 0   0  rgba(255,255,255,0.12); }
+          50%      { box-shadow: 0 0 0 10px rgba(255,255,255,0);    }
         }
-        [data-ambient="true"] .hero-photo-inner img {
-          filter: saturate(1.15) brightness(1.05);
-          transition: filter 2s;
+        @keyframes ambientIn {
+          from { opacity: 0; transform: translateY(6px) scale(0.97); }
+          to   { opacity: 1; transform: translateY(0)   scale(1);    }
+        }
+        .ambient-slider {
+          -webkit-appearance: none;
+          appearance: none;
+          width: 100%;
+          height: 2px;
+          background: rgba(255,255,255,0.12);
+          border-radius: 2px;
+          outline: none;
+          cursor: pointer;
+        }
+        .ambient-slider::-webkit-slider-thumb {
+          -webkit-appearance: none;
+          width: 12px;
+          height: 12px;
+          border-radius: 50%;
+          background: #ffffff;
+          cursor: pointer;
+          box-shadow: 0 0 6px rgba(255,255,255,0.35);
+          transition: transform 0.15s;
+        }
+        .ambient-slider::-webkit-slider-thumb:hover {
+          transform: scale(1.25);
+        }
+        .ambient-slider::-moz-range-thumb {
+          width: 12px;
+          height: 12px;
+          border-radius: 50%;
+          background: #ffffff;
+          cursor: pointer;
+          border: none;
         }
       `}</style>
-    </>
+    </div>
   )
 }

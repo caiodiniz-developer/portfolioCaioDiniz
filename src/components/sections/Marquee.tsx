@@ -2,7 +2,7 @@ import { useRef, useEffect } from 'react'
 
 const ITEMS_A = [
   'React', 'TypeScript', 'Node.js', 'PostgreSQL', 'MySQL',
-  'GSAP', 'Framer Motion', 'UI Design', 'Web Apps', 'APIs',
+  'Framer Motion', 'UI Design', 'Web Apps', 'APIs',
   'JavaScript', 'CSS', 'HTML', 'Git', 'GitHub',
 ]
 
