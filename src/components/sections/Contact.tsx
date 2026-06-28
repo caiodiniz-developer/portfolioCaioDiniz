@@ -6,9 +6,10 @@ import { SITE } from '@/lib/constants'
 import { useCursorStore } from '@/store/useCursorStore'
 
 const socials = [
-  { label: 'LinkedIn', href: SITE.linkedin },
-  { label: 'GitHub',   href: SITE.github   },
-  { label: 'TikTok',   href: SITE.tiktok   },
+  { label: 'LinkedIn',  href: SITE.linkedin },
+  { label: 'GitHub',    href: SITE.github   },
+  { label: 'WhatsApp',  href: `https://wa.me/${SITE.whatsapp.replace(/\D/g, '')}` },
+  { label: 'TikTok',    href: SITE.tiktok   },
 ]
 
 /* ── Step definitions ── */
