@@ -40,6 +40,10 @@ export default function App() {
       "%c 🔗  github.com/caiodiniz-dev",
       "color:#60a5fa;font-size:11px;padding:0 0 6px;"
     );
+    console.log(
+      "%c 💡  Pressione Ctrl+` para abrir o terminal secreto. Tente: snake, joke, matrix",
+      "color:rgba(80,250,123,0.6);font-size:11px;font-style:italic;padding:0 0 8px;"
+    );
   }, []);
 
   return (

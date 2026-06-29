@@ -13,6 +13,7 @@ import ProjectDetail from "@/pages/ProjectDetail";
 import ServicesPage from "@/pages/ServicesPage";
 import ContactPage from "@/pages/ContactPage";
 import NotFound from "@/pages/NotFound";
+import BugCatcher from "@/pages/BugCatcher";
 import { getLenis } from "@/hooks/useLenis";
 
 function ScrollReset() {
@@ -71,6 +72,7 @@ export const router = createBrowserRouter([
       { path: "projects/:slug", element: <ProjectDetail /> },
       { path: "services", element: <ServicesPage /> },
       { path: "contact", element: <ContactPage /> },
+      { path: "debug",   element: <BugCatcher /> },
       { path: "*", element: <NotFound /> },
     ],
   },

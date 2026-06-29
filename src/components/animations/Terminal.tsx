@@ -5,6 +5,11 @@ import { SITE } from '@/lib/constants'
 
 interface Line { type: 'input' | 'output' | 'error' | 'success' | 'dim'; text: string }
 
+/* ── Snake constants ── */
+const SK_COLS = 30
+const SK_ROWS = 18
+const SK_CELL = 16
+
 const PROMPT = 'dev@portfolio:~$ '
 const VERSION = '2.5.0'
 
@@ -23,6 +28,7 @@ Commands:
   npm install     Install everything
   fibonacci <n>   Print Fibonacci sequence
   hello           Hello, World!
+  snake           Jogar Snake 🐍
   rubber          Rubber duck debugging
   stackoverflow   Open Stack Overflow
   tabs            The eternal debate
@@ -273,9 +279,11 @@ export default function Terminal() {
   ])
   const [history, setHistory] = useState<string[]>([])
   const [histIdx, setHistIdx] = useState(-1)
-  const inputRef  = useRef<HTMLInputElement>(null)
-  const bottomRef = useRef<HTMLDivElement>(null)
-  const navigate  = useNavigate()
+  const [snakeMode, setSnakeMode] = useState(false)
+  const inputRef   = useRef<HTMLInputElement>(null)
+  const bottomRef  = useRef<HTMLDivElement>(null)
+  const snakeRef   = useRef<HTMLCanvasElement>(null)
+  const navigate   = useNavigate()
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -288,6 +296,93 @@ export default function Terminal() {
 
   useEffect(() => { if (open) setTimeout(() => inputRef.current?.focus(), 80) }, [open])
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [lines])
+
+  /* ── Snake game ── */
+  useEffect(() => {
+    if (!snakeMode) return
+    const canvas = snakeRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')!
+    interface Pos { x: number; y: number }
+    let snake: Pos[] = [{ x: 15, y: 9 }, { x: 14, y: 9 }, { x: 13, y: 9 }]
+    let dir: Pos = { x: 1, y: 0 }, nextDir: Pos = { x: 1, y: 0 }
+    let food: Pos = { x: 5, y: 5 }
+    let score = 0, alive = true
+    let tid: ReturnType<typeof setInterval>
+
+    function place() {
+      let p: Pos
+      do { p = { x: Math.floor(Math.random() * SK_COLS), y: Math.floor(Math.random() * SK_ROWS) } }
+      while (snake.some(s => s.x === p.x && s.y === p.y))
+      food = p
+    }
+
+    function draw() {
+      ctx.fillStyle = '#0a0a0a'; ctx.fillRect(0, 0, SK_COLS * SK_CELL, SK_ROWS * SK_CELL)
+      ctx.strokeStyle = 'rgba(80,250,123,0.04)'; ctx.lineWidth = 0.5
+      for (let x = 0; x <= SK_COLS; x++) { ctx.beginPath(); ctx.moveTo(x * SK_CELL, 0); ctx.lineTo(x * SK_CELL, SK_ROWS * SK_CELL); ctx.stroke() }
+      for (let y = 0; y <= SK_ROWS; y++) { ctx.beginPath(); ctx.moveTo(0, y * SK_CELL); ctx.lineTo(SK_COLS * SK_CELL, y * SK_CELL); ctx.stroke() }
+      ctx.fillStyle = '#f87171'; ctx.shadowBlur = 10; ctx.shadowColor = '#f87171'
+      ctx.fillRect(food.x * SK_CELL + 3, food.y * SK_CELL + 3, SK_CELL - 6, SK_CELL - 6)
+      snake.forEach((s, i) => {
+        const a = 1 - (i / snake.length) * 0.6
+        ctx.fillStyle = `rgba(80,250,123,${a})`; ctx.shadowBlur = i === 0 ? 14 : 3; ctx.shadowColor = '#50fa7b'
+        ctx.fillRect(s.x * SK_CELL + 1, s.y * SK_CELL + 1, SK_CELL - 2, SK_CELL - 2)
+      })
+      ctx.shadowBlur = 0; ctx.font = '11px "JetBrains Mono",monospace'; ctx.fillStyle = 'rgba(80,250,123,0.55)'
+      ctx.textAlign = 'left'; ctx.fillText(`SCORE ${score}`, 8, 16)
+      ctx.fillStyle = 'rgba(255,255,255,0.14)'; ctx.textAlign = 'right'
+      ctx.fillText('Q = sair', SK_COLS * SK_CELL - 8, 16); ctx.textAlign = 'left'
+      if (!alive) {
+        ctx.fillStyle = 'rgba(0,0,0,0.72)'; ctx.fillRect(0, 0, SK_COLS * SK_CELL, SK_ROWS * SK_CELL)
+        ctx.font = 'bold 22px "JetBrains Mono",monospace'; ctx.fillStyle = '#f87171'; ctx.textAlign = 'center'
+        ctx.fillText('GAME OVER', SK_COLS * SK_CELL / 2, SK_ROWS * SK_CELL / 2 - 16)
+        ctx.font = '12px "JetBrains Mono",monospace'; ctx.fillStyle = 'rgba(255,255,255,0.4)'
+        ctx.fillText(`Score: ${score}`, SK_COLS * SK_CELL / 2, SK_ROWS * SK_CELL / 2 + 8)
+        ctx.fillStyle = 'rgba(255,255,255,0.2)'
+        ctx.fillText('R = reiniciar · Q = sair', SK_COLS * SK_CELL / 2, SK_ROWS * SK_CELL / 2 + 30)
+        ctx.textAlign = 'left'
+      }
+    }
+
+    function restart() {
+      clearInterval(tid); snake = [{ x: 15, y: 9 }, { x: 14, y: 9 }, { x: 13, y: 9 }]
+      dir = { x: 1, y: 0 }; nextDir = { x: 1, y: 0 }; score = 0; alive = true
+      place(); draw(); tid = setInterval(tick, 115)
+    }
+
+    function tick() {
+      if (!alive) return
+      dir = nextDir
+      const h = { x: snake[0].x + dir.x, y: snake[0].y + dir.y }
+      if (h.x < 0 || h.x >= SK_COLS || h.y < 0 || h.y >= SK_ROWS || snake.some(s => s.x === h.x && s.y === h.y)) {
+        alive = false; draw(); return
+      }
+      snake.unshift(h)
+      if (h.x === food.x && h.y === food.y) { score++; place() } else snake.pop()
+      draw()
+    }
+
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'q' || e.key === 'Q' || e.key === 'Escape') {
+        clearInterval(tid)
+        setLines(prev => [...prev, { type: 'output', text: `Snake encerrado · Score: ${score}` }])
+        setSnakeMode(false)
+        return
+      }
+      if (!alive && (e.key === 'r' || e.key === 'R')) { restart(); return }
+      const m: Record<string, Pos> = {
+        ArrowUp: { x: 0, y: -1 }, w: { x: 0, y: -1 }, ArrowDown: { x: 0, y: 1 }, s: { x: 0, y: 1 },
+        ArrowLeft: { x: -1, y: 0 }, a: { x: -1, y: 0 }, ArrowRight: { x: 1, y: 0 }, d: { x: 1, y: 0 },
+      }
+      const nd = m[e.key]
+      if (nd && (nd.x + dir.x !== 0 || nd.y + dir.y !== 0)) { nextDir = nd; e.preventDefault() }
+    }
+
+    place(); draw(); tid = setInterval(tick, 115)
+    window.addEventListener('keydown', onKey)
+    return () => { clearInterval(tid); window.removeEventListener('keydown', onKey) }
+  }, [snakeMode])
 
   const push = useCallback((l: Line | Line[]) =>
     setLines(prev => [...prev, ...(Array.isArray(l) ? l : [l])]), [])
@@ -502,6 +597,11 @@ export default function Terminal() {
         setTimeout(() => setOpen(false), 400)
         break
 
+      case 'snake':
+        push({ type: 'success', text: 'Iniciando Snake 🐍\n↑↓←→ ou WASD para mover · R reiniciar · Q sair' })
+        setTimeout(() => setSnakeMode(true), 450)
+        break
+
       /* funny wrong inputs */
       case ':q': case ':q!': case ':wq':
         push({ type: 'dim', text: "This isn't vim. But thanks for trying." })
@@ -526,7 +626,7 @@ export default function Terminal() {
     if (e.key === 'ArrowDown') { e.preventDefault(); const i = Math.max(histIdx - 1, -1); setHistIdx(i); setInput(i === -1 ? '' : history[i] ?? '') }
     if (e.key === 'Tab') {
       e.preventDefault()
-      const cmds = ['help','joke','fortune','coffee','matrix','hack','vim','git log','git status','git blame','npm install','fibonacci','hello','rubber','stackoverflow','tabs','42','sleep','debug','ls','cd','repo','ping','date','sudo','clear','exit']
+      const cmds = ['help','joke','fortune','coffee','matrix','hack','vim','git log','git status','git blame','npm install','fibonacci','hello','rubber','stackoverflow','tabs','42','sleep','debug','ls','cd','repo','ping','date','sudo','snake','clear','exit']
       const match = cmds.find(c => c.startsWith(input) && c !== input)
       if (match) setInput(match)
     }
@@ -602,28 +702,43 @@ export default function Terminal() {
           </button>
         </div>
 
+        {/* Snake mode */}
+        {snakeMode && (
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 10, background: '#0a0a0a', padding: '12px' }}>
+            <canvas ref={snakeRef} width={SK_COLS * SK_CELL} height={SK_ROWS * SK_CELL}
+              style={{ border: '1px solid rgba(80,250,123,0.15)', borderRadius: 6, display: 'block', maxWidth: '100%', height: 'auto' }} />
+            <p style={{ margin: 0, color: 'rgba(80,250,123,0.3)', fontSize: '0.6rem', letterSpacing: '0.06em', fontFamily: 'inherit' }}>
+              WASD · SETAS  ·  R reiniciar  ·  Q sair
+            </p>
+          </div>
+        )}
+
         {/* Output */}
-        <div style={{ flex: 1, overflowY: 'auto', padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: 1 }} className="hide-scrollbar">
-          {lines.map((l, i) => (
-            <pre key={i} style={{ margin: 0, whiteSpace: 'pre-wrap', wordBreak: 'break-word', lineHeight: '1.65',
-              color: l.type === 'input'   ? 'rgba(255,255,255,0.92)'
-                   : l.type === 'error'   ? '#ff6b6b'
-                   : l.type === 'success' ? '#50fa7b'
-                   : l.type === 'dim'     ? 'rgba(255,255,255,0.2)'
-                   : 'rgba(255,255,255,0.5)' }}>
-              {l.text}
-            </pre>
-          ))}
-          <div ref={bottomRef} />
-        </div>
+        {!snakeMode && (
+          <div style={{ flex: 1, overflowY: 'auto', padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: 1 }} className="hide-scrollbar">
+            {lines.map((l, i) => (
+              <pre key={i} style={{ margin: 0, whiteSpace: 'pre-wrap', wordBreak: 'break-word', lineHeight: '1.65',
+                color: l.type === 'input'   ? 'rgba(255,255,255,0.92)'
+                     : l.type === 'error'   ? '#ff6b6b'
+                     : l.type === 'success' ? '#50fa7b'
+                     : l.type === 'dim'     ? 'rgba(255,255,255,0.2)'
+                     : 'rgba(255,255,255,0.5)' }}>
+                {l.text}
+              </pre>
+            ))}
+            <div ref={bottomRef} />
+          </div>
+        )}
 
         {/* Input */}
-        <div style={{ display: 'flex', alignItems: 'center', padding: '8px 16px', borderTop: '1px solid rgba(255,255,255,0.05)', flexShrink: 0 }}>
-          <span style={{ color: '#50fa7b', flexShrink: 0, userSelect: 'none' }}>{PROMPT}</span>
-          <input ref={inputRef} value={input} onChange={e => setInput(e.target.value)} onKeyDown={onKeyDown}
-            style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none', color: 'rgba(255,255,255,0.9)', fontFamily: 'inherit', fontSize: 'inherit', caretColor: '#50fa7b' }}
-            spellCheck={false} autoComplete="off" />
-        </div>
+        {!snakeMode && (
+          <div style={{ display: 'flex', alignItems: 'center', padding: '8px 16px', borderTop: '1px solid rgba(255,255,255,0.05)', flexShrink: 0 }}>
+            <span style={{ color: '#50fa7b', flexShrink: 0, userSelect: 'none' }}>{PROMPT}</span>
+            <input ref={inputRef} value={input} onChange={e => setInput(e.target.value)} onKeyDown={onKeyDown}
+              style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none', color: 'rgba(255,255,255,0.9)', fontFamily: 'inherit', fontSize: 'inherit', caretColor: '#50fa7b' }}
+              spellCheck={false} autoComplete="off" />
+          </div>
+        )}
       </div>
 
       <style>{`
