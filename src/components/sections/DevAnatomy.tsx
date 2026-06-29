@@ -1,11 +1,15 @@
-import { useState, useRef } from 'react'
-import { motion, AnimatePresence, useSpring } from 'framer-motion'
+import { Suspense, useState, useMemo, useRef } from 'react'
+import { Canvas } from '@react-three/fiber'
+import { useGLTF, Html, OrbitControls, Environment } from '@react-three/drei'
+import * as THREE from 'three'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useInView } from 'framer-motion'
 import { Brain, Heart, Code2, Layers } from 'lucide-react'
 import { useLanguageStore } from '@/store/useLanguageStore'
 
 const E: [number, number, number, number] = [0.22, 1, 0.36, 1]
 
+/* ── Types ── */
 interface Zone {
   id: string
   labelPt: string; labelEn: string
@@ -14,8 +18,7 @@ interface Zone {
   skills: string[]
   color: string
   icon: React.ComponentType<{ size?: number; color?: string; strokeWidth?: number }>
-  top: string
-  left: string
+  yFrac: number  // 0 = feet, 1 = top of head
 }
 
 const ZONES: Zone[] = [
@@ -26,9 +29,7 @@ const ZONES: Zone[] = [
     descPt: 'Arquitetura limpa, raciocínio lógico e decisões técnicas que escalam sem quebrar.',
     descEn: 'Clean architecture, logical thinking and technical decisions that scale without breaking.',
     skills: ['Algoritmos', 'System Design', 'Problem Solving', 'Code Review', 'UI/UX'],
-    color: '#b8b3ff',
-    icon: Brain,
-    top: '7%', left: '50%',
+    color: '#b8b3ff', icon: Brain, yFrac: 0.91,
   },
   {
     id: 'heart',
@@ -37,9 +38,7 @@ const ZONES: Zone[] = [
     descPt: 'Paixão real por código que funciona, performa e que o próximo dev vai adorar manter.',
     descEn: 'Real passion for code that works, performs and that the next dev will love maintaining.',
     skills: ['Clean Code', 'SOLID', 'Performance', 'DX', 'Open Source'],
-    color: '#f0a6b4',
-    icon: Heart,
-    top: '34%', left: '50%',
+    color: '#f0a6b4', icon: Heart, yFrac: 0.62,
   },
   {
     id: 'hands',
@@ -48,9 +47,7 @@ const ZONES: Zone[] = [
     descPt: 'As ferramentas que domino para transformar ideias em produto funcional de verdade.',
     descEn: 'The tools I master to turn ideas into actual working products.',
     skills: ['React', 'TypeScript', 'Node.js', 'PostgreSQL', 'Docker', 'Git'],
-    color: '#a0d4b8',
-    icon: Code2,
-    top: '56%', left: '62%',
+    color: '#a0d4b8', icon: Code2, yFrac: 0.46,
   },
   {
     id: 'base',
@@ -59,110 +56,149 @@ const ZONES: Zone[] = [
     descPt: 'Infraestrutura robusta, CI/CD e deploys que não te acordam de madrugada.',
     descEn: "Robust infrastructure, CI/CD and deploys that won't wake you up at 3am.",
     skills: ['CI/CD', 'Linux', 'Vercel', 'Railway', 'Segurança', 'Monitoramento'],
-    color: '#d4b896',
-    icon: Layers,
-    top: '88%', left: '50%',
+    color: '#d4b896', icon: Layers, yFrac: 0.05,
   },
 ]
 
-/* ── Zone dot ── */
-function ZoneDot({ zone, active, onEnter, onLeave }: {
-  zone: Zone
-  active: boolean
-  onEnter: () => void
-  onLeave: () => void
+/* ────────────────────────────────────────────
+   3-D ZONE DOT (rendered via drei <Html>)
+──────────────────────────────────────────── */
+function ZoneDot3D({ zone, active, onEnter, onLeave }: {
+  zone: Zone; active: boolean; onEnter: () => void; onLeave: () => void
 }) {
   const Icon = zone.icon
   return (
     <div
-      style={{
-        position: 'absolute',
-        top: zone.top,
-        left: zone.left,
-        transform: 'translate(-50%, -50%)',
-        zIndex: 10,
-        cursor: 'crosshair',
-      }}
       onMouseEnter={onEnter}
       onMouseLeave={onLeave}
+      style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', width: 44, height: 44, cursor: 'crosshair', userSelect: 'none' }}
     >
-      {/* Invisible hit area */}
-      <div style={{ position: 'absolute', width: 72, height: 72, borderRadius: '50%', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', zIndex: 11 }} />
+      {/* Pulse ring (idle) */}
+      {!active && (
+        <div style={{
+          position: 'absolute', width: 26, height: 26, borderRadius: '50%',
+          border: `1.5px solid ${zone.color}`, opacity: 0.4,
+          animation: 'zdpulse 2.4s ease-in-out infinite',
+        }} />
+      )}
 
-      {/* Dot */}
-      <motion.div
-        animate={active
-          ? { scale: 1.1 }
-          : { scale: [1, 1.22, 1] }
-        }
-        transition={active
-          ? { duration: 0.22, ease: E }
-          : { duration: 2.8, repeat: Infinity, ease: 'easeInOut' }
-        }
-        style={{
-          width: 16, height: 16,
-          borderRadius: '50%',
-          background: `${zone.color}cc`,
-          position: 'relative', zIndex: 12,
-        }}
-      />
-
-      {/* Icon ring — appears on hover */}
-      <AnimatePresence>
-        {active && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.6 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.6 }}
-            transition={{ duration: 0.22, ease: E }}
-            style={{
-              position: 'absolute',
-              top: '50%', left: '50%',
-              transform: 'translate(-50%,-50%)',
-              width: 36, height: 36,
-              borderRadius: '50%',
-              background: 'rgba(10,10,10,0.85)',
-              border: `1px solid ${zone.color}35`,
-              backdropFilter: 'blur(8px)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              zIndex: 13,
-            }}
-          >
-            <Icon size={14} color={zone.color} strokeWidth={1.7} />
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Dot / icon */}
+      <div style={{
+        width: active ? 32 : 12, height: active ? 32 : 12,
+        borderRadius: '50%',
+        background: active ? 'rgba(8,8,8,0.88)' : zone.color,
+        border: active ? `1px solid ${zone.color}45` : 'none',
+        backdropFilter: active ? 'blur(12px)' : 'none',
+        WebkitBackdropFilter: active ? 'blur(12px)' : 'none',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        transition: 'all 0.26s cubic-bezier(0.22,1,0.36,1)',
+      }}>
+        {active && <Icon size={13} color={zone.color} strokeWidth={1.7} />}
+      </div>
 
       {/* Label pill */}
-      <motion.div
-        animate={{ opacity: active ? 1 : 0, y: active ? 0 : 5 }}
-        transition={{ duration: 0.22, ease: E }}
-        style={{
-          position: 'absolute',
-          top: '100%', left: '50%',
-          transform: 'translateX(-50%)',
-          marginTop: 14,
-          background: 'rgba(20,20,20,0.85)',
-          border: `1px solid rgba(255,255,255,0.09)`,
-          color: 'rgba(255,255,255,0.55)',
-          fontSize: '0.5rem',
-          fontWeight: 700,
-          letterSpacing: '0.14em',
-          textTransform: 'uppercase',
-          padding: '3px 9px',
-          borderRadius: 99,
-          whiteSpace: 'nowrap',
-          pointerEvents: 'none',
-          backdropFilter: 'blur(8px)',
-        }}
-      >
+      <div style={{
+        position: 'absolute', top: 'calc(100% + 5px)', left: '50%',
+        transform: 'translateX(-50%)',
+        padding: '2px 8px', borderRadius: 99,
+        background: 'rgba(10,10,10,0.82)',
+        border: '1px solid rgba(255,255,255,0.08)',
+        color: 'rgba(255,255,255,0.5)',
+        fontSize: '0.44rem', fontWeight: 700,
+        letterSpacing: '0.13em', textTransform: 'uppercase' as const,
+        whiteSpace: 'nowrap' as const,
+        fontFamily: 'Inter, sans-serif',
+        backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)',
+        opacity: active ? 1 : 0,
+        transition: 'opacity 0.18s',
+        pointerEvents: 'none' as const,
+      }}>
         {zone.labelPt}
-      </motion.div>
+      </div>
     </div>
   )
 }
 
-/* ── Skill card ── */
+/* ────────────────────────────────────────────
+   3-D MODEL (inside Canvas)
+──────────────────────────────────────────── */
+const TARGET_H = 2.0 // Normalize model to 2 world-units tall
+
+function HumanModel({ activeId, onEnter, onLeave }: {
+  activeId: string | null
+  onEnter: (id: string) => void
+  onLeave: () => void
+}) {
+  const { scene } = useGLTF('/caiocorpointeiro.glb')
+
+  /* Compute scale + offset + zone local positions from bounding box */
+  const { s, groupPos, zonePosLocal } = useMemo(() => {
+    const bbox = new THREE.Box3().setFromObject(scene)
+    const size = bbox.getSize(new THREE.Vector3())
+    const center = bbox.getCenter(new THREE.Vector3())
+
+    const s = TARGET_H / size.y
+
+    // groupPos: world position of the group so that feet=y0, center=x0/z0
+    // World Y of model vertex at vy: groupPos.y + vy * s
+    // Want feet (bbox.min.y) at world y=0: groupPos.y = -bbox.min.y * s
+    // Want center.x at world x=0:         groupPos.x = -center.x * s
+    const groupPos: [number, number, number] = [
+      -center.x * s,
+      -bbox.min.y * s,
+      -center.z * s,
+    ]
+
+    // Zone positions in GROUP-LOCAL space (children of group with scale=s):
+    // localY = bbox.min.y + yFrac * size.y
+    // This maps to world y = groupPos.y + localY * s = yFrac * TARGET_H ✓
+    const zonePosLocal: Record<string, [number, number, number]> = {}
+    const frontZ = (0.06 / s) // ~6 cm in front, in model-local units
+    for (const z of ZONES) {
+      zonePosLocal[z.id] = [0, bbox.min.y + z.yFrac * size.y, frontZ]
+    }
+
+    return { s, groupPos, zonePosLocal }
+  }, [scene])
+
+  return (
+    <group position={groupPos} scale={s}>
+      <primitive object={scene} />
+      {ZONES.map(zone => (
+        <Html
+          key={zone.id}
+          position={zonePosLocal[zone.id]}
+          center
+          zIndexRange={[0, 30]}
+          occlude="blending"
+          style={{ pointerEvents: 'auto' }}
+        >
+          <ZoneDot3D
+            zone={zone}
+            active={activeId === zone.id}
+            onEnter={() => onEnter(zone.id)}
+            onLeave={onLeave}
+          />
+        </Html>
+      ))}
+    </group>
+  )
+}
+
+/* Simple spinning loader */
+function Loader() {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%', gap: 8 }}>
+      <div style={{ width: 6, height: 6, borderRadius: '50%', background: 'rgba(255,255,255,0.3)', animation: 'zdpulse 1.2s ease-in-out infinite' }} />
+      <div style={{ width: 6, height: 6, borderRadius: '50%', background: 'rgba(255,255,255,0.3)', animation: 'zdpulse 1.2s ease-in-out 0.2s infinite' }} />
+      <div style={{ width: 6, height: 6, borderRadius: '50%', background: 'rgba(255,255,255,0.3)', animation: 'zdpulse 1.2s ease-in-out 0.4s infinite' }} />
+    </div>
+  )
+}
+
+/* ────────────────────────────────────────────
+   SKILL CARD (right column)
+──────────────────────────────────────────── */
 function SkillCard({ zone, pt }: { zone: Zone; pt: boolean }) {
   const Icon = zone.icon
   return (
@@ -171,28 +207,14 @@ function SkillCard({ zone, pt }: { zone: Zone; pt: boolean }) {
       initial={{ opacity: 0, y: 18, filter: 'blur(8px)' }}
       animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
       exit={{ opacity: 0, y: -12, filter: 'blur(8px)' }}
-      transition={{ duration: 0.5, ease: [0.25, 1, 0.4, 1] }}
-      style={{
-        padding: 'clamp(2rem,4vw,2.8rem)',
-        borderRadius: 18,
-        background: 'rgba(255,255,255,0.025)',
-        border: '1px solid rgba(255,255,255,0.07)',
-        position: 'relative',
-        overflow: 'hidden',
-      }}
+      transition={{ duration: 0.48, ease: [0.25, 1, 0.4, 1] }}
+      style={{ padding: 'clamp(2rem,4vw,2.8rem)', borderRadius: 18, background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.07)', position: 'relative', overflow: 'hidden' }}
     >
-      {/* Thin top accent line */}
-      <div style={{ position: 'absolute', top: 0, left: '15%', right: '15%', height: 1, background: `linear-gradient(90deg, transparent, ${zone.color}45, transparent)` }} />
+      <div style={{ position: 'absolute', top: 0, left: '15%', right: '15%', height: 1, background: `linear-gradient(90deg,transparent,${zone.color}40,transparent)` }} />
 
-      {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14, marginBottom: '1.25rem' }}>
-        <div style={{
-          width: 40, height: 40, borderRadius: 10,
-          background: 'rgba(255,255,255,0.04)',
-          border: '1px solid rgba(255,255,255,0.08)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-        }}>
-          <Icon size={16} color={zone.color} strokeWidth={1.6} />
+      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14, marginBottom: '1.3rem' }}>
+        <div style={{ width: 42, height: 42, borderRadius: 11, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          <Icon size={17} color={zone.color} strokeWidth={1.6} />
         </div>
         <div>
           <h3 style={{ fontFamily: 'Syne,sans-serif', fontWeight: 900, fontSize: 'clamp(1.7rem,3.2vw,2.8rem)', letterSpacing: '-0.045em', color: '#fff', margin: 0, lineHeight: 1 }}>
@@ -204,30 +226,16 @@ function SkillCard({ zone, pt }: { zone: Zone; pt: boolean }) {
         </div>
       </div>
 
-      <div style={{ height: 1, background: 'rgba(255,255,255,0.05)', marginBottom: '1.25rem' }} />
+      <div style={{ height: 1, background: 'rgba(255,255,255,0.05)', marginBottom: '1.3rem' }} />
 
       <p style={{ fontSize: 'clamp(0.88rem,1.4vw,1.02rem)', color: 'rgba(255,255,255,0.38)', lineHeight: 1.82, margin: '0 0 1.8rem' }}>
         {pt ? zone.descPt : zone.descEn}
       </p>
 
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.32rem' }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem' }}>
         {zone.skills.map((s, i) => (
-          <motion.span
-            key={s}
-            initial={{ opacity: 0, y: 5 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, ease: E, delay: 0.12 + i * 0.065 }}
-            style={{
-              padding: '0.3rem 0.78rem',
-              borderRadius: 999,
-              fontSize: '0.66rem',
-              fontWeight: 600,
-              letterSpacing: '0.03em',
-              background: 'rgba(255,255,255,0.04)',
-              border: '1px solid rgba(255,255,255,0.09)',
-              color: 'rgba(255,255,255,0.42)',
-            }}
-          >
+          <motion.span key={s} initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.28, ease: E, delay: 0.1 + i * 0.065 }}
+            style={{ padding: '0.3rem 0.78rem', borderRadius: 999, fontSize: '0.67rem', fontWeight: 600, letterSpacing: '0.03em', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.09)', color: 'rgba(255,255,255,0.45)' }}>
             {s}
           </motion.span>
         ))}
@@ -236,17 +244,10 @@ function SkillCard({ zone, pt }: { zone: Zone; pt: boolean }) {
   )
 }
 
-/* ── Idle placeholder ── */
 function IdlePlaceholder({ pt }: { pt: boolean }) {
   return (
-    <motion.div
-      key="idle"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.4 }}
-      style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}
-    >
+    <motion.div key="idle" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.4 }}
+      style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
       <p style={{ fontFamily: 'Syne,sans-serif', fontWeight: 900, fontSize: 'clamp(1.1rem,2vw,1.6rem)', letterSpacing: '-0.04em', color: 'rgba(255,255,255,0.09)', lineHeight: 1.3, margin: 0, whiteSpace: 'pre-line' }}>
         {pt ? 'Passe o cursor\npelos pontos.' : 'Hover the dots\nto explore.'}
       </p>
@@ -254,13 +255,8 @@ function IdlePlaceholder({ pt }: { pt: boolean }) {
         {ZONES.map((z, i) => {
           const Icon = z.icon
           return (
-            <motion.div
-              key={z.id}
-              initial={{ opacity: 0, x: -8 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.08 + i * 0.1, duration: 0.35, ease: E }}
-              style={{ display: 'flex', alignItems: 'center', gap: 12, opacity: 0.3 }}
-            >
+            <motion.div key={z.id} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.08 + i * 0.1, duration: 0.35, ease: E }}
+              style={{ display: 'flex', alignItems: 'center', gap: 12, opacity: 0.28 }}>
               <Icon size={13} color={z.color} strokeWidth={1.6} />
               <span style={{ fontSize: '0.68rem', fontWeight: 600, color: 'rgba(255,255,255,0.38)', letterSpacing: '0.04em' }}>
                 {pt ? z.labelPt : z.labelEn}
@@ -274,54 +270,35 @@ function IdlePlaceholder({ pt }: { pt: boolean }) {
   )
 }
 
-/* ═══════════════════════════ MAIN ═══════════════════════════ */
+/* ════════════════════════════════════════════
+   MAIN EXPORT
+════════════════════════════════════════════ */
 export default function DevAnatomy() {
-  const lang  = useLanguageStore(s => s.lang)
-  const pt    = lang === 'pt'
+  const lang   = useLanguageStore(s => s.lang)
+  const pt     = lang === 'pt'
   const [activeId, setActiveId] = useState<string | null>(null)
-  const secRef  = useRef<HTMLElement>(null)
-  const figRef  = useRef<HTMLDivElement>(null)
-  const inView  = useInView(secRef, { once: true, margin: '-80px' })
-
-  const rX = useSpring(0, { stiffness: 50, damping: 16 })
-  const rY = useSpring(0, { stiffness: 50, damping: 16 })
-
-  function onMove(e: React.MouseEvent) {
-    const el = figRef.current; if (!el) return
-    const r = el.getBoundingClientRect()
-    rY.set(((e.clientX - r.left) / r.width - 0.5) * 12)
-    rX.set(-((e.clientY - r.top) / r.height - 0.5) * 8)
-  }
-  function onLeave() { rX.set(0); rY.set(0); setActiveId(null) }
-
-  const zone = ZONES.find(z => z.id === activeId) ?? null
+  const secRef = useRef<HTMLElement>(null)
+  const inView = useInView(secRef, { once: true, margin: '-80px' })
+  const zone   = ZONES.find(z => z.id === activeId) ?? null
 
   return (
     <section
       ref={secRef}
       style={{ padding: 'clamp(6rem,12vw,10rem) clamp(2rem,7vw,6rem)', borderTop: '1px solid rgba(255,255,255,0.06)', position: 'relative', overflow: 'hidden' }}
     >
-      {/* Very subtle ambient — barely visible */}
+      {/* Ambient glow */}
       <AnimatePresence>
         {zone && (
-          <motion.div
-            key={zone.id}
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            transition={{ duration: 1.2 }}
-            style={{ position: 'absolute', top: '10%', left: '25%', width: 480, height: 480, borderRadius: '50%', background: zone.color, filter: 'blur(180px)', opacity: 0.035, pointerEvents: 'none' }}
-          />
+          <motion.div key={zone.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 1.2 }}
+            style={{ position: 'absolute', top: '15%', left: '20%', width: 600, height: 600, borderRadius: '50%', background: zone.color, filter: 'blur(200px)', opacity: 0.03, pointerEvents: 'none' }} />
         )}
       </AnimatePresence>
 
       <div style={{ position: 'relative', zIndex: 1, maxWidth: 1100, margin: '0 auto' }}>
 
         {/* ── Header ── */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.75, ease: E }}
-          style={{ textAlign: 'center', marginBottom: 'clamp(4rem,7vw,6rem)' }}
-        >
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.75, ease: E }}
+          style={{ textAlign: 'center', marginBottom: 'clamp(4rem,7vw,6rem)' }}>
           <p style={{ fontSize: '0.5rem', fontWeight: 700, letterSpacing: '0.24em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.18)', margin: '0 0 0.9rem', display: 'inline-flex', alignItems: 'center', gap: 10 }}>
             <span style={{ display: 'inline-block', width: 16, height: 1, background: 'rgba(255,255,255,0.1)' }} />
             {pt ? 'Anatomia de um Dev' : 'Anatomy of a Dev'}
@@ -331,56 +308,58 @@ export default function DevAnatomy() {
             {pt ? 'Um dev, por dentro.' : 'A dev, from the inside.'}
           </h2>
           <p style={{ fontSize: 'clamp(0.78rem,1.2vw,0.88rem)', color: 'rgba(255,255,255,0.2)', margin: 0 }}>
-            {pt ? 'Explore cada camada.' : 'Explore each layer.'}
+            {pt ? 'Arraste para girar · passe nos pontos para explorar' : 'Drag to rotate · hover dots to explore'}
           </p>
         </motion.div>
 
-        {/* ── Content grid ── */}
-        <div
-          className="anatomy-grid"
-          style={{ display: 'grid', gridTemplateColumns: '1fr 1.3fr', gap: 'clamp(3rem,7vw,7rem)', alignItems: 'center', justifyItems: 'center' }}
-        >
-          {/* LEFT — photo, no box */}
-          <motion.div
-            ref={figRef}
-            initial={{ opacity: 0, x: -18 }}
-            animate={inView ? { opacity: 1, x: 0 } : {}}
-            transition={{ duration: 0.95, ease: E, delay: 0.08 }}
-            onMouseMove={onMove}
-            onMouseLeave={onLeave}
-            style={{
-              rotateX: rX, rotateY: rY,
-              transformStyle: 'preserve-3d',
-              perspective: 900,
-              position: 'relative',
-              display: 'inline-block',
-              animation: 'figfloat 6.5s ease-in-out infinite',
-            }}
-          >
-            {/* Bare image — no box, no border, transparent PNG */}
-            <img
-              src="/caiocorpointeiro.png"
-              alt="Caio Diniz"
-              style={{ display: 'block', width: '100%', maxWidth: 460, height: 'auto', maxHeight: 660, objectFit: 'contain', objectPosition: 'top', userSelect: 'none', pointerEvents: 'none' }}
-              draggable={false}
-            />
+        {/* ── Grid ── */}
+        <div className="anatomy-grid"
+          style={{ display: 'grid', gridTemplateColumns: '1fr 1.3fr', gap: 'clamp(3rem,7vw,7rem)', alignItems: 'center', justifyItems: 'center' }}>
 
-            {/* Zone dots */}
-            {ZONES.map(z => (
-              <ZoneDot
-                key={z.id}
-                zone={z}
-                active={activeId === z.id}
-                onEnter={() => setActiveId(z.id)}
-                onLeave={() => setActiveId(null)}
+          {/* LEFT — 3-D Canvas */}
+          <motion.div
+            initial={{ opacity: 0, x: -18 }} animate={inView ? { opacity: 1, x: 0 } : {}}
+            transition={{ duration: 0.95, ease: E, delay: 0.08 }}
+            style={{ width: '100%', maxWidth: 480, aspectRatio: '3/4', position: 'relative' }}
+          >
+            <Canvas
+              gl={{ alpha: true, antialias: true }}
+              camera={{ position: [0, TARGET_H * 0.5, 3.4], fov: 42, near: 0.05, far: 50 }}
+              style={{ width: '100%', height: '100%', background: 'transparent' }}
+            >
+              <ambientLight intensity={0.55} />
+              <directionalLight position={[3, 5, 3]} intensity={1.1} />
+              <directionalLight position={[-2, 2, -3]} intensity={0.35} color="#d0c8ff" />
+              <pointLight position={[0, TARGET_H, 0.5]} intensity={0.2} color="#ffffff" />
+
+              <Environment preset="studio" />
+
+              <OrbitControls
+                target={[0, TARGET_H * 0.50, 0]}
+                enableZoom={false}
+                enablePan={false}
+                autoRotate
+                autoRotateSpeed={0.7}
+                enableDamping
+                dampingFactor={0.07}
+                minPolarAngle={Math.PI * 0.1}
+                maxPolarAngle={Math.PI * 0.9}
               />
-            ))}
+
+              <Suspense fallback={null}>
+                <HumanModel activeId={activeId} onEnter={setActiveId} onLeave={() => setActiveId(null)} />
+              </Suspense>
+            </Canvas>
+
+            {/* Loading overlay while Suspense resolves */}
+            <div id="model-loader" style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
+              {/* Hidden once model loads — Suspense handles this internally */}
+            </div>
           </motion.div>
 
-          {/* RIGHT — card */}
+          {/* RIGHT — skill card */}
           <motion.div
-            initial={{ opacity: 0, x: 18 }}
-            animate={inView ? { opacity: 1, x: 0 } : {}}
+            initial={{ opacity: 0, x: 18 }} animate={inView ? { opacity: 1, x: 0 } : {}}
             transition={{ duration: 0.95, ease: E, delay: 0.16 }}
             style={{ width: '100%', minHeight: 280 }}
           >
@@ -395,15 +374,17 @@ export default function DevAnatomy() {
       </div>
 
       <style>{`
-        @keyframes figfloat {
-          0%,100% { transform: translateY(0px); }
-          50%      { transform: translateY(-10px); }
+        @keyframes zdpulse {
+          0%,100% { opacity: 0.35; transform: scale(1); }
+          50%      { opacity: 0.7;  transform: scale(1.3); }
         }
         @media (max-width: 680px) {
           .anatomy-grid { grid-template-columns: 1fr !important; }
-          .anatomy-grid > div:first-child { justify-self: center; }
         }
       `}</style>
     </section>
   )
 }
+
+/* Preload GLB as soon as this module is imported */
+useGLTF.preload('/caiocorpointeiro.glb')
