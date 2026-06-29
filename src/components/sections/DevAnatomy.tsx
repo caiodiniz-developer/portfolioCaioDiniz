@@ -28,7 +28,7 @@ const ZONES: Zone[] = [
     skills: ['Algoritmos', 'System Design', 'Problem Solving', 'Code Review', 'UI/UX'],
     color: '#b8b3ff',
     icon: Brain,
-    top: '9%', left: '50%',
+    top: '7%', left: '50%',
   },
   {
     id: 'heart',
@@ -39,7 +39,7 @@ const ZONES: Zone[] = [
     skills: ['Clean Code', 'SOLID', 'Performance', 'DX', 'Open Source'],
     color: '#f0a6b4',
     icon: Heart,
-    top: '38%', left: '50%',
+    top: '34%', left: '50%',
   },
   {
     id: 'hands',
@@ -50,7 +50,7 @@ const ZONES: Zone[] = [
     skills: ['React', 'TypeScript', 'Node.js', 'PostgreSQL', 'Docker', 'Git'],
     color: '#a0d4b8',
     icon: Code2,
-    top: '57%', left: '50%',
+    top: '56%', left: '62%',
   },
   {
     id: 'base',
@@ -61,7 +61,7 @@ const ZONES: Zone[] = [
     skills: ['CI/CD', 'Linux', 'Vercel', 'Railway', 'Segurança', 'Monitoramento'],
     color: '#d4b896',
     icon: Layers,
-    top: '84%', left: '50%',
+    top: '88%', left: '50%',
   },
 ]
 
@@ -173,8 +173,8 @@ function SkillCard({ zone, pt }: { zone: Zone; pt: boolean }) {
       exit={{ opacity: 0, y: -12, filter: 'blur(8px)' }}
       transition={{ duration: 0.5, ease: [0.25, 1, 0.4, 1] }}
       style={{
-        padding: 'clamp(1.5rem,3vw,2rem)',
-        borderRadius: 16,
+        padding: 'clamp(2rem,4vw,2.8rem)',
+        borderRadius: 18,
         background: 'rgba(255,255,255,0.025)',
         border: '1px solid rgba(255,255,255,0.07)',
         position: 'relative',
@@ -195,7 +195,7 @@ function SkillCard({ zone, pt }: { zone: Zone; pt: boolean }) {
           <Icon size={16} color={zone.color} strokeWidth={1.6} />
         </div>
         <div>
-          <h3 style={{ fontFamily: 'Syne,sans-serif', fontWeight: 900, fontSize: 'clamp(1.4rem,2.8vw,2rem)', letterSpacing: '-0.045em', color: '#fff', margin: 0, lineHeight: 1 }}>
+          <h3 style={{ fontFamily: 'Syne,sans-serif', fontWeight: 900, fontSize: 'clamp(1.7rem,3.2vw,2.8rem)', letterSpacing: '-0.045em', color: '#fff', margin: 0, lineHeight: 1 }}>
             {pt ? zone.labelPt : zone.labelEn}
           </h3>
           <p style={{ fontSize: '0.5rem', fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: zone.color, margin: '5px 0 0', opacity: 0.7 }}>
@@ -206,7 +206,7 @@ function SkillCard({ zone, pt }: { zone: Zone; pt: boolean }) {
 
       <div style={{ height: 1, background: 'rgba(255,255,255,0.05)', marginBottom: '1.25rem' }} />
 
-      <p style={{ fontSize: 'clamp(0.8rem,1.2vw,0.91rem)', color: 'rgba(255,255,255,0.36)', lineHeight: 1.82, margin: '0 0 1.5rem' }}>
+      <p style={{ fontSize: 'clamp(0.88rem,1.4vw,1.02rem)', color: 'rgba(255,255,255,0.38)', lineHeight: 1.82, margin: '0 0 1.8rem' }}>
         {pt ? zone.descPt : zone.descEn}
       </p>
 
@@ -299,7 +299,7 @@ export default function DevAnatomy() {
   return (
     <section
       ref={secRef}
-      style={{ padding: 'clamp(5rem,10vw,8rem) clamp(1.5rem,6vw,5rem)', borderTop: '1px solid rgba(255,255,255,0.06)', position: 'relative', overflow: 'hidden' }}
+      style={{ padding: 'clamp(6rem,12vw,10rem) clamp(2rem,7vw,6rem)', borderTop: '1px solid rgba(255,255,255,0.06)', position: 'relative', overflow: 'hidden' }}
     >
       {/* Very subtle ambient — barely visible */}
       <AnimatePresence>
@@ -313,21 +313,21 @@ export default function DevAnatomy() {
         )}
       </AnimatePresence>
 
-      <div style={{ position: 'relative', zIndex: 1, maxWidth: 960, margin: '0 auto' }}>
+      <div style={{ position: 'relative', zIndex: 1, maxWidth: 1100, margin: '0 auto' }}>
 
         {/* ── Header ── */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.75, ease: E }}
-          style={{ textAlign: 'center', marginBottom: 'clamp(3rem,6vw,5rem)' }}
+          style={{ textAlign: 'center', marginBottom: 'clamp(4rem,7vw,6rem)' }}
         >
           <p style={{ fontSize: '0.5rem', fontWeight: 700, letterSpacing: '0.24em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.18)', margin: '0 0 0.9rem', display: 'inline-flex', alignItems: 'center', gap: 10 }}>
             <span style={{ display: 'inline-block', width: 16, height: 1, background: 'rgba(255,255,255,0.1)' }} />
             {pt ? 'Anatomia de um Dev' : 'Anatomy of a Dev'}
             <span style={{ display: 'inline-block', width: 16, height: 1, background: 'rgba(255,255,255,0.1)' }} />
           </p>
-          <h2 style={{ fontFamily: 'Syne,sans-serif', fontWeight: 900, fontSize: 'clamp(2rem,5vw,4rem)', letterSpacing: '-0.055em', lineHeight: 0.9, color: '#fff', margin: '0 0 1rem' }}>
+          <h2 style={{ fontFamily: 'Syne,sans-serif', fontWeight: 900, fontSize: 'clamp(2.5rem,6vw,5.5rem)', letterSpacing: '-0.055em', lineHeight: 0.9, color: '#fff', margin: '0 0 1rem' }}>
             {pt ? 'Um dev, por dentro.' : 'A dev, from the inside.'}
           </h2>
           <p style={{ fontSize: 'clamp(0.78rem,1.2vw,0.88rem)', color: 'rgba(255,255,255,0.2)', margin: 0 }}>
@@ -338,7 +338,7 @@ export default function DevAnatomy() {
         {/* ── Content grid ── */}
         <div
           className="anatomy-grid"
-          style={{ display: 'grid', gridTemplateColumns: '1fr 1.15fr', gap: 'clamp(2rem,5vw,4.5rem)', alignItems: 'center', justifyItems: 'center' }}
+          style={{ display: 'grid', gridTemplateColumns: '1fr 1.3fr', gap: 'clamp(3rem,7vw,7rem)', alignItems: 'center', justifyItems: 'center' }}
         >
           {/* LEFT — photo, no box */}
           <motion.div
@@ -361,7 +361,7 @@ export default function DevAnatomy() {
             <img
               src="/caiocorpointeiro.png"
               alt="Caio Diniz"
-              style={{ display: 'block', width: '100%', maxWidth: 380, height: 'auto', maxHeight: 570, objectFit: 'contain', objectPosition: 'top', userSelect: 'none', pointerEvents: 'none' }}
+              style={{ display: 'block', width: '100%', maxWidth: 460, height: 'auto', maxHeight: 660, objectFit: 'contain', objectPosition: 'top', userSelect: 'none', pointerEvents: 'none' }}
               draggable={false}
             />
 
@@ -382,7 +382,7 @@ export default function DevAnatomy() {
             initial={{ opacity: 0, x: 18 }}
             animate={inView ? { opacity: 1, x: 0 } : {}}
             transition={{ duration: 0.95, ease: E, delay: 0.16 }}
-            style={{ width: '100%', minHeight: 220 }}
+            style={{ width: '100%', minHeight: 280 }}
           >
             <AnimatePresence mode="wait">
               {zone

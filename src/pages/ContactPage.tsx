@@ -408,7 +408,10 @@ function ChatForm({ slot, lang }: { slot: string; lang: string }) {
   }, [bubbles.length])
 
   useEffect(() => {
-    const t = setTimeout(() => { inputRef.current?.focus(); textareaRef.current?.focus() }, 350)
+    const t = setTimeout(() => {
+      inputRef.current?.focus({ preventScroll: true })
+      textareaRef.current?.focus({ preventScroll: true })
+    }, 350)
     return () => clearTimeout(t)
   }, [step])
 
