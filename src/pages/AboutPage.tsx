@@ -4,6 +4,7 @@ import { Code2, Zap, Palette, TrendingUp, Film, RefreshCw } from 'lucide-react'
 import { useT } from '@/hooks/useTranslation'
 import { useLanguageStore } from '@/store/useLanguageStore'
 import About from '@/components/sections/About'
+import DevAnatomy from '@/components/sections/DevAnatomy'
 import Experience from '@/components/sections/Experience'
 import CTASection from '@/components/sections/CTASection'
 import { SITE } from '@/lib/constants'
@@ -125,6 +126,9 @@ export default function AboutPage() {
 
       {/* About split section — foto-1 only, no hover */}
       <About />
+
+      {/* ─── Dev Anatomy ─── */}
+      <DevAnatomy />
 
       {/* ─── Creative Tech Stack ─── */}
       <section style={{ background: '#111111', borderTop: '1px solid rgba(255,255,255,0.06)', padding: 'clamp(4rem,8vw,7rem) clamp(1.5rem,5vw,4.5rem)' }}>
