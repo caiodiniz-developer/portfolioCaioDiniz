@@ -1,12 +1,13 @@
 import { useEffect, useState, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Send, MessageSquareHeart } from 'lucide-react'
+import { Send, Trash2 } from 'lucide-react'
 import { SITE } from '@/lib/constants'
 
 /* ── Supabase config (set in .env.local) ── */
-const SB_URL  = import.meta.env.VITE_SUPABASE_URL  as string | undefined
-const SB_KEY  = import.meta.env.VITE_SUPABASE_ANON as string | undefined
-const TABLE   = 'guestbook'
+const SB_URL     = import.meta.env.VITE_SUPABASE_URL  as string | undefined
+const SB_KEY     = import.meta.env.VITE_SUPABASE_ANON as string | undefined
+const ADMIN_PASS = import.meta.env.VITE_ADMIN_PASS    as string | undefined
+const TABLE      = 'guestbook'
 
 const E: [number, number, number, number] = [0.16, 1, 0.3, 1]
 
@@ -39,8 +40,8 @@ function avatarColor(name: string) {
 
 function timeAgo(iso: string) {
   const diff = (Date.now() - new Date(iso).getTime()) / 1000
-  if (diff < 60)   return 'agora mesmo'
-  if (diff < 3600) return `${Math.floor(diff / 60)}min atrás`
+  if (diff < 60)    return 'agora mesmo'
+  if (diff < 3600)  return `${Math.floor(diff / 60)}min atrás`
   if (diff < 86400) return `${Math.floor(diff / 3600)}h atrás`
   return new Date(iso).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' })
 }
@@ -55,9 +56,12 @@ export default function GuestbookPage() {
   const [name,       setName]       = useState('')
   const [message,    setMessage]    = useState('')
   const [error,      setError]      = useState('')
+  const [isAdmin,    setIsAdmin]    = useState(() =>
+    typeof sessionStorage !== 'undefined' && sessionStorage.getItem('gb_admin') === '1'
+  )
   const nameRef = useRef<HTMLInputElement>(null)
 
-  useEffect(() => { document.title = `Guestbook — ${SITE.name}` }, [])
+  useEffect(() => { document.title = `Livro de Visitas — ${SITE.name}` }, [])
 
   useEffect(() => {
     if (!CONFIGURED) return
@@ -71,9 +75,7 @@ export default function GuestbookPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (!name.trim() || !message.trim()) return
-    if (!CONFIGURED) return
-
+    if (!name.trim() || !message.trim() || !CONFIGURED) return
     setSubmitting(true)
     setError('')
     try {
@@ -92,6 +94,28 @@ export default function GuestbookPage() {
       setError('Erro ao enviar. Tente novamente.')
     } finally {
       setSubmitting(false)
+    }
+  }
+
+  function activateAdmin() {
+    if (isAdmin) {
+      sessionStorage.removeItem('gb_admin')
+      setIsAdmin(false)
+      return
+    }
+    const pass = prompt('Senha de admin:')
+    if (!pass || !ADMIN_PASS || pass !== ADMIN_PASS) return
+    sessionStorage.setItem('gb_admin', '1')
+    setIsAdmin(true)
+  }
+
+  async function deleteEntry(id: string) {
+    if (!confirm('Apagar este recado?')) return
+    try {
+      await sbFetch(`${TABLE}?id=eq.${id}`, { method: 'DELETE' })
+      setEntries(prev => prev.filter(e => e.id !== id))
+    } catch {
+      alert('Erro ao apagar.')
     }
   }
 
@@ -124,7 +148,8 @@ export default function GuestbookPage() {
             </p>
             <pre style={{ marginTop: '0.75rem', padding: '0.9rem 1rem', borderRadius: 10, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)', fontSize: '0.73rem', color: 'rgba(255,255,255,0.55)', fontFamily: '"JetBrains Mono", monospace', lineHeight: 1.8, overflowX: 'auto' }}>
 {`VITE_SUPABASE_URL=https://xxx.supabase.co
-VITE_SUPABASE_ANON=your-anon-key`}
+VITE_SUPABASE_ANON=your-anon-key
+VITE_ADMIN_PASS=sua-senha-secreta`}
             </pre>
             <p style={{ marginTop: '0.75rem', fontSize: '0.72rem', color: 'rgba(255,255,255,0.28)', lineHeight: 1.65 }}>
               Crie uma conta gratuita em <strong style={{ color: 'rgba(255,255,255,0.5)' }}>supabase.com</strong> e execute no SQL Editor:
@@ -138,7 +163,8 @@ VITE_SUPABASE_ANON=your-anon-key`}
 );
 ALTER TABLE guestbook ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "read_all"   ON guestbook FOR SELECT USING (true);
-CREATE POLICY "insert_all" ON guestbook FOR INSERT WITH CHECK (true);`}
+CREATE POLICY "insert_all" ON guestbook FOR INSERT WITH CHECK (true);
+CREATE POLICY "delete_all" ON guestbook FOR DELETE USING (true);`}
             </pre>
           </motion.div>
         ) : (
@@ -184,7 +210,7 @@ CREATE POLICY "insert_all" ON guestbook FOR INSERT WITH CHECK (true);`}
                 {submitted && (
                   <motion.span initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0 }}
                     style={{ fontSize: '0.75rem', color: '#4ade80', fontWeight: 600 }}>
-                    ✓ Recado enviado!
+                    Recado enviado!
                   </motion.span>
                 )}
               </AnimatePresence>
@@ -203,12 +229,16 @@ CREATE POLICY "insert_all" ON guestbook FOR INSERT WITH CHECK (true);`}
 
         <div style={{ height: 'clamp(2.5rem,5vw,4rem)' }} />
 
-        {/* Entries */}
+        {/* Entries header */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
           <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 'clamp(1rem,2.5vw,1.4rem)', letterSpacing: '-0.03em', color: 'rgba(255,255,255,0.7)', margin: 0 }}>
             {loading ? 'Carregando...' : `${entries.length} recado${entries.length !== 1 ? 's' : ''}`}
           </h2>
-          <MessageSquareHeart size={18} style={{ color: 'rgba(255,255,255,0.2)' }} />
+          {isAdmin && (
+            <span style={{ fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#f87171', padding: '0.25rem 0.6rem', borderRadius: 999, border: '1px solid rgba(248,113,113,0.25)', background: 'rgba(248,113,113,0.06)' }}>
+              Admin
+            </span>
+          )}
         </div>
 
         {loading && (
@@ -222,7 +252,6 @@ CREATE POLICY "insert_all" ON guestbook FOR INSERT WITH CHECK (true);`}
         {!loading && entries.length === 0 && CONFIGURED && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}
             style={{ textAlign: 'center', padding: '3rem 1rem', color: 'rgba(255,255,255,0.2)', fontSize: '0.85rem' }}>
-            <div style={{ fontSize: '2.5rem', marginBottom: '0.75rem' }}>✍️</div>
             <p style={{ margin: 0 }}>Seja o primeiro a deixar um recado.</p>
           </motion.div>
         )}
@@ -230,7 +259,7 @@ CREATE POLICY "insert_all" ON guestbook FOR INSERT WITH CHECK (true);`}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
           <AnimatePresence initial={false}>
             {entries.map((entry, i) => {
-              const color = avatarColor(entry.name)
+              const color    = avatarColor(entry.name)
               const initials = entry.name.trim().split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
               return (
                 <motion.div
@@ -239,9 +268,9 @@ CREATE POLICY "insert_all" ON guestbook FOR INSERT WITH CHECK (true);`}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.97 }}
                   transition={{ duration: 0.3, delay: i < 6 ? i * 0.04 : 0, ease: E }}
-                  style={{ display: 'flex', gap: '0.9rem', padding: '1rem 1.2rem', borderRadius: 14, border: '1px solid rgba(255,255,255,0.07)', background: 'rgba(255,255,255,0.02)', transition: 'border-color 0.2s' }}
-                  onMouseEnter={e => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.13)')}
-                  onMouseLeave={e => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.07)')}
+                  style={{ display: 'flex', gap: '0.9rem', padding: '1rem 1.2rem', borderRadius: 14, border: `1px solid ${isAdmin ? 'rgba(248,113,113,0.12)' : 'rgba(255,255,255,0.07)'}`, background: 'rgba(255,255,255,0.02)', transition: 'border-color 0.2s', alignItems: 'flex-start' }}
+                  onMouseEnter={e => (e.currentTarget.style.borderColor = isAdmin ? 'rgba(248,113,113,0.25)' : 'rgba(255,255,255,0.13)')}
+                  onMouseLeave={e => (e.currentTarget.style.borderColor = isAdmin ? 'rgba(248,113,113,0.12)' : 'rgba(255,255,255,0.07)')}
                 >
                   {/* Avatar */}
                   <div style={{ flexShrink: 0, width: 38, height: 38, borderRadius: '50%', background: `${color}22`, border: `1.5px solid ${color}55`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.7rem', fontWeight: 800, color, letterSpacing: '0.02em' }}>
@@ -256,10 +285,31 @@ CREATE POLICY "insert_all" ON guestbook FOR INSERT WITH CHECK (true);`}
                       {entry.message}
                     </p>
                   </div>
+                  {/* Delete button — admin only */}
+                  {isAdmin && (
+                    <button
+                      onClick={() => deleteEntry(entry.id)}
+                      title="Apagar recado"
+                      style={{ flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', width: 30, height: 30, borderRadius: 8, border: '1px solid rgba(248,113,113,0.2)', background: 'rgba(248,113,113,0.06)', color: '#f87171', cursor: 'pointer', transition: 'all 0.2s' }}
+                      onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(248,113,113,0.18)'; (e.currentTarget as HTMLElement).style.borderColor = 'rgba(248,113,113,0.4)' }}
+                      onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(248,113,113,0.06)'; (e.currentTarget as HTMLElement).style.borderColor = 'rgba(248,113,113,0.2)' }}
+                    >
+                      <Trash2 size={13} />
+                    </button>
+                  )}
                 </motion.div>
               )
             })}
           </AnimatePresence>
+        </div>
+
+        {/* Hidden admin toggle — small dot at the bottom */}
+        <div style={{ marginTop: '4rem', display: 'flex', justifyContent: 'center' }}>
+          <button
+            onClick={activateAdmin}
+            title={isAdmin ? 'Sair do modo admin' : 'Admin'}
+            style={{ width: 6, height: 6, borderRadius: '50%', background: isAdmin ? '#f87171' : 'rgba(255,255,255,0.1)', border: 'none', cursor: 'pointer', padding: 0, transition: 'background 0.3s' }}
+          />
         </div>
 
       </div>
