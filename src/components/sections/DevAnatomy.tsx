@@ -1,6 +1,6 @@
-import { Suspense, useState, useMemo, useRef } from 'react'
-import { Canvas } from '@react-three/fiber'
-import { useGLTF, Html, OrbitControls, Environment } from '@react-three/drei'
+import { Suspense, useState, useMemo, useRef, useEffect } from 'react'
+import { Canvas, useFrame, useThree } from '@react-three/fiber'
+import { useGLTF, OrbitControls, Environment } from '@react-three/drei'
 import * as THREE from 'three'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useInView } from 'framer-motion'
@@ -8,6 +8,7 @@ import { Brain, Heart, Code2, Layers } from 'lucide-react'
 import { useLanguageStore } from '@/store/useLanguageStore'
 
 const E: [number, number, number, number] = [0.22, 1, 0.36, 1]
+const TARGET_H = 2.0
 
 /* ── Types ── */
 interface Zone {
@@ -18,7 +19,7 @@ interface Zone {
   skills: string[]
   color: string
   icon: React.ComponentType<{ size?: number; color?: string; strokeWidth?: number }>
-  yFrac: number  // 0 = feet, 1 = top of head
+  yFrac: number
 }
 
 const ZONES: Zone[] = [
@@ -61,143 +62,83 @@ const ZONES: Zone[] = [
 ]
 
 /* ────────────────────────────────────────────
-   3-D ZONE DOT (rendered via drei <Html>)
+   Zone world positions (after normalization)
+   wx=0 (centered), wy=yFrac*TARGET_H, wz=slightly front
 ──────────────────────────────────────────── */
-function ZoneDot3D({ zone, active, onEnter, onLeave }: {
-  zone: Zone; active: boolean; onEnter: () => void; onLeave: () => void
+const ZONE_WORLD: Record<string, THREE.Vector3> = {}
+ZONES.forEach(z => {
+  ZONE_WORLD[z.id] = new THREE.Vector3(0, z.yFrac * TARGET_H, 0.12)
+})
+
+/* ────────────────────────────────────────────
+   DOT PROJECTOR — runs inside Canvas
+   projects world positions → canvas px → updates DOM refs directly
+──────────────────────────────────────────── */
+function DotProjector({ dotRefs, modelOffset }: {
+  dotRefs: React.RefObject<Map<string, HTMLDivElement | null>>
+  modelOffset: React.RefObject<[number, number, number]>
 }) {
-  const Icon = zone.icon
-  return (
-    <div
-      onMouseEnter={onEnter}
-      onMouseLeave={onLeave}
-      style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', width: 44, height: 44, cursor: 'crosshair', userSelect: 'none' }}
-    >
-      {/* Pulse ring (idle) */}
-      {!active && (
-        <div style={{
-          position: 'absolute', width: 26, height: 26, borderRadius: '50%',
-          border: `1.5px solid ${zone.color}`, opacity: 0.4,
-          animation: 'zdpulse 2.4s ease-in-out infinite',
-        }} />
-      )}
+  const { camera, size } = useThree()
+  const vec = useMemo(() => new THREE.Vector3(), [])
 
-      {/* Dot / icon */}
-      <div style={{
-        width: active ? 32 : 12, height: active ? 32 : 12,
-        borderRadius: '50%',
-        background: active ? 'rgba(8,8,8,0.88)' : zone.color,
-        border: active ? `1px solid ${zone.color}45` : 'none',
-        backdropFilter: active ? 'blur(12px)' : 'none',
-        WebkitBackdropFilter: active ? 'blur(12px)' : 'none',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        transition: 'all 0.26s cubic-bezier(0.22,1,0.36,1)',
-      }}>
-        {active && <Icon size={13} color={zone.color} strokeWidth={1.7} />}
-      </div>
+  useFrame(() => {
+    ZONES.forEach(zone => {
+      const el = dotRefs.current?.get(zone.id)
+      if (!el) return
 
-      {/* Label pill */}
-      <div style={{
-        position: 'absolute', top: 'calc(100% + 5px)', left: '50%',
-        transform: 'translateX(-50%)',
-        padding: '2px 8px', borderRadius: 99,
-        background: 'rgba(10,10,10,0.82)',
-        border: '1px solid rgba(255,255,255,0.08)',
-        color: 'rgba(255,255,255,0.5)',
-        fontSize: '0.44rem', fontWeight: 700,
-        letterSpacing: '0.13em', textTransform: 'uppercase' as const,
-        whiteSpace: 'nowrap' as const,
-        fontFamily: 'Inter, sans-serif',
-        backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)',
-        opacity: active ? 1 : 0,
-        transition: 'opacity 0.18s',
-        pointerEvents: 'none' as const,
-      }}>
-        {zone.labelPt}
-      </div>
-    </div>
-  )
+      const base = ZONE_WORLD[zone.id]
+      const off  = modelOffset.current ?? [0, 0, 0]
+      // World pos = group position offset + zone local * scale
+      // Already pre-computed as TARGET_H fractions, just add X/Z centring offset
+      vec.set(base.x + off[0], base.y, base.z + off[2])
+      vec.project(camera)
+
+      // NDC → canvas pixels
+      const x = ((vec.x + 1) / 2) * size.width
+      const y = ((-vec.y + 1) / 2) * size.height
+
+      el.style.left = `${x}px`
+      el.style.top  = `${y}px`
+
+      // Hide dots that are behind the camera
+      const behind = vec.z > 1
+      el.style.opacity       = behind ? '0' : '1'
+      el.style.pointerEvents = behind ? 'none' : 'auto'
+    })
+  })
+
+  return null
 }
 
 /* ────────────────────────────────────────────
-   3-D MODEL (inside Canvas)
+   3-D MODEL
 ──────────────────────────────────────────── */
-const TARGET_H = 2.0 // Normalize model to 2 world-units tall
-
-function HumanModel({ activeId, onEnter, onLeave }: {
-  activeId: string | null
-  onEnter: (id: string) => void
-  onLeave: () => void
-}) {
+function HumanModel({ onOffset }: { onOffset: (off: [number, number, number]) => void }) {
   const { scene } = useGLTF('/caiocorpointeiro.glb')
 
-  /* Compute scale + offset + zone local positions from bounding box */
-  const { s, groupPos, zonePosLocal } = useMemo(() => {
+  const { s, groupPos } = useMemo(() => {
     const bbox = new THREE.Box3().setFromObject(scene)
     const size = bbox.getSize(new THREE.Vector3())
     const center = bbox.getCenter(new THREE.Vector3())
-
     const s = TARGET_H / size.y
-
-    // groupPos: world position of the group so that feet=y0, center=x0/z0
-    // World Y of model vertex at vy: groupPos.y + vy * s
-    // Want feet (bbox.min.y) at world y=0: groupPos.y = -bbox.min.y * s
-    // Want center.x at world x=0:         groupPos.x = -center.x * s
-    const groupPos: [number, number, number] = [
-      -center.x * s,
-      -bbox.min.y * s,
-      -center.z * s,
-    ]
-
-    // Zone positions in GROUP-LOCAL space (children of group with scale=s):
-    // localY = bbox.min.y + yFrac * size.y
-    // This maps to world y = groupPos.y + localY * s = yFrac * TARGET_H ✓
-    const zonePosLocal: Record<string, [number, number, number]> = {}
-    const frontZ = (0.06 / s) // ~6 cm in front, in model-local units
-    for (const z of ZONES) {
-      zonePosLocal[z.id] = [0, bbox.min.y + z.yFrac * size.y, frontZ]
-    }
-
-    return { s, groupPos, zonePosLocal }
+    const groupPos: [number, number, number] = [-center.x * s, -bbox.min.y * s, -center.z * s]
+    return { s, groupPos }
   }, [scene])
+
+  useEffect(() => {
+    // Tell projector about X/Z offset so dots centre on the model
+    onOffset([groupPos[0], 0, groupPos[2]])
+  }, [groupPos, onOffset])
 
   return (
     <group position={groupPos} scale={s}>
       <primitive object={scene} />
-      {ZONES.map(zone => (
-        <Html
-          key={zone.id}
-          position={zonePosLocal[zone.id]}
-          center
-          zIndexRange={[0, 30]}
-          occlude="blending"
-          style={{ pointerEvents: 'auto' }}
-        >
-          <ZoneDot3D
-            zone={zone}
-            active={activeId === zone.id}
-            onEnter={() => onEnter(zone.id)}
-            onLeave={onLeave}
-          />
-        </Html>
-      ))}
     </group>
   )
 }
 
-/* Simple spinning loader */
-function Loader() {
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%', gap: 8 }}>
-      <div style={{ width: 6, height: 6, borderRadius: '50%', background: 'rgba(255,255,255,0.3)', animation: 'zdpulse 1.2s ease-in-out infinite' }} />
-      <div style={{ width: 6, height: 6, borderRadius: '50%', background: 'rgba(255,255,255,0.3)', animation: 'zdpulse 1.2s ease-in-out 0.2s infinite' }} />
-      <div style={{ width: 6, height: 6, borderRadius: '50%', background: 'rgba(255,255,255,0.3)', animation: 'zdpulse 1.2s ease-in-out 0.4s infinite' }} />
-    </div>
-  )
-}
-
 /* ────────────────────────────────────────────
-   SKILL CARD (right column)
+   SKILL CARD
 ──────────────────────────────────────────── */
 function SkillCard({ zone, pt }: { zone: Zone; pt: boolean }) {
   const Icon = zone.icon
@@ -227,7 +168,6 @@ function SkillCard({ zone, pt }: { zone: Zone; pt: boolean }) {
       </div>
 
       <div style={{ height: 1, background: 'rgba(255,255,255,0.05)', marginBottom: '1.3rem' }} />
-
       <p style={{ fontSize: 'clamp(0.88rem,1.4vw,1.02rem)', color: 'rgba(255,255,255,0.38)', lineHeight: 1.82, margin: '0 0 1.8rem' }}>
         {pt ? zone.descPt : zone.descEn}
       </p>
@@ -271,6 +211,54 @@ function IdlePlaceholder({ pt }: { pt: boolean }) {
 }
 
 /* ════════════════════════════════════════════
+   ZONE DOT HTML ELEMENT
+════════════════════════════════════════════ */
+function ZoneDotEl({ zone, active }: { zone: Zone; active: boolean }) {
+  const Icon = zone.icon
+  return (
+    <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', width: 44, height: 44, cursor: 'crosshair' }}>
+      {/* Pulse ring (idle) */}
+      {!active && (
+        <div style={{
+          position: 'absolute', width: 26, height: 26, borderRadius: '50%',
+          border: `1.5px solid ${zone.color}`, opacity: 0.45,
+          animation: 'zdpulse 2.2s ease-in-out infinite',
+        }} />
+      )}
+      {/* Dot / icon */}
+      <div style={{
+        width: active ? 32 : 12, height: active ? 32 : 12, borderRadius: '50%',
+        background: active ? 'rgba(8,8,8,0.9)' : zone.color,
+        border: active ? `1px solid ${zone.color}55` : 'none',
+        backdropFilter: active ? 'blur(12px)' : 'none',
+        WebkitBackdropFilter: active ? 'blur(12px)' : 'none',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        transition: 'all 0.26s cubic-bezier(0.22,1,0.36,1)',
+      }}>
+        {active && <Icon size={13} color={zone.color} strokeWidth={1.7} />}
+      </div>
+      {/* Label pill */}
+      <div style={{
+        position: 'absolute', top: 'calc(100% + 6px)', left: '50%',
+        transform: 'translateX(-50%)',
+        padding: '2px 8px', borderRadius: 99,
+        background: 'rgba(10,10,10,0.85)',
+        border: '1px solid rgba(255,255,255,0.08)',
+        color: 'rgba(255,255,255,0.55)',
+        fontSize: '0.44rem', fontWeight: 700,
+        letterSpacing: '0.13em', textTransform: 'uppercase' as const,
+        whiteSpace: 'nowrap' as const, fontFamily: 'Inter, sans-serif',
+        backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)',
+        opacity: active ? 1 : 0, transition: 'opacity 0.18s',
+        pointerEvents: 'none' as const,
+      }}>
+        {zone.labelPt}
+      </div>
+    </div>
+  )
+}
+
+/* ════════════════════════════════════════════
    MAIN EXPORT
 ════════════════════════════════════════════ */
 export default function DevAnatomy() {
@@ -280,6 +268,15 @@ export default function DevAnatomy() {
   const secRef = useRef<HTMLElement>(null)
   const inView = useInView(secRef, { once: true, margin: '-80px' })
   const zone   = ZONES.find(z => z.id === activeId) ?? null
+
+  // Refs for dot DOM elements — updated by DotProjector every frame
+  const dotRefs      = useRef<Map<string, HTMLDivElement | null>>(new Map())
+  // X/Z offset from the model's center (communicated by HumanModel after load)
+  const modelOffset  = useRef<[number, number, number]>([0, 0, 0])
+
+  const handleOffset = useRef(([x, _y, z]: [number, number, number]) => {
+    modelOffset.current = [x, 0, z]
+  })
 
   return (
     <section
@@ -296,7 +293,7 @@ export default function DevAnatomy() {
 
       <div style={{ position: 'relative', zIndex: 1, maxWidth: 1100, margin: '0 auto' }}>
 
-        {/* ── Header ── */}
+        {/* Header */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.75, ease: E }}
           style={{ textAlign: 'center', marginBottom: 'clamp(4rem,7vw,6rem)' }}>
           <p style={{ fontSize: '0.5rem', fontWeight: 700, letterSpacing: '0.24em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.18)', margin: '0 0 0.9rem', display: 'inline-flex', alignItems: 'center', gap: 10 }}>
@@ -312,28 +309,26 @@ export default function DevAnatomy() {
           </p>
         </motion.div>
 
-        {/* ── Grid ── */}
+        {/* Grid */}
         <div className="anatomy-grid"
           style={{ display: 'grid', gridTemplateColumns: '1fr 1.3fr', gap: 'clamp(3rem,7vw,7rem)', alignItems: 'center', justifyItems: 'center' }}>
 
-          {/* LEFT — 3-D Canvas */}
+          {/* LEFT — 3D canvas + dot overlays */}
           <motion.div
             initial={{ opacity: 0, x: -18 }} animate={inView ? { opacity: 1, x: 0 } : {}}
             transition={{ duration: 0.95, ease: E, delay: 0.08 }}
-            style={{ width: '100%', maxWidth: 480, aspectRatio: '3/4', position: 'relative' }}
+            style={{ width: '100%', maxWidth: 460, position: 'relative', aspectRatio: '3/4' }}
           >
+            {/* Canvas */}
             <Canvas
               gl={{ alpha: true, antialias: true }}
-              camera={{ position: [0, TARGET_H * 0.5, 3.4], fov: 42, near: 0.05, far: 50 }}
+              camera={{ position: [0, TARGET_H * 0.5, 3.5], fov: 40, near: 0.05, far: 50 }}
               style={{ width: '100%', height: '100%', background: 'transparent' }}
             >
-              <ambientLight intensity={0.55} />
+              <ambientLight intensity={0.6} />
               <directionalLight position={[3, 5, 3]} intensity={1.1} />
               <directionalLight position={[-2, 2, -3]} intensity={0.35} color="#d0c8ff" />
-              <pointLight position={[0, TARGET_H, 0.5]} intensity={0.2} color="#ffffff" />
-
               <Environment preset="studio" />
-
               <OrbitControls
                 target={[0, TARGET_H * 0.50, 0]}
                 enableZoom={false}
@@ -345,15 +340,32 @@ export default function DevAnatomy() {
                 minPolarAngle={Math.PI * 0.1}
                 maxPolarAngle={Math.PI * 0.9}
               />
-
               <Suspense fallback={null}>
-                <HumanModel activeId={activeId} onEnter={setActiveId} onLeave={() => setActiveId(null)} />
+                <HumanModel onOffset={handleOffset.current} />
               </Suspense>
+              <DotProjector dotRefs={dotRefs} modelOffset={modelOffset} />
             </Canvas>
 
-            {/* Loading overlay while Suspense resolves */}
-            <div id="model-loader" style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
-              {/* Hidden once model loads — Suspense handles this internally */}
+            {/* Dot overlays — positioned by DotProjector each frame */}
+            <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', overflow: 'hidden' }}>
+              {ZONES.map(zone => (
+                <div
+                  key={zone.id}
+                  ref={el => { dotRefs.current.set(zone.id, el) }}
+                  style={{
+                    position: 'absolute',
+                    transform: 'translate(-50%, -50%)',
+                    opacity: 0,        // DotProjector sets this
+                    pointerEvents: 'none',  // DotProjector enables this
+                    transition: 'opacity 0.2s',
+                    zIndex: 10,
+                  }}
+                  onMouseEnter={() => setActiveId(zone.id)}
+                  onMouseLeave={() => setActiveId(null)}
+                >
+                  <ZoneDotEl zone={zone} active={activeId === zone.id} />
+                </div>
+              ))}
             </div>
           </motion.div>
 
@@ -386,5 +398,4 @@ export default function DevAnatomy() {
   )
 }
 
-/* Preload GLB as soon as this module is imported */
 useGLTF.preload('/caiocorpointeiro.glb')
