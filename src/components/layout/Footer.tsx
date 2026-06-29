@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { Github, Linkedin } from 'lucide-react'
 import { useT } from '@/hooks/useTranslation'
 import { NAV_LINKS, SITE } from '@/lib/constants'
@@ -23,7 +23,9 @@ export default function Footer() {
   const t           = useT()
   const setCursor   = useCursorStore((s) => s.setState)
   const presenting  = usePresentationStore((s) => s.active)
+  const { pathname} = useLocation()
   const year        = new Date().getFullYear()
+  const isGuestbook = pathname === '/guestbook'
 
   if (presenting) return null
 
@@ -36,7 +38,18 @@ export default function Footer() {
   }
 
   return (
-    <footer style={{ background: '#080808', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+    <footer style={isGuestbook ? {
+      position:        'relative',
+      zIndex:          3,
+      background:      'rgba(8,8,8,0.75)',
+      backdropFilter:  'blur(20px)',
+      WebkitBackdropFilter: 'blur(20px)',
+      borderTop:       '1px solid rgba(255,255,255,0.18)',
+      boxShadow:       '0 -1px 40px rgba(0,0,0,0.6)',
+    } : {
+      background: '#080808',
+      borderTop:  '1px solid rgba(255,255,255,0.06)',
+    }}>
       <div className="container-custom py-8">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
           {/* Left */}
@@ -47,7 +60,7 @@ export default function Footer() {
             >
               Caio Diniz
             </Link>
-            <p className="text-[0.6875rem] text-white/20 tracking-wide">
+            <p className={isGuestbook ? 'text-[0.6875rem] text-white/40 tracking-wide' : 'text-[0.6875rem] text-white/20 tracking-wide'}>
               © {year} — Full Stack Developer
             </p>
           </div>
@@ -58,7 +71,10 @@ export default function Footer() {
               <Link
                 key={link.path}
                 to={link.path}
-                className="text-[0.6875rem] font-semibold uppercase tracking-[0.1em] text-white/25 hover:text-white transition-colors duration-200"
+                className={isGuestbook
+                  ? 'text-[0.6875rem] font-semibold uppercase tracking-[0.1em] text-white/50 hover:text-white transition-colors duration-200'
+                  : 'text-[0.6875rem] font-semibold uppercase tracking-[0.1em] text-white/25 hover:text-white transition-colors duration-200'
+                }
                 onMouseEnter={() => setCursor('pointer')}
                 onMouseLeave={() => setCursor('default')}
               >
@@ -67,7 +83,10 @@ export default function Footer() {
             ))}
             <Link
               to="/guestbook"
-              className="text-[0.6875rem] font-semibold uppercase tracking-[0.1em] text-white/25 hover:text-white transition-colors duration-200"
+              className={isGuestbook
+                ? 'text-[0.6875rem] font-semibold uppercase tracking-[0.1em] text-white hover:text-white transition-colors duration-200'
+                : 'text-[0.6875rem] font-semibold uppercase tracking-[0.1em] text-white/25 hover:text-white transition-colors duration-200'
+              }
               onMouseEnter={() => setCursor('pointer')}
               onMouseLeave={() => setCursor('default')}
             >
@@ -84,7 +103,10 @@ export default function Footer() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={label}
-                className="text-white/20 hover:text-white transition-colors duration-200"
+                className={isGuestbook
+                  ? 'text-white/45 hover:text-white transition-colors duration-200'
+                  : 'text-white/20 hover:text-white transition-colors duration-200'
+                }
                 onMouseEnter={() => setCursor('pointer')}
                 onMouseLeave={() => setCursor('default')}
               >
