@@ -1,9 +1,8 @@
-import { type MeshPhysicalMaterialProps } from '@react-three/fiber'
+import { type ThreeElements } from '@react-three/fiber'
 import { forwardRef } from 'react'
 import { MeshPhysicalMaterial } from 'three'
 
-interface GlassMaterialProps extends MeshPhysicalMaterialProps {
-  color?: string
+type GlassMaterialProps = ThreeElements['meshPhysicalMaterial'] & {
   tint?: number
 }
 

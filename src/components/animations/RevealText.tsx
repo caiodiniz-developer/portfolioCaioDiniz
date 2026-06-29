@@ -64,9 +64,11 @@ export default function RevealText({
     ))
   ) : text
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const TagComponent = Tag as any
   return (
-    <Tag ref={containerRef} className={cn('overflow-hidden', className)}>
+    <TagComponent ref={containerRef} className={cn('overflow-hidden', className)}>
       {content}
-    </Tag>
+    </TagComponent>
   )
 }
