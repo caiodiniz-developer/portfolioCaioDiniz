@@ -62,13 +62,18 @@ const ZONES: Zone[] = [
 ]
 
 /* ────────────────────────────────────────────
-   Zone world positions (after normalization)
-   wx=0 (centered), wy=yFrac*TARGET_H, wz=slightly front
+   Dot world positions — supports multiple dots per zone
+   (hands split into left + right)
 ──────────────────────────────────────────── */
-const ZONE_WORLD: Record<string, THREE.Vector3> = {}
-ZONES.forEach(z => {
-  ZONE_WORLD[z.id] = new THREE.Vector3(0, z.yFrac * TARGET_H, 0.12)
-})
+interface ZoneDot { dotId: string; zoneId: string; pos: THREE.Vector3 }
+
+const ZONE_DOTS: ZoneDot[] = [
+  { dotId: 'head',        zoneId: 'head',  pos: new THREE.Vector3(0,     0.91 * TARGET_H, 0.12) },
+  { dotId: 'heart',       zoneId: 'heart', pos: new THREE.Vector3(0,     0.62 * TARGET_H, 0.12) },
+  { dotId: 'hands-left',  zoneId: 'hands', pos: new THREE.Vector3(-0.30, 0.39 * TARGET_H, 0.10) },
+  { dotId: 'hands-right', zoneId: 'hands', pos: new THREE.Vector3( 0.30, 0.39 * TARGET_H, 0.10) },
+  { dotId: 'base',        zoneId: 'base',  pos: new THREE.Vector3(0,     0.05 * TARGET_H, 0.12) },
+]
 
 /* ────────────────────────────────────────────
    DOT PROJECTOR — runs inside Canvas
@@ -82,25 +87,20 @@ function DotProjector({ dotRefs, modelOffset }: {
   const vec = useMemo(() => new THREE.Vector3(), [])
 
   useFrame(() => {
-    ZONES.forEach(zone => {
-      const el = dotRefs.current?.get(zone.id)
+    ZONE_DOTS.forEach(dot => {
+      const el = dotRefs.current?.get(dot.dotId)
       if (!el) return
 
-      const base = ZONE_WORLD[zone.id]
-      const off  = modelOffset.current ?? [0, 0, 0]
-      // World pos = group position offset + zone local * scale
-      // Already pre-computed as TARGET_H fractions, just add X/Z centring offset
-      vec.set(base.x + off[0], base.y, base.z + off[2])
+      const off = modelOffset.current ?? [0, 0, 0]
+      vec.set(dot.pos.x + off[0], dot.pos.y, dot.pos.z + off[2])
       vec.project(camera)
 
-      // NDC → canvas pixels
       const x = ((vec.x + 1) / 2) * size.width
       const y = ((-vec.y + 1) / 2) * size.height
 
       el.style.left = `${x}px`
       el.style.top  = `${y}px`
 
-      // Hide dots that are behind the camera
       const behind = vec.z > 1
       el.style.opacity       = behind ? '0' : '1'
       el.style.pointerEvents = behind ? 'none' : 'auto'
@@ -265,23 +265,35 @@ export default function DevAnatomy() {
   const lang   = useLanguageStore(s => s.lang)
   const pt     = lang === 'pt'
   const [activeId, setActiveId] = useState<string | null>(null)
-  const secRef = useRef<HTMLElement>(null)
-  const inView = useInView(secRef, { once: true, margin: '-80px' })
-  const zone   = ZONES.find(z => z.id === activeId) ?? null
+  const secRef  = useRef<HTMLElement>(null)
+  const cardRef = useRef<HTMLDivElement>(null)
+  const inView  = useInView(secRef, { once: true, margin: '-80px' })
+  const zone    = ZONES.find(z => z.id === activeId) ?? null
 
   // Refs for dot DOM elements — updated by DotProjector every frame
-  const dotRefs      = useRef<Map<string, HTMLDivElement | null>>(new Map())
+  const dotRefs     = useRef<Map<string, HTMLDivElement | null>>(new Map())
   // X/Z offset from the model's center (communicated by HumanModel after load)
-  const modelOffset  = useRef<[number, number, number]>([0, 0, 0])
+  const modelOffset = useRef<[number, number, number]>([0, 0, 0])
 
   const handleOffset = useRef(([x, _y, z]: [number, number, number]) => {
     modelOffset.current = [x, 0, z]
   })
 
+  // On mobile: scroll card into view when a zone is activated
+  useEffect(() => {
+    if (!activeId) return
+    if (!window.matchMedia('(hover: none)').matches) return
+    const id = setTimeout(() => {
+      cardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+    }, 120)
+    return () => clearTimeout(id)
+  }, [activeId])
+
   return (
     <section
       ref={secRef}
-      style={{ padding: 'clamp(6rem,12vw,10rem) clamp(2rem,7vw,6rem)', borderTop: '1px solid rgba(255,255,255,0.06)', position: 'relative', overflow: 'hidden' }}
+      className="anatomy-section"
+      style={{ padding: 'clamp(4rem,10vw,10rem) clamp(1.25rem,5vw,6rem)', borderTop: '1px solid rgba(255,255,255,0.06)', position: 'relative', overflow: 'hidden' }}
     >
       {/* Ambient glow */}
       <AnimatePresence>
@@ -304,25 +316,27 @@ export default function DevAnatomy() {
           <h2 style={{ fontFamily: 'Syne,sans-serif', fontWeight: 900, fontSize: 'clamp(2.5rem,6vw,5.5rem)', letterSpacing: '-0.055em', lineHeight: 0.9, color: '#fff', margin: '0 0 1rem' }}>
             {pt ? 'Um dev, por dentro.' : 'A dev, from the inside.'}
           </h2>
-          <p style={{ fontSize: 'clamp(0.78rem,1.2vw,0.88rem)', color: 'rgba(255,255,255,0.2)', margin: 0 }}>
-            {pt ? 'Arraste para girar · passe nos pontos para explorar' : 'Drag to rotate · hover dots to explore'}
+          <p className="anatomy-hint" style={{ fontSize: 'clamp(0.78rem,1.2vw,0.88rem)', color: 'rgba(255,255,255,0.2)', margin: 0 }}>
+            <span className="anatomy-hint-desktop">{pt ? 'Arraste para girar · passe nos pontos para explorar' : 'Drag to rotate · hover dots to explore'}</span>
+            <span className="anatomy-hint-mobile">{pt ? 'Toque para girar · toque nos pontos para explorar' : 'Touch to rotate · tap dots to explore'}</span>
           </p>
         </motion.div>
 
         {/* Grid */}
         <div className="anatomy-grid"
-          style={{ display: 'grid', gridTemplateColumns: '1fr 1.3fr', gap: 'clamp(3rem,7vw,7rem)', alignItems: 'center', justifyItems: 'center' }}>
+          style={{ display: 'grid', gridTemplateColumns: '1.35fr 1fr', gap: 'clamp(2rem,5vw,5rem)', alignItems: 'center', justifyItems: 'center' }}>
 
           {/* LEFT — 3D canvas + dot overlays */}
           <motion.div
             initial={{ opacity: 0, x: -18 }} animate={inView ? { opacity: 1, x: 0 } : {}}
             transition={{ duration: 0.95, ease: E, delay: 0.08 }}
-            style={{ width: '100%', maxWidth: 460, position: 'relative', aspectRatio: '3/4' }}
+            className="anatomy-canvas-wrap"
+          style={{ width: '100%', maxWidth: 560, position: 'relative', aspectRatio: '3/4' }}
           >
             {/* Canvas */}
             <Canvas
               gl={{ alpha: true, antialias: true }}
-              camera={{ position: [0, TARGET_H * 0.5, 3.5], fov: 40, near: 0.05, far: 50 }}
+              camera={{ position: [0, TARGET_H * 0.5, 3.8], fov: 36, near: 0.05, far: 50 }}
               style={{ width: '100%', height: '100%', background: 'transparent' }}
             >
               <ambientLight intensity={0.6} />
@@ -348,29 +362,34 @@ export default function DevAnatomy() {
 
             {/* Dot overlays — positioned by DotProjector each frame */}
             <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', overflow: 'hidden' }}>
-              {ZONES.map(zone => (
-                <div
-                  key={zone.id}
-                  ref={el => { dotRefs.current.set(zone.id, el) }}
-                  style={{
-                    position: 'absolute',
-                    transform: 'translate(-50%, -50%)',
-                    opacity: 0,        // DotProjector sets this
-                    pointerEvents: 'none',  // DotProjector enables this
-                    transition: 'opacity 0.2s',
-                    zIndex: 10,
-                  }}
-                  onMouseEnter={() => setActiveId(zone.id)}
-                  onMouseLeave={() => setActiveId(null)}
-                >
-                  <ZoneDotEl zone={zone} active={activeId === zone.id} />
-                </div>
-              ))}
+              {ZONE_DOTS.map(dot => {
+                const zoneData = ZONES.find(z => z.id === dot.zoneId)!
+                return (
+                  <div
+                    key={dot.dotId}
+                    ref={el => { dotRefs.current.set(dot.dotId, el) }}
+                    style={{
+                      position: 'absolute',
+                      transform: 'translate(-50%, -50%)',
+                      opacity: 0,
+                      pointerEvents: 'none',
+                      transition: 'opacity 0.2s',
+                      zIndex: 10,
+                    }}
+                    onMouseEnter={() => setActiveId(dot.zoneId)}
+                    onMouseLeave={() => { if (!window.matchMedia('(hover: none)').matches) setActiveId(null) }}
+                    onClick={() => { if (window.matchMedia('(hover: none)').matches) setActiveId(p => p === dot.zoneId ? null : dot.zoneId) }}
+                  >
+                    <ZoneDotEl zone={zoneData} active={activeId === dot.zoneId} />
+                  </div>
+                )
+              })}
             </div>
           </motion.div>
 
           {/* RIGHT — skill card */}
           <motion.div
+            ref={cardRef}
             initial={{ opacity: 0, x: 18 }} animate={inView ? { opacity: 1, x: 0 } : {}}
             transition={{ duration: 0.95, ease: E, delay: 0.16 }}
             style={{ width: '100%', minHeight: 280 }}
@@ -390,8 +409,26 @@ export default function DevAnatomy() {
           0%,100% { opacity: 0.35; transform: scale(1); }
           50%      { opacity: 0.7;  transform: scale(1.3); }
         }
-        @media (max-width: 680px) {
-          .anatomy-grid { grid-template-columns: 1fr !important; }
+        .anatomy-hint-mobile { display: none; }
+        @media (hover: none) {
+          .anatomy-hint-desktop { display: none; }
+          .anatomy-hint-mobile  { display: inline; }
+        }
+        @media (max-width: 720px) {
+          .anatomy-grid {
+            grid-template-columns: 1fr !important;
+            gap: 2rem !important;
+          }
+          .anatomy-canvas-wrap {
+            max-width: 320px !important;
+            aspect-ratio: 2/3 !important;
+            margin: 0 auto;
+          }
+        }
+        @media (max-width: 420px) {
+          .anatomy-canvas-wrap {
+            max-width: 260px !important;
+          }
         }
       `}</style>
     </section>

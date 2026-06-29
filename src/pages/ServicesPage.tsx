@@ -1,8 +1,8 @@
 import { useEffect, useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  Zap, Building2, Monitor, Server, Sparkles, Rocket,
-  Check, MessageCircle, Calculator, ChevronRight, ArrowUpRight
+  Check, MessageCircle, Calculator, ChevronRight, ArrowUpRight,
+  ChevronLeft,
 } from 'lucide-react'
 import { useLanguageStore } from '@/store/useLanguageStore'
 import { useCursorStore } from '@/store/useCursorStore'
@@ -12,37 +12,31 @@ import type { CursorState } from '@/store/useCursorStore'
 /* ── Data ── */
 const SERVICES_DATA = [
   {
-    Icon: Monitor,
     titleEn: 'Landing Pages',       titlePt: 'Landing Pages',
     descEn:  'High-converting, fast landing pages designed to turn visitors into clients.',
     descPt:  'Landing pages rápidas e focadas em conversão, transformando visitantes em clientes.',
   },
   {
-    Icon: Building2,
     titleEn: 'Business Websites',   titlePt: 'Sites Institucionais',
     descEn:  'Professional multi-page websites that communicate authority and trust.',
     descPt:  'Sites profissionais de múltiplas páginas que transmitem autoridade e confiança.',
   },
   {
-    Icon: Zap,
     titleEn: 'Web Applications',    titlePt: 'Aplicações Web',
     descEn:  'Full-stack React + Node.js apps with auth, database and real-time features.',
     descPt:  'Apps full-stack com React + Node.js, autenticação, banco de dados e tempo real.',
   },
   {
-    Icon: Server,
     titleEn: 'APIs & Backends',     titlePt: 'APIs & Backends',
     descEn:  'REST APIs, database modeling, authentication systems and server architecture.',
     descPt:  'APIs REST, modelagem de banco, sistemas de autenticação e arquitetura de servidor.',
   },
   {
-    Icon: Sparkles,
     titleEn: 'UI/UX & Animations',  titlePt: 'UI/UX & Animações',
     descEn:  'Motion design with GSAP and Framer Motion — interfaces that feel alive.',
     descPt:  'Motion design com GSAP e Framer Motion — interfaces que parecem vivas.',
   },
   {
-    Icon: Rocket,
     titleEn: 'Performance & SEO',   titlePt: 'Performance & SEO',
     descEn:  'Core Web Vitals optimization, Lighthouse 100, structured data and more.',
     descPt:  'Otimização de Core Web Vitals, Lighthouse 100, dados estruturados e mais.',
@@ -244,6 +238,175 @@ function BudgetCalculator({ lang, setCursor }: { lang: string; setCursor: (s: Cu
   )
 }
 
+/* ── Services Section ── */
+function ServicesSection({ lang, setCursor }: { lang: string; setCursor: (s: CursorState) => void }) {
+  const [hovered, setHovered] = useState<number | null>(null)
+  const [openMobile, setOpenMobile] = useState<number | null>(null)
+  const pt  = lang === 'pt'
+  const svc = hovered !== null ? SERVICES_DATA[hovered] : null
+  const E   = [0.22, 1, 0.36, 1] as const
+
+  return (
+    <section style={{ padding: 'clamp(4rem,8vw,6rem) clamp(1.5rem,5vw,5rem)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+      <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: 18 }} whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }} transition={{ duration: 0.6, ease: E }}
+          style={{ marginBottom: 'clamp(2.5rem,5vw,4rem)', display: 'flex', flexDirection: 'column', gap: '0.65rem' }}
+        >
+          <span style={{ fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.22em', textTransform: 'uppercase' as const, color: 'rgba(255,255,255,0.22)', display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ width: 18, height: 1, background: 'rgba(255,255,255,0.12)', display: 'inline-block' }} />
+            {pt ? 'O que faço' : 'What I do'}
+          </span>
+          <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 900, fontSize: 'clamp(2rem,4.5vw,3.5rem)', letterSpacing: '-0.048em', lineHeight: 0.95, color: '#fff', margin: 0 }}>
+            {pt ? 'Serviços.' : 'Services.'}
+          </h2>
+        </motion.div>
+
+        {/* ── Desktop: split list + detail panel ── */}
+        <div className="svc-split-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0', alignItems: 'stretch' }}>
+
+          {/* Left — list */}
+          <div style={{ borderRight: '1px solid rgba(255,255,255,0.07)' }}>
+            {SERVICES_DATA.map((s, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, x: -16 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true, margin: '-20px' }}
+                transition={{ delay: i * 0.07, duration: 0.55, ease: E }}
+                onMouseEnter={() => setHovered(i)}
+                onMouseLeave={() => setHovered(null)}
+                style={{
+                  position: 'relative',
+                  display: 'flex', alignItems: 'center', gap: '1.5rem',
+                  padding: 'clamp(1.2rem,2.5vw,1.8rem) clamp(1.5rem,3vw,2.5rem)',
+                  borderBottom: '1px solid rgba(255,255,255,0.06)',
+                  cursor: 'default',
+                  opacity: hovered === null || hovered === i ? 1 : 0.28,
+                  transition: 'opacity 0.35s ease',
+                }}
+              >
+                {/* Active left bar */}
+                <motion.div
+                  animate={{ scaleY: hovered === i ? 1 : 0 }}
+                  transition={{ duration: 0.32, ease: E }}
+                  style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 2, background: '#fff', transformOrigin: 'top', borderRadius: 1 }}
+                />
+
+                {/* Number */}
+                <span style={{
+                  fontFamily: '"JetBrains Mono","Fira Code",monospace',
+                  fontSize: '0.55rem', fontWeight: 700, letterSpacing: '0.12em',
+                  color: hovered === i ? 'rgba(255,255,255,0.55)' : 'rgba(255,255,255,0.18)',
+                  transition: 'color 0.25s', flexShrink: 0, minWidth: '2rem',
+                }}>
+                  {String(i + 1).padStart(2, '0')}
+                </span>
+
+                {/* Title */}
+                <span style={{
+                  fontFamily: 'Syne, sans-serif', fontWeight: 900,
+                  fontSize: 'clamp(1.1rem,1.9vw,1.55rem)', letterSpacing: '-0.035em',
+                  color: hovered === i ? '#fff' : 'rgba(255,255,255,0.52)',
+                  transition: 'color 0.25s, transform 0.35s cubic-bezier(0.22,1,0.36,1)',
+                  transform: hovered === i ? 'translateX(6px)' : 'translateX(0)',
+                }}>
+                  {pt ? s.titlePt : s.titleEn}
+                </span>
+
+                {/* Arrow */}
+                <span style={{
+                  marginLeft: 'auto', fontSize: '0.9rem',
+                  color: 'rgba(255,255,255,0.25)',
+                  transform: hovered === i ? 'translate(4px,0)' : 'translate(0,0)',
+                  opacity: hovered === i ? 1 : 0,
+                  transition: 'opacity 0.25s, transform 0.35s cubic-bezier(0.22,1,0.36,1)',
+                }}>→</span>
+              </motion.div>
+            ))}
+          </div>
+
+          {/* Right — detail panel */}
+          <div style={{ display: 'flex', alignItems: 'center', padding: 'clamp(2rem,4vw,3.5rem) clamp(2rem,4vw,3rem)' }}>
+            <AnimatePresence mode="wait">
+              {svc ? (
+                <motion.div
+                  key={hovered}
+                  initial={{ opacity: 0, y: 22 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -16 }}
+                  transition={{ duration: 0.38, ease: E }}
+                  style={{ display: 'flex', flexDirection: 'column', gap: '1.8rem' }}
+                >
+                  {/* Big number watermark */}
+                  <p style={{ fontFamily: 'Syne, sans-serif', fontWeight: 900, fontSize: 'clamp(5rem,12vw,9rem)', letterSpacing: '-0.07em', lineHeight: 0.82, color: 'rgba(255,255,255,0.04)', margin: 0, userSelect: 'none' as const, pointerEvents: 'none' as const }}>
+                    {String((hovered ?? 0) + 1).padStart(2, '0')}
+                  </p>
+                  <div style={{ marginTop: '-1.4rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 900, fontSize: 'clamp(1.6rem,2.8vw,2.4rem)', letterSpacing: '-0.044em', lineHeight: 1.1, color: '#fff', margin: 0 }}>
+                      {pt ? svc.titlePt : svc.titleEn}
+                    </h3>
+                    <p style={{ fontSize: 'clamp(0.82rem,1.2vw,0.95rem)', color: 'rgba(255,255,255,0.34)', lineHeight: 1.82, margin: 0 }}>
+                      {pt ? svc.descPt : svc.descEn}
+                    </p>
+                  </div>
+                </motion.div>
+              ) : (
+                <motion.p
+                  key="idle"
+                  initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                  transition={{ duration: 0.3 }}
+                  style={{ fontFamily: 'Syne, sans-serif', fontWeight: 900, fontSize: 'clamp(1.2rem,2.5vw,2rem)', letterSpacing: '-0.04em', color: 'rgba(255,255,255,0.07)', lineHeight: 1.3, margin: 0, userSelect: 'none' as const }}
+                >
+                  {pt ? 'Passe o cursor\npela lista.' : 'Hover the list\nto explore.'}
+                </motion.p>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
+
+        {/* ── Mobile: tap accordion ── */}
+        <div className="svc-mobile-list">
+          {SERVICES_DATA.map((s, i) => (
+            <div key={i} style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+              <button
+                onClick={() => setOpenMobile(openMobile === i ? null : i)}
+                style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '1rem', padding: '1.25rem 0', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left' as const }}
+              >
+                <span style={{ fontFamily: '"JetBrains Mono",monospace', fontSize: '0.55rem', fontWeight: 700, letterSpacing: '0.12em', color: 'rgba(255,255,255,0.25)', minWidth: '2rem' }}>
+                  {String(i + 1).padStart(2, '0')}
+                </span>
+                <span style={{ fontFamily: 'Syne, sans-serif', fontWeight: 900, fontSize: '1.15rem', letterSpacing: '-0.035em', color: '#fff', flex: 1 }}>
+                  {pt ? s.titlePt : s.titleEn}
+                </span>
+                <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: '1rem', transform: openMobile === i ? 'rotate(45deg)' : 'none', transition: 'transform 0.3s ease' }}>+</span>
+              </button>
+              <AnimatePresence>
+                {openMobile === i && (
+                  <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.32, ease: E }} style={{ overflow: 'hidden' }}>
+                    <p style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.32)', lineHeight: 1.78, margin: 0, paddingBottom: '1.25rem', paddingLeft: '3rem' }}>
+                      {pt ? s.descPt : s.descEn}
+                    </p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <style>{`
+        .svc-mobile-list { display: none; }
+        @media (max-width: 720px) {
+          .svc-split-grid  { display: none !important; }
+          .svc-mobile-list { display: block; }
+        }
+      `}</style>
+    </section>
+  )
+}
+
 /* ── Main Page ── */
 export default function ServicesPage() {
   const lang      = useLanguageStore((s) => s.lang)
@@ -259,7 +422,7 @@ export default function ServicesPage() {
 
       {/* ── Hero ── */}
       <section style={{ padding: 'clamp(3rem,7vw,6rem) clamp(1.5rem,5vw,5rem) clamp(2.5rem,5vw,4rem)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-        <div style={{ maxWidth: 1280, margin: '0 auto', display: 'grid', gridTemplateColumns: '1fr 32%', gap: 'clamp(2rem,4vw,3.5rem)', alignItems: 'stretch' }}
+        <div style={{ maxWidth: 1280, margin: '0 auto', display: 'grid', gridTemplateColumns: '1fr 46%', gap: 'clamp(2rem,4vw,3.5rem)', alignItems: 'stretch' }}
           className="svc-hero-grid">
           {/* Left: text */}
           <motion.div
@@ -312,36 +475,7 @@ export default function ServicesPage() {
         <style>{`@media (max-width: 860px) { .svc-hero-grid { grid-template-columns: 1fr !important; } }`}</style>
       </section>
 
-      {/* ── Services Grid ── */}
-      <section style={{ padding: 'clamp(4rem,8vw,6rem) clamp(1.5rem,5vw,5rem)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-        <div style={{ maxWidth: 1200, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '3rem' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-            <span style={{ fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.22)', display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{ display: 'inline-block', width: 18, height: 1, background: 'rgba(255,255,255,0.15)' }} />
-              {lang === 'en' ? 'What I do' : 'O que faço'}
-            </span>
-            <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 900, fontSize: 'clamp(2rem,4.5vw,3.5rem)', letterSpacing: '-0.045em', lineHeight: 0.95, color: '#fff', margin: 0 }}>
-              {lang === 'en' ? 'Services.' : 'Serviços.'}
-            </h2>
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(320px,100%), 1fr))', gap: '1px', border: '1px solid rgba(255,255,255,0.06)' }}>
-            {SERVICES_DATA.map(({ Icon, titleEn, titlePt, descEn, descPt }, i) => (
-              <motion.div key={titleEn} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-30px' }} transition={{ duration: 0.55, delay: i * 0.06, ease: [0.16,1,0.3,1] }}
-                style={{ padding: '2rem', background: 'rgba(255,255,255,0.02)', borderRight: '1px solid rgba(255,255,255,0.06)', display: 'flex', flexDirection: 'column', gap: '1rem', transition: 'background 0.3s' }}
-                onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.04)')}
-                onMouseLeave={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.02)')}>
-                <div style={{ width: 42, height: 42, borderRadius: 10, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <Icon size={19} style={{ color: 'rgba(255,255,255,0.6)' }} />
-                </div>
-                <div>
-                  <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#fff', marginBottom: '0.4rem' }}>{lang === 'en' ? titleEn : titlePt}</h3>
-                  <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.35)', lineHeight: 1.7 }}>{lang === 'en' ? descEn : descPt}</p>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
+      <ServicesSection lang={lang} setCursor={setCursor} />
 
       {/* ── Packages ── */}
       <section style={{ padding: 'clamp(4rem,8vw,6rem) clamp(1.5rem,5vw,5rem)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
