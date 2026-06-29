@@ -71,7 +71,7 @@ export default function Footer() {
               onMouseEnter={() => setCursor('pointer')}
               onMouseLeave={() => setCursor('default')}
             >
-              Guestbook
+              Livro de Visitas
             </Link>
           </nav>
 
