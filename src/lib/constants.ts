@@ -5,7 +5,7 @@ export const SITE = {
     'Portfolio of Caio Diniz, a Full Stack Developer building premium websites, web apps and digital experiences with React, TypeScript and Node.js.',
   url: 'https://caiodiniz.dev',
   email: 'cvdinizramos@gmail.com',
-  whatsapp: '+5519999473425',
+  whatsapp: '+5519994737425',
   github: 'https://github.com/caiodiniz-dev',
   linkedin: 'https://www.linkedin.com/in/caiodinizdev/',
   tiktok: 'https://www.tiktok.com/@caiodinizdev',
