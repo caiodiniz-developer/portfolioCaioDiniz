@@ -1,9 +1,10 @@
 import { useState, useRef } from 'react'
 import { motion, AnimatePresence, useSpring } from 'framer-motion'
 import { useInView } from 'framer-motion'
+import { Brain, Heart, Code2, Layers } from 'lucide-react'
 import { useLanguageStore } from '@/store/useLanguageStore'
 
-const E: [number, number, number, number] = [0.16, 1, 0.3, 1]
+const E: [number, number, number, number] = [0.22, 1, 0.36, 1]
 
 interface Zone {
   id: string
@@ -12,7 +13,7 @@ interface Zone {
   descPt: string; descEn: string
   skills: string[]
   color: string
-  // Position on photo (% of container)
+  icon: React.ComponentType<{ size?: number; color?: string; strokeWidth?: number }>
   top: string
   left: string
 }
@@ -25,7 +26,8 @@ const ZONES: Zone[] = [
     descPt: 'Arquitetura limpa, raciocínio lógico e decisões técnicas que escalam sem quebrar.',
     descEn: 'Clean architecture, logical thinking and technical decisions that scale without breaking.',
     skills: ['Algoritmos', 'System Design', 'Problem Solving', 'Code Review', 'UI/UX'],
-    color: '#a78bfa',
+    color: '#b8b3ff',
+    icon: Brain,
     top: '9%', left: '50%',
   },
   {
@@ -35,7 +37,8 @@ const ZONES: Zone[] = [
     descPt: 'Paixão real por código que funciona, performa e que o próximo dev vai adorar manter.',
     descEn: 'Real passion for code that works, performs and that the next dev will love maintaining.',
     skills: ['Clean Code', 'SOLID', 'Performance', 'DX', 'Open Source'],
-    color: '#f472b6',
+    color: '#f0a6b4',
+    icon: Heart,
     top: '38%', left: '50%',
   },
   {
@@ -45,7 +48,8 @@ const ZONES: Zone[] = [
     descPt: 'As ferramentas que domino para transformar ideias em produto funcional de verdade.',
     descEn: 'The tools I master to turn ideas into actual working products.',
     skills: ['React', 'TypeScript', 'Node.js', 'PostgreSQL', 'Docker', 'Git'],
-    color: '#4ade80',
+    color: '#a0d4b8',
+    icon: Code2,
     top: '57%', left: '50%',
   },
   {
@@ -55,18 +59,20 @@ const ZONES: Zone[] = [
     descPt: 'Infraestrutura robusta, CI/CD e deploys que não te acordam de madrugada.',
     descEn: "Robust infrastructure, CI/CD and deploys that won't wake you up at 3am.",
     skills: ['CI/CD', 'Linux', 'Vercel', 'Railway', 'Segurança', 'Monitoramento'],
-    color: '#fb923c',
+    color: '#d4b896',
+    icon: Layers,
     top: '84%', left: '50%',
   },
 ]
 
-/* ── Zone dot overlay on photo ── */
+/* ── Zone dot ── */
 function ZoneDot({ zone, active, onEnter, onLeave }: {
   zone: Zone
   active: boolean
   onEnter: () => void
   onLeave: () => void
 }) {
+  const Icon = zone.icon
   return (
     <div
       style={{
@@ -80,61 +86,74 @@ function ZoneDot({ zone, active, onEnter, onLeave }: {
       onMouseEnter={onEnter}
       onMouseLeave={onLeave}
     >
-      {/* Hit area (larger invisible circle) */}
+      {/* Invisible hit area */}
       <div style={{ position: 'absolute', width: 72, height: 72, borderRadius: '50%', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', zIndex: 11 }} />
 
-      {/* Outer ring — visible on hover */}
-      <motion.div
-        animate={{ opacity: active ? 1 : 0, scale: active ? 1 : 0.5 }}
-        transition={{ duration: 0.3, ease: E }}
-        style={{
-          position: 'absolute',
-          width: 64, height: 64,
-          borderRadius: '50%',
-          border: `1.5px solid ${zone.color}`,
-          top: '50%', left: '50%',
-          transform: 'translate(-50%,-50%)',
-          boxShadow: `0 0 22px ${zone.color}55`,
-        }}
-      />
-
-      {/* Pulsing dot */}
+      {/* Dot */}
       <motion.div
         animate={active
-          ? { scale: 1.3, boxShadow: `0 0 18px 4px ${zone.color}99` }
-          : { scale: [1, 1.35, 1], boxShadow: [`0 0 8px ${zone.color}66`, `0 0 14px ${zone.color}aa`, `0 0 8px ${zone.color}66`] }
+          ? { scale: 1.1 }
+          : { scale: [1, 1.22, 1] }
         }
         transition={active
-          ? { duration: 0.25, ease: E }
-          : { duration: 2.4, repeat: Infinity, ease: 'easeInOut' }
+          ? { duration: 0.22, ease: E }
+          : { duration: 2.8, repeat: Infinity, ease: 'easeInOut' }
         }
         style={{
-          width: 14, height: 14,
+          width: 16, height: 16,
           borderRadius: '50%',
-          background: zone.color,
+          background: `${zone.color}cc`,
           position: 'relative', zIndex: 12,
         }}
       />
 
+      {/* Icon ring — appears on hover */}
+      <AnimatePresence>
+        {active && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.6 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.6 }}
+            transition={{ duration: 0.22, ease: E }}
+            style={{
+              position: 'absolute',
+              top: '50%', left: '50%',
+              transform: 'translate(-50%,-50%)',
+              width: 36, height: 36,
+              borderRadius: '50%',
+              background: 'rgba(10,10,10,0.85)',
+              border: `1px solid ${zone.color}35`,
+              backdropFilter: 'blur(8px)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              zIndex: 13,
+            }}
+          >
+            <Icon size={14} color={zone.color} strokeWidth={1.7} />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Label pill */}
       <motion.div
-        animate={{ opacity: active ? 1 : 0, y: active ? -2 : 4 }}
+        animate={{ opacity: active ? 1 : 0, y: active ? 0 : 5 }}
         transition={{ duration: 0.22, ease: E }}
         style={{
           position: 'absolute',
           top: '100%', left: '50%',
           transform: 'translateX(-50%)',
-          marginTop: 8,
-          background: zone.color,
-          color: '#000',
-          fontSize: '0.55rem',
-          fontWeight: 800,
-          letterSpacing: '0.1em',
+          marginTop: 14,
+          background: 'rgba(20,20,20,0.85)',
+          border: `1px solid rgba(255,255,255,0.09)`,
+          color: 'rgba(255,255,255,0.55)',
+          fontSize: '0.5rem',
+          fontWeight: 700,
+          letterSpacing: '0.14em',
           textTransform: 'uppercase',
           padding: '3px 9px',
           borderRadius: 99,
           whiteSpace: 'nowrap',
           pointerEvents: 'none',
+          backdropFilter: 'blur(8px)',
         }}
       >
         {zone.labelPt}
@@ -145,58 +164,69 @@ function ZoneDot({ zone, active, onEnter, onLeave }: {
 
 /* ── Skill card ── */
 function SkillCard({ zone, pt }: { zone: Zone; pt: boolean }) {
+  const Icon = zone.icon
   return (
     <motion.div
       key={zone.id}
-      initial={{ opacity: 0, x: 20, filter: 'blur(8px)' }}
-      animate={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
-      exit={{ opacity: 0, x: -12, filter: 'blur(8px)' }}
-      transition={{ duration: 0.32, ease: E }}
+      initial={{ opacity: 0, y: 18, filter: 'blur(8px)' }}
+      animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+      exit={{ opacity: 0, y: -12, filter: 'blur(8px)' }}
+      transition={{ duration: 0.5, ease: [0.25, 1, 0.4, 1] }}
       style={{
         padding: 'clamp(1.5rem,3vw,2rem)',
-        borderRadius: 18,
+        borderRadius: 16,
         background: 'rgba(255,255,255,0.025)',
-        border: `1px solid ${zone.color}25`,
-        boxShadow: `0 0 50px ${zone.color}0d`,
+        border: '1px solid rgba(255,255,255,0.07)',
         position: 'relative',
         overflow: 'hidden',
       }}
     >
-      {/* Gradient accent bar */}
-      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: `linear-gradient(90deg, transparent, ${zone.color}, transparent)` }} />
+      {/* Thin top accent line */}
+      <div style={{ position: 'absolute', top: 0, left: '15%', right: '15%', height: 1, background: `linear-gradient(90deg, transparent, ${zone.color}45, transparent)` }} />
 
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: '1.25rem' }}>
-        <div style={{ width: 42, height: 42, borderRadius: 11, background: `${zone.color}16`, border: `1px solid ${zone.color}35`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-          <div style={{ width: 11, height: 11, borderRadius: '50%', background: zone.color, boxShadow: `0 0 12px ${zone.color}` }} />
+      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14, marginBottom: '1.25rem' }}>
+        <div style={{
+          width: 40, height: 40, borderRadius: 10,
+          background: 'rgba(255,255,255,0.04)',
+          border: '1px solid rgba(255,255,255,0.08)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+        }}>
+          <Icon size={16} color={zone.color} strokeWidth={1.6} />
         </div>
         <div>
-          <h3 style={{ fontFamily: 'Syne,sans-serif', fontWeight: 900, fontSize: 'clamp(1.6rem,3vw,2.2rem)', letterSpacing: '-0.045em', color: '#fff', margin: 0, lineHeight: 1 }}>
+          <h3 style={{ fontFamily: 'Syne,sans-serif', fontWeight: 900, fontSize: 'clamp(1.4rem,2.8vw,2rem)', letterSpacing: '-0.045em', color: '#fff', margin: 0, lineHeight: 1 }}>
             {pt ? zone.labelPt : zone.labelEn}
           </h3>
-          <p style={{ fontSize: '0.55rem', fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: zone.color, margin: '4px 0 0', opacity: 0.85 }}>
+          <p style={{ fontSize: '0.5rem', fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: zone.color, margin: '5px 0 0', opacity: 0.7 }}>
             {pt ? zone.subtitlePt : zone.subtitleEn}
           </p>
         </div>
       </div>
 
-      {/* Divider */}
-      <div style={{ height: 1, background: 'rgba(255,255,255,0.07)', marginBottom: '1.25rem' }} />
+      <div style={{ height: 1, background: 'rgba(255,255,255,0.05)', marginBottom: '1.25rem' }} />
 
-      {/* Description */}
-      <p style={{ fontSize: 'clamp(0.85rem,1.4vw,0.98rem)', color: 'rgba(255,255,255,0.42)', lineHeight: 1.78, margin: '0 0 1.5rem' }}>
+      <p style={{ fontSize: 'clamp(0.8rem,1.2vw,0.91rem)', color: 'rgba(255,255,255,0.36)', lineHeight: 1.82, margin: '0 0 1.5rem' }}>
         {pt ? zone.descPt : zone.descEn}
       </p>
 
-      {/* Skills */}
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.38rem' }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.32rem' }}>
         {zone.skills.map((s, i) => (
           <motion.span
             key={s}
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.2, ease: E, delay: 0.08 + i * 0.05 }}
-            style={{ padding: '0.35rem 0.85rem', borderRadius: 999, fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.04em', background: `${zone.color}14`, border: `1px solid ${zone.color}30`, color: zone.color }}
+            initial={{ opacity: 0, y: 5 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, ease: E, delay: 0.12 + i * 0.065 }}
+            style={{
+              padding: '0.3rem 0.78rem',
+              borderRadius: 999,
+              fontSize: '0.66rem',
+              fontWeight: 600,
+              letterSpacing: '0.03em',
+              background: 'rgba(255,255,255,0.04)',
+              border: '1px solid rgba(255,255,255,0.09)',
+              color: 'rgba(255,255,255,0.42)',
+            }}
           >
             {s}
           </motion.span>
@@ -214,24 +244,31 @@ function IdlePlaceholder({ pt }: { pt: boolean }) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      transition={{ duration: 0.28 }}
-      style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}
+      transition={{ duration: 0.4 }}
+      style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}
     >
-      <p style={{ fontFamily: 'Syne,sans-serif', fontWeight: 900, fontSize: 'clamp(1.3rem,2.5vw,1.9rem)', letterSpacing: '-0.04em', color: 'rgba(255,255,255,0.13)', lineHeight: 1.2, margin: 0 }}>
-        {pt ? 'Passe o cursor\npelos pontos.' : 'Hover over\nthe dots.'}
+      <p style={{ fontFamily: 'Syne,sans-serif', fontWeight: 900, fontSize: 'clamp(1.1rem,2vw,1.6rem)', letterSpacing: '-0.04em', color: 'rgba(255,255,255,0.09)', lineHeight: 1.3, margin: 0, whiteSpace: 'pre-line' }}>
+        {pt ? 'Passe o cursor\npelos pontos.' : 'Hover the dots\nto explore.'}
       </p>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
-        {ZONES.map((z, i) => (
-          <motion.span
-            key={z.id}
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.08 + i * 0.07, duration: 0.3, ease: E }}
-            style={{ padding: '0.32rem 0.8rem', borderRadius: 999, fontSize: '0.66rem', fontWeight: 700, color: z.color, border: `1px solid ${z.color}25`, background: `${z.color}0a`, opacity: 0.55 }}
-          >
-            {pt ? z.labelPt : z.labelEn}
-          </motion.span>
-        ))}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+        {ZONES.map((z, i) => {
+          const Icon = z.icon
+          return (
+            <motion.div
+              key={z.id}
+              initial={{ opacity: 0, x: -8 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.08 + i * 0.1, duration: 0.35, ease: E }}
+              style={{ display: 'flex', alignItems: 'center', gap: 12, opacity: 0.3 }}
+            >
+              <Icon size={13} color={z.color} strokeWidth={1.6} />
+              <span style={{ fontSize: '0.68rem', fontWeight: 600, color: 'rgba(255,255,255,0.38)', letterSpacing: '0.04em' }}>
+                {pt ? z.labelPt : z.labelEn}
+              </span>
+              <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.05)' }} />
+            </motion.div>
+          )
+        })}
       </div>
     </motion.div>
   )
@@ -239,21 +276,21 @@ function IdlePlaceholder({ pt }: { pt: boolean }) {
 
 /* ═══════════════════════════ MAIN ═══════════════════════════ */
 export default function DevAnatomy() {
-  const lang = useLanguageStore(s => s.lang)
-  const pt   = lang === 'pt'
+  const lang  = useLanguageStore(s => s.lang)
+  const pt    = lang === 'pt'
   const [activeId, setActiveId] = useState<string | null>(null)
-  const secRef = useRef<HTMLElement>(null)
-  const figRef = useRef<HTMLDivElement>(null)
-  const inView = useInView(secRef, { once: true, margin: '-80px' })
+  const secRef  = useRef<HTMLElement>(null)
+  const figRef  = useRef<HTMLDivElement>(null)
+  const inView  = useInView(secRef, { once: true, margin: '-80px' })
 
-  const rX = useSpring(0, { stiffness: 45, damping: 13 })
-  const rY = useSpring(0, { stiffness: 45, damping: 13 })
+  const rX = useSpring(0, { stiffness: 50, damping: 16 })
+  const rY = useSpring(0, { stiffness: 50, damping: 16 })
 
   function onMove(e: React.MouseEvent) {
     const el = figRef.current; if (!el) return
     const r = el.getBoundingClientRect()
-    rY.set(((e.clientX - r.left) / r.width - 0.5) * 18)
-    rX.set(-((e.clientY - r.top) / r.height - 0.5) * 12)
+    rY.set(((e.clientX - r.left) / r.width - 0.5) * 12)
+    rX.set(-((e.clientY - r.top) / r.height - 0.5) * 8)
   }
   function onLeave() { rX.set(0); rY.set(0); setActiveId(null) }
 
@@ -264,75 +301,71 @@ export default function DevAnatomy() {
       ref={secRef}
       style={{ padding: 'clamp(5rem,10vw,8rem) clamp(1.5rem,6vw,5rem)', borderTop: '1px solid rgba(255,255,255,0.06)', position: 'relative', overflow: 'hidden' }}
     >
-      {/* Ambient background glow */}
+      {/* Very subtle ambient — barely visible */}
       <AnimatePresence>
         {zone && (
           <motion.div
             key={zone.id}
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            transition={{ duration: 0.7 }}
-            style={{ position: 'absolute', top: '20%', left: '50%', transform: 'translateX(-50%)', width: 600, height: 600, borderRadius: '50%', background: zone.color, filter: 'blur(140px)', opacity: 0.055, pointerEvents: 'none' }}
+            transition={{ duration: 1.2 }}
+            style={{ position: 'absolute', top: '10%', left: '25%', width: 480, height: 480, borderRadius: '50%', background: zone.color, filter: 'blur(180px)', opacity: 0.035, pointerEvents: 'none' }}
           />
         )}
       </AnimatePresence>
 
-      <div style={{ position: 'relative', zIndex: 1, maxWidth: 1000, margin: '0 auto' }}>
+      <div style={{ position: 'relative', zIndex: 1, maxWidth: 960, margin: '0 auto' }}>
 
-        {/* ── Header (centrado) ── */}
+        {/* ── Header ── */}
         <motion.div
-          initial={{ opacity: 0, y: 22 }}
+          initial={{ opacity: 0, y: 20 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.65, ease: E }}
+          transition={{ duration: 0.75, ease: E }}
           style={{ textAlign: 'center', marginBottom: 'clamp(3rem,6vw,5rem)' }}
         >
-          <p style={{ fontSize: '0.52rem', fontWeight: 700, letterSpacing: '0.24em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.22)', margin: '0 0 0.9rem', display: 'inline-flex', alignItems: 'center', gap: 10 }}>
-            <span style={{ display: 'inline-block', width: 20, height: 1, background: 'rgba(255,255,255,0.15)' }} />
+          <p style={{ fontSize: '0.5rem', fontWeight: 700, letterSpacing: '0.24em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.18)', margin: '0 0 0.9rem', display: 'inline-flex', alignItems: 'center', gap: 10 }}>
+            <span style={{ display: 'inline-block', width: 16, height: 1, background: 'rgba(255,255,255,0.1)' }} />
             {pt ? 'Anatomia de um Dev' : 'Anatomy of a Dev'}
-            <span style={{ display: 'inline-block', width: 20, height: 1, background: 'rgba(255,255,255,0.15)' }} />
+            <span style={{ display: 'inline-block', width: 16, height: 1, background: 'rgba(255,255,255,0.1)' }} />
           </p>
-          <h2 style={{ fontFamily: 'Syne,sans-serif', fontWeight: 900, fontSize: 'clamp(2.2rem,5.5vw,4.5rem)', letterSpacing: '-0.055em', lineHeight: 0.9, color: '#fff', margin: '0 0 1rem' }}>
+          <h2 style={{ fontFamily: 'Syne,sans-serif', fontWeight: 900, fontSize: 'clamp(2rem,5vw,4rem)', letterSpacing: '-0.055em', lineHeight: 0.9, color: '#fff', margin: '0 0 1rem' }}>
             {pt ? 'Um dev, por dentro.' : 'A dev, from the inside.'}
           </h2>
-          <p style={{ fontSize: 'clamp(0.82rem,1.4vw,0.96rem)', color: 'rgba(255,255,255,0.28)', margin: 0 }}>
-            {pt ? 'Passe o cursor pelos pontos para explorar cada camada.' : 'Hover over the dots to explore each layer.'}
+          <p style={{ fontSize: 'clamp(0.78rem,1.2vw,0.88rem)', color: 'rgba(255,255,255,0.2)', margin: 0 }}>
+            {pt ? 'Explore cada camada.' : 'Explore each layer.'}
           </p>
         </motion.div>
 
         {/* ── Content grid ── */}
         <div
           className="anatomy-grid"
-          style={{ display: 'grid', gridTemplateColumns: '1fr 1.1fr', gap: 'clamp(2rem,5vw,5rem)', alignItems: 'center', justifyItems: 'center' }}
+          style={{ display: 'grid', gridTemplateColumns: '1fr 1.15fr', gap: 'clamp(2rem,5vw,4.5rem)', alignItems: 'center', justifyItems: 'center' }}
         >
-          {/* LEFT — photo with zone dots */}
+          {/* LEFT — photo, no box */}
           <motion.div
             ref={figRef}
-            initial={{ opacity: 0, x: -24 }}
+            initial={{ opacity: 0, x: -18 }}
             animate={inView ? { opacity: 1, x: 0 } : {}}
-            transition={{ duration: 0.85, ease: E, delay: 0.1 }}
+            transition={{ duration: 0.95, ease: E, delay: 0.08 }}
             onMouseMove={onMove}
             onMouseLeave={onLeave}
             style={{
               rotateX: rX, rotateY: rY,
               transformStyle: 'preserve-3d',
-              perspective: 700,
+              perspective: 900,
               position: 'relative',
               display: 'inline-block',
-              animation: 'figfloat 5.5s ease-in-out infinite',
+              animation: 'figfloat 6.5s ease-in-out infinite',
             }}
           >
-            {/* Photo */}
-            <div style={{ position: 'relative', borderRadius: 24, overflow: 'hidden', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)' }}>
-              <img
-                src="/caiocorpointeiro.png"
-                alt="Caio Diniz"
-                style={{ display: 'block', width: '100%', maxWidth: 300, height: 'auto', maxHeight: 520, objectFit: 'contain', objectPosition: 'top' }}
-                draggable={false}
-              />
-              {/* Bottom vignette */}
-              <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '25%', background: 'linear-gradient(to top, #0d0d0d, transparent)', pointerEvents: 'none' }} />
-            </div>
+            {/* Bare image — no box, no border, transparent PNG */}
+            <img
+              src="/caiocorpointeiro.png"
+              alt="Caio Diniz"
+              style={{ display: 'block', width: '100%', maxWidth: 380, height: 'auto', maxHeight: 570, objectFit: 'contain', objectPosition: 'top', userSelect: 'none', pointerEvents: 'none' }}
+              draggable={false}
+            />
 
-            {/* Zone dots overlay */}
+            {/* Zone dots */}
             {ZONES.map(z => (
               <ZoneDot
                 key={z.id}
@@ -344,12 +377,12 @@ export default function DevAnatomy() {
             ))}
           </motion.div>
 
-          {/* RIGHT — skill card */}
+          {/* RIGHT — card */}
           <motion.div
-            initial={{ opacity: 0, x: 24 }}
+            initial={{ opacity: 0, x: 18 }}
             animate={inView ? { opacity: 1, x: 0 } : {}}
-            transition={{ duration: 0.85, ease: E, delay: 0.18 }}
-            style={{ width: '100%', minHeight: 240 }}
+            transition={{ duration: 0.95, ease: E, delay: 0.16 }}
+            style={{ width: '100%', minHeight: 220 }}
           >
             <AnimatePresence mode="wait">
               {zone
@@ -364,9 +397,9 @@ export default function DevAnatomy() {
       <style>{`
         @keyframes figfloat {
           0%,100% { transform: translateY(0px); }
-          50%      { transform: translateY(-12px); }
+          50%      { transform: translateY(-10px); }
         }
-        @media (max-width: 700px) {
+        @media (max-width: 680px) {
           .anatomy-grid { grid-template-columns: 1fr !important; }
           .anatomy-grid > div:first-child { justify-self: center; }
         }
