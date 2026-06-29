@@ -1,7 +1,7 @@
 import { useRef, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { ArrowLeft, ExternalLink, Github, ArrowRight, Check } from 'lucide-react'
+import { ArrowLeft, ExternalLink, Github, ArrowRight, Check, Share2 } from 'lucide-react'
 import gsap from 'gsap'
 import ScrollTrigger from 'gsap/ScrollTrigger'
 import type { Project } from '@/data/projects'
@@ -20,6 +20,22 @@ export default function CaseStudyLayout({ project, nextProject }: Props) {
   const galleryRef = useRef<HTMLDivElement>(null)
   const galleryImages = project.gallery.slice(1)
   const isLive = project.liveUrl && project.liveUrl !== '#'
+
+  async function shareProject() {
+    const data = {
+      title: `${project.title} — Caio Diniz`,
+      text:  project.description,
+      url:   window.location.href,
+    }
+    try {
+      if (navigator.canShare?.(data)) {
+        await navigator.share(data)
+      } else {
+        await navigator.clipboard.writeText(window.location.href)
+        alert('Link copiado!')
+      }
+    } catch {/* user cancelled */}
+  }
 
   useEffect(() => {
     if (!galleryRef.current || galleryImages.length === 0) return
@@ -104,6 +120,13 @@ export default function CaseStudyLayout({ project, nextProject }: Props) {
                 <Github size={13} /> {t.common.github}
               </a>
             )}
+            <button
+              onClick={shareProject}
+              style={{ ...S.btn, background: 'transparent', color: 'rgba(255,255,255,0.4)', border: '1px solid rgba(255,255,255,0.1)' }}
+              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = '#fff'; (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.3)'; setCursor('pointer') }}
+              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.4)'; (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.1)'; setCursor('default') }}>
+              <Share2 size={13} /> {lang === 'en' ? 'Share' : 'Compartilhar'}
+            </button>
           </div>
         </motion.div>
 

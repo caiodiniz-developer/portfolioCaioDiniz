@@ -1,0 +1,36 @@
+{
+  "name": "Caio Diniz — Full Stack Developer",
+  "short_name": "Caio Diniz",
+  "description": "Portfólio de Caio Diniz, desenvolvedor Full Stack especializado em interfaces premium e APIs robustas.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0d0d0d",
+  "theme_color": "#0d0d0d",
+  "orientation": "any",
+  "lang": "pt-BR",
+  "categories": ["portfolio", "developer", "web"],
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/assets/caio-pixel.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Caio Diniz Portfolio"
+    }
+  ]
+}

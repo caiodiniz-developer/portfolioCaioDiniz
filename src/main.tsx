@@ -23,6 +23,13 @@ try {
   // silently skip — R3F may already work without the shim in newer versions
 }
 
+// Register service worker for PWA
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {/* SW registration optional */})
+  })
+}
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <App />

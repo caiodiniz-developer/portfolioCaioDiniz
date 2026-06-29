@@ -65,6 +65,14 @@ export default function Footer() {
                 {navLabels[link.label]}
               </Link>
             ))}
+            <Link
+              to="/guestbook"
+              className="text-[0.6875rem] font-semibold uppercase tracking-[0.1em] text-white/25 hover:text-white transition-colors duration-200"
+              onMouseEnter={() => setCursor('pointer')}
+              onMouseLeave={() => setCursor('default')}
+            >
+              Guestbook
+            </Link>
           </nav>
 
           {/* Right: socials */}
