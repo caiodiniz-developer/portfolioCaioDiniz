@@ -21,13 +21,6 @@ const CAT_COLOR: Record<string, string> = {
   'Creative':   'rgba(255,210,80,0.7)',
 }
 
-function complexity(stack: string[]) {
-  const n = stack.length
-  if (n <= 2) return 'R$ 2k'
-  if (n <= 4) return 'R$ 5k'
-  if (n <= 6) return 'R$ 12k'
-  return 'R$ 25k+'
-}
 
 interface WinState { x: number; y: number; z: number }
 
@@ -387,7 +380,7 @@ export default function ProjectsPage() {
           <motion.div key="store" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
             <div style={{ padding: '0.5rem clamp(1rem,4vw,5rem) 5rem' }}>
               <p style={{ margin: '0 0 1.75rem', fontSize: '0.62rem', fontWeight: 600, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.18)' }}>
-                {filtered.length} {lang === 'en' ? 'products available' : 'produtos disponíveis'} · {lang === 'en' ? 'estimated values' : 'valores estimados'}
+                {filtered.length} {lang === 'en' ? 'products available' : 'produtos disponíveis'}
               </p>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '1.1rem' }}>
                 {filtered.map((project, i) => (
@@ -436,13 +429,7 @@ export default function ProjectsPage() {
                             ))}
                           </div>
 
-                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '0.75rem', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-                            <div>
-                              <div style={{ fontSize: '0.5rem', color: 'rgba(255,255,255,0.18)', letterSpacing: '0.1em', marginBottom: 2 }}>VALOR ESTIMADO</div>
-                              <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: '1.1rem', color: '#fff', letterSpacing: '-0.02em' }}>
-                                {complexity(project.stack)}
-                              </div>
-                            </div>
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', paddingTop: '0.75rem', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
                             <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: '0.62rem', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase', color: '#fff', background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)', padding: '0.42rem 0.85rem', borderRadius: 999 }}>
                               Ver <ArrowUpRight size={10} />
                             </span>
