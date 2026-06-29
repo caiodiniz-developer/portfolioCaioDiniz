@@ -1,15 +1,16 @@
 import { useLocation, NavLink } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Home, User, FolderOpen, Layers, Mail } from 'lucide-react'
+import { Home, User, FolderOpen, Layers, Mail, BookOpen } from 'lucide-react'
 import { useLanguageStore } from '@/store/useLanguageStore'
 import { usePresentationStore } from '@/store/usePresentationStore'
 
 const TABS = [
-  { path: '/',         icon: Home,       en: 'Home',    pt: 'Início'  },
-  { path: '/about',    icon: User,       en: 'About',   pt: 'Sobre'   },
-  { path: '/projects', icon: FolderOpen, en: 'Work',    pt: 'Work'    },
-  { path: '/services', icon: Layers,     en: 'Services',pt: 'Serviços'},
-  { path: '/contact',  icon: Mail,       en: 'Contact', pt: 'Contato' },
+  { path: '/',          icon: Home,       en: 'Home',    pt: 'Início'  },
+  { path: '/about',     icon: User,       en: 'About',   pt: 'Sobre'   },
+  { path: '/projects',  icon: FolderOpen, en: 'Work',    pt: 'Work'    },
+  { path: '/services',  icon: Layers,     en: 'Services',pt: 'Serviços'},
+  { path: '/contact',   icon: Mail,       en: 'Contact', pt: 'Contato' },
+  { path: '/guestbook', icon: BookOpen,   en: 'Book',    pt: 'Visitas' },
 ]
 
 export default function MobileNav() {

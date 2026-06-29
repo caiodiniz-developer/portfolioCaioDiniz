@@ -22,17 +22,12 @@ export default function CaseStudyLayout({ project, nextProject }: Props) {
   const isLive = project.liveUrl && project.liveUrl !== '#'
 
   async function shareProject() {
-    const data = {
-      title: `${project.title} — Caio Diniz`,
-      text:  project.description,
-      url:   window.location.href,
-    }
     try {
-      if (navigator.canShare?.(data)) {
-        await navigator.share(data)
-      } else {
+      if (navigator.share) {
+        await navigator.share({ title: `${project.title} — Caio Diniz`, url: window.location.href })
+      } else if (navigator.clipboard) {
         await navigator.clipboard.writeText(window.location.href)
-        alert('Link copiado!')
+        alert(lang === 'en' ? 'Link copied!' : 'Link copiado!')
       }
     } catch {/* user cancelled */}
   }

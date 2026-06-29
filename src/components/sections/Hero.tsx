@@ -291,46 +291,6 @@ export default function Hero() {
             gap: "clamp(1.2rem,2vw,1.8rem)",
           }}
         >
-          {/* Mobile-only photo strip — visible below 860px */}
-          <div className="hero-photo-mobile" style={{ display: 'none', marginBottom: '0.5rem' }}>
-            <div style={{
-              height:       220,
-              borderRadius: 18,
-              overflow:     'hidden',
-              position:     'relative',
-              background:   '#111',
-            }}>
-              <img
-                src="/assets/minha-foto-1.png"
-                alt="Caio Diniz"
-                style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top', display: 'block' }}
-              />
-              <div style={{
-                position:   'absolute',
-                inset:      0,
-                background: 'linear-gradient(to bottom, transparent 45%, rgba(13,13,13,0.9) 100%)',
-                zIndex:     1,
-              }} />
-              {/* Name tag overlay */}
-              <div style={{
-                position:      'absolute',
-                bottom:        14,
-                left:          16,
-                zIndex:        2,
-                display:       'flex',
-                flexDirection: 'column',
-                gap:           2,
-              }}>
-                <span style={{ fontFamily: 'Syne,sans-serif', fontWeight: 900, fontSize: '1.1rem', color: '#fff', letterSpacing: '-0.03em', lineHeight: 1 }}>
-                  Caio Diniz
-                </span>
-                <span style={{ fontSize: '0.55rem', fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)' }}>
-                  Full Stack Developer
-                </span>
-              </div>
-            </div>
-          </div>
-
           {/* Badge + uptime */}
           <div
             className="hero-badge"
@@ -466,7 +426,6 @@ export default function Hero() {
         @media (max-width:860px) {
           .hero-grid        { grid-template-columns:1fr !important; }
           .hero-photo-col   { display:none !important; }
-          .hero-photo-mobile{ display:block !important; }
         }
       `}</style>
     </section>

@@ -1,5 +1,5 @@
-const CACHE = 'caiodiniz-v1'
-const PRECACHE = ['/']
+const CACHE = 'caiodiniz-v2'
+const PRECACHE = ['/', '/icon-192.png', '/icon-512.png', '/manifest.json']
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(PRECACHE)))
@@ -19,10 +19,8 @@ self.addEventListener('fetch', (e) => {
   const { request } = e
   const url = new URL(request.url)
 
-  // Skip non-GET and cross-origin
   if (request.method !== 'GET' || url.origin !== location.origin) return
 
-  // Navigation requests → network first, fallback to /index.html for SPA routing
   if (request.mode === 'navigate') {
     e.respondWith(
       fetch(request).catch(() =>
@@ -32,7 +30,6 @@ self.addEventListener('fetch', (e) => {
     return
   }
 
-  // Assets → stale-while-revalidate
   e.respondWith(
     caches.open(CACHE).then(cache =>
       cache.match(request).then(cached => {
