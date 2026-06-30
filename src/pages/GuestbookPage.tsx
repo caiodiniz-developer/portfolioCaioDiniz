@@ -322,7 +322,7 @@ CREATE POLICY "delete_all" ON guestbook FOR DELETE USING (true);`}
         </div>
       </div>
 
-      {/* ── Message modal ── */}
+      {/* ── Message modal / bottom sheet ── */}
       <AnimatePresence>
         {active && (
           <>
@@ -335,26 +335,25 @@ CREATE POLICY "delete_all" ON guestbook FOR DELETE USING (true);`}
               style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(6px)', zIndex: 100, cursor: 'pointer' }}
             />
 
-            {/* Card */}
+            {/* Card — centered on desktop, bottom sheet on mobile */}
             <motion.div
               key="modal"
-              initial={{ opacity: 0, scale: 0.88, y: 24 }}
-              animate={{ opacity: 1, scale: 1,    y: 0  }}
-              exit={{   opacity: 0, scale: 0.88, y: 16  }}
-              transition={{ duration: 0.3, ease: E }}
+              className="gb-modal"
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0  }}
+              exit={{   opacity: 0, y: 40  }}
+              transition={{ duration: 0.28, ease: E }}
               style={{
-                position: 'fixed', top: '50%', left: '50%',
-                transform: 'translate(-50%, -50%)',
+                position: 'fixed',
                 zIndex: 101,
-                width: 'min(480px, calc(100vw - 2.5rem))',
-                padding: '1.75rem',
-                borderRadius: 20,
-                border: '1px solid rgba(255,255,255,0.12)',
-                background: 'rgba(14,14,14,0.92)',
+                background: 'rgba(14,14,14,0.97)',
                 backdropFilter: 'blur(24px)',
-                boxShadow: '0 32px 80px rgba(0,0,0,0.7)',
+                boxShadow: '0 -8px 60px rgba(0,0,0,0.7)',
               }}
             >
+              {/* Drag handle (mobile only) */}
+              <div className="gb-handle" style={{ display: 'none', width: 36, height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.18)', margin: '0 auto 1.25rem' }} />
+
               {/* Close */}
               <button
                 onClick={() => setActive(null)}
@@ -409,6 +408,35 @@ CREATE POLICY "delete_all" ON guestbook FOR DELETE USING (true);`}
         @keyframes pulse { 0%,100%{opacity:.4} 50%{opacity:.9} }
         textarea::placeholder, input::placeholder { color: rgba(255,255,255,0.2); }
         ::-webkit-scrollbar { display: none; }
+
+        /* ── Desktop: centered modal ── */
+        .gb-modal {
+          top: 50%; left: 50%;
+          transform: translate(-50%, -50%);
+          width: min(480px, calc(100vw - 2.5rem));
+          padding: 1.75rem;
+          border-radius: 20px;
+          border: 1px solid rgba(255,255,255,0.12);
+        }
+
+        /* ── Mobile: bottom sheet ── */
+        @media (max-width: 640px) {
+          .gb-modal {
+            top: auto !important;
+            bottom: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            transform: none !important;
+            width: 100% !important;
+            padding: 1.25rem 1.25rem calc(1.5rem + env(safe-area-inset-bottom, 0px));
+            border-radius: 20px 20px 0 0 !important;
+            border: none !important;
+            border-top: 1px solid rgba(255,255,255,0.1) !important;
+            max-height: 85svh;
+            overflow-y: auto;
+          }
+          .gb-handle { display: block !important; }
+        }
       `}</style>
     </main>
   )
