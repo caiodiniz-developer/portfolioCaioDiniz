@@ -57,6 +57,7 @@ export default function GuestbookPage() {
   const gb   = t.guestbook
   const lang = useLanguageStore(s => s.lang)
 
+  const [isMobile,   setIsMobile]   = useState(() => typeof window !== 'undefined' && window.innerWidth < 640)
   const [entries,    setEntries]    = useState<Entry[]>([])
   const [loading,    setLoading]    = useState(CONFIGURED)
   const [submitting, setSubmitting] = useState(false)
@@ -82,11 +83,13 @@ export default function GuestbookPage() {
       .finally(() => setLoading(false))
   }, [gb.errorLoad])
 
-  // close modal on Escape
+  // close modal on Escape + track mobile breakpoint
   useEffect(() => {
-    const fn = (e: KeyboardEvent) => { if (e.key === 'Escape') setActive(null) }
-    window.addEventListener('keydown', fn)
-    return () => window.removeEventListener('keydown', fn)
+    const onKey    = (e: KeyboardEvent) => { if (e.key === 'Escape') setActive(null) }
+    const onResize = () => setIsMobile(window.innerWidth < 640)
+    window.addEventListener('keydown', onKey)
+    window.addEventListener('resize', onResize)
+    return () => { window.removeEventListener('keydown', onKey); window.removeEventListener('resize', onResize) }
   }, [])
 
   async function handleSubmit(e: React.FormEvent) {
@@ -338,21 +341,41 @@ CREATE POLICY "delete_all" ON guestbook FOR DELETE USING (true);`}
             {/* Card — centered on desktop, bottom sheet on mobile */}
             <motion.div
               key="modal"
-              className="gb-modal"
-              initial={{ opacity: 0, y: 40 }}
-              animate={{ opacity: 1, y: 0  }}
-              exit={{   opacity: 0, y: 40  }}
-              transition={{ duration: 0.28, ease: E }}
-              style={{
-                position: 'fixed',
-                zIndex: 101,
-                background: 'rgba(14,14,14,0.97)',
+              initial={isMobile ? { y: '100%' } : { opacity: 0, scale: 0.92, y: 20 }}
+              animate={isMobile ? { y: 0 }      : { opacity: 1, scale: 1,    y: 0  }}
+              exit={   isMobile ? { y: '100%' } : { opacity: 0, scale: 0.92, y: 20 }}
+              transition={{ duration: 0.32, ease: E }}
+              style={isMobile ? {
+                position:     'fixed',
+                bottom:       0,
+                left:         0,
+                right:        0,
+                zIndex:       101,
+                background:   'rgba(14,14,14,0.97)',
                 backdropFilter: 'blur(24px)',
-                boxShadow: '0 -8px 60px rgba(0,0,0,0.7)',
+                borderRadius: '20px 20px 0 0',
+                borderTop:    '1px solid rgba(255,255,255,0.1)',
+                boxShadow:    '0 -8px 60px rgba(0,0,0,0.7)',
+                padding:      `1.25rem 1.25rem calc(1.5rem + env(safe-area-inset-bottom, 0px))`,
+                maxHeight:    '85svh',
+                overflowY:    'auto',
+              } : {
+                position:     'fixed',
+                top:          '50%',
+                left:         '50%',
+                transform:    'translate(-50%, -50%)',
+                zIndex:       101,
+                width:        'min(480px, calc(100vw - 2.5rem))',
+                padding:      '1.75rem',
+                borderRadius: 20,
+                border:       '1px solid rgba(255,255,255,0.12)',
+                background:   'rgba(14,14,14,0.92)',
+                backdropFilter: 'blur(24px)',
+                boxShadow:    '0 32px 80px rgba(0,0,0,0.7)',
               }}
             >
-              {/* Drag handle (mobile only) */}
-              <div className="gb-handle" style={{ display: 'none', width: 36, height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.18)', margin: '0 auto 1.25rem' }} />
+              {/* Drag handle — mobile only */}
+              {isMobile && <div style={{ width: 36, height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.18)', margin: '0 auto 1.25rem' }} />
 
               {/* Close */}
               <button
@@ -408,35 +431,6 @@ CREATE POLICY "delete_all" ON guestbook FOR DELETE USING (true);`}
         @keyframes pulse { 0%,100%{opacity:.4} 50%{opacity:.9} }
         textarea::placeholder, input::placeholder { color: rgba(255,255,255,0.2); }
         ::-webkit-scrollbar { display: none; }
-
-        /* ── Desktop: centered modal ── */
-        .gb-modal {
-          top: 50%; left: 50%;
-          transform: translate(-50%, -50%);
-          width: min(480px, calc(100vw - 2.5rem));
-          padding: 1.75rem;
-          border-radius: 20px;
-          border: 1px solid rgba(255,255,255,0.12);
-        }
-
-        /* ── Mobile: bottom sheet ── */
-        @media (max-width: 640px) {
-          .gb-modal {
-            top: auto !important;
-            bottom: 0 !important;
-            left: 0 !important;
-            right: 0 !important;
-            transform: none !important;
-            width: 100% !important;
-            padding: 1.25rem 1.25rem calc(1.5rem + env(safe-area-inset-bottom, 0px));
-            border-radius: 20px 20px 0 0 !important;
-            border: none !important;
-            border-top: 1px solid rgba(255,255,255,0.1) !important;
-            max-height: 85svh;
-            overflow-y: auto;
-          }
-          .gb-handle { display: block !important; }
-        }
       `}</style>
     </main>
   )
