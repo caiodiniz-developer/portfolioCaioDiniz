@@ -375,7 +375,7 @@ CREATE POLICY "delete_all" ON guestbook FOR DELETE USING (true);`}
               }}
             >
               {/* Drag handle — mobile only */}
-              {isMobile && <div style={{ width: 36, height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.18)', margin: '0 auto 1.25rem' }} />
+              {isMobile && <div style={{ width: 36, height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.18)', margin: '0 auto 1.25rem' }} />}
 
               {/* Close */}
               <button
