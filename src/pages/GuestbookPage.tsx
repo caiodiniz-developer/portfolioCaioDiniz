@@ -57,7 +57,6 @@ export default function GuestbookPage() {
   const gb   = t.guestbook
   const lang = useLanguageStore(s => s.lang)
 
-  const [isMobile,   setIsMobile]   = useState(() => typeof window !== 'undefined' && window.innerWidth < 640)
   const [entries,    setEntries]    = useState<Entry[]>([])
   const [loading,    setLoading]    = useState(CONFIGURED)
   const [submitting, setSubmitting] = useState(false)
@@ -85,11 +84,9 @@ export default function GuestbookPage() {
 
   // close modal on Escape + track mobile breakpoint
   useEffect(() => {
-    const onKey    = (e: KeyboardEvent) => { if (e.key === 'Escape') setActive(null) }
-    const onResize = () => setIsMobile(window.innerWidth < 640)
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setActive(null) }
     window.addEventListener('keydown', onKey)
-    window.addEventListener('resize', onResize)
-    return () => { window.removeEventListener('keydown', onKey); window.removeEventListener('resize', onResize) }
+    return () => window.removeEventListener('keydown', onKey)
   }, [])
 
   async function handleSubmit(e: React.FormEvent) {
@@ -325,103 +322,90 @@ CREATE POLICY "delete_all" ON guestbook FOR DELETE USING (true);`}
         </div>
       </div>
 
-      {/* ── Message modal / bottom sheet ── */}
+      {/* ── Message modal ── */}
       <AnimatePresence>
         {active && (
           <>
-            {/* Backdrop */}
+            {/* Backdrop — also acts as centering flex container */}
             <motion.div
               key="backdrop"
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              transition={{ duration: 0.22 }}
+              transition={{ duration: 0.2 }}
               onClick={() => setActive(null)}
-              style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(6px)', zIndex: 100, cursor: 'pointer' }}
-            />
-
-            {/* Card — centered on desktop, bottom sheet on mobile */}
-            <motion.div
-              key="modal"
-              initial={isMobile ? { y: '100%' } : { opacity: 0, scale: 0.92, y: 20 }}
-              animate={isMobile ? { y: 0 }      : { opacity: 1, scale: 1,    y: 0  }}
-              exit={   isMobile ? { y: '100%' } : { opacity: 0, scale: 0.92, y: 20 }}
-              transition={{ duration: 0.32, ease: E }}
-              style={isMobile ? {
-                position:     'fixed',
-                bottom:       0,
-                left:         0,
-                right:        0,
-                zIndex:       101,
-                background:   'rgba(14,14,14,0.97)',
-                backdropFilter: 'blur(24px)',
-                borderRadius: '20px 20px 0 0',
-                borderTop:    '1px solid rgba(255,255,255,0.1)',
-                boxShadow:    '0 -8px 60px rgba(0,0,0,0.7)',
-                padding:      `1.25rem 1.25rem calc(1.5rem + env(safe-area-inset-bottom, 0px))`,
-                maxHeight:    '85svh',
-                overflowY:    'auto',
-              } : {
-                position:     'fixed',
-                top:          '50%',
-                left:         '50%',
-                transform:    'translate(-50%, -50%)',
-                zIndex:       101,
-                width:        'min(480px, calc(100vw - 2.5rem))',
-                padding:      '1.75rem',
-                borderRadius: 20,
-                border:       '1px solid rgba(255,255,255,0.12)',
-                background:   'rgba(14,14,14,0.92)',
-                backdropFilter: 'blur(24px)',
-                boxShadow:    '0 32px 80px rgba(0,0,0,0.7)',
+              style={{
+                position: 'fixed', inset: 0, zIndex: 100,
+                background: 'rgba(0,0,0,0.75)',
+                backdropFilter: 'blur(6px)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '1.25rem',
               }}
             >
-              {/* Drag handle — mobile only */}
-              {isMobile && <div style={{ width: 36, height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.18)', margin: '0 auto 1.25rem' }} />}
-
-              {/* Close */}
-              <button
-                onClick={() => setActive(null)}
-                style={{ position: 'absolute', top: 14, right: 14, width: 30, height: 30, borderRadius: 8, border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.18s' }}
-                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = '#fff'; (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.1)' }}
-                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.4)'; (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.04)' }}
+              {/* Card — stops click propagation so it doesn't close on tap inside */}
+              <motion.div
+                key="modal"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1   }}
+                exit={{   opacity: 0, scale: 0.9  }}
+                transition={{ duration: 0.22, ease: E }}
+                onClick={e => e.stopPropagation()}
+                style={{
+                  position:       'relative',
+                  width:          '100%',
+                  maxWidth:       480,
+                  maxHeight:      '80svh',
+                  overflowY:      'auto',
+                  padding:        '1.5rem',
+                  borderRadius:   20,
+                  border:         '1px solid rgba(255,255,255,0.12)',
+                  background:     'rgba(14,14,14,0.97)',
+                  backdropFilter: 'blur(24px)',
+                  boxShadow:      '0 32px 80px rgba(0,0,0,0.8)',
+                }}
               >
-                <X size={14} />
-              </button>
+                {/* Close */}
+                <button
+                  onClick={() => setActive(null)}
+                  style={{ position: 'absolute', top: 14, right: 14, width: 30, height: 30, borderRadius: 8, border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.18s' }}
+                >
+                  <X size={14} />
+                </button>
 
-              {/* Avatar + meta */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.25rem' }}>
-                {(() => {
-                  const color = avatarColor(active.name)
-                  const ini   = initials(active.name)
-                  return (
-                    <div style={{ flexShrink: 0, width: 52, height: 52, borderRadius: '50%', background: `${color}22`, border: `2px solid ${color}66`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.78rem', fontWeight: 800, color }}>
-                      {ini}
-                    </div>
-                  )
-                })()}
-                <div>
-                  <p style={{ margin: 0, fontWeight: 700, fontSize: '0.9rem', color: '#fff' }}>{active.name}</p>
-                  <p style={{ margin: '2px 0 0', fontSize: '0.62rem', color: 'rgba(255,255,255,0.28)', letterSpacing: '0.04em' }}>{timeAgo(active.created_at, lang)}</p>
+                {/* Avatar + meta */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.25rem', paddingRight: '2rem' }}>
+                  {(() => {
+                    const color = avatarColor(active.name)
+                    const ini   = initials(active.name)
+                    return (
+                      <div style={{ flexShrink: 0, width: 48, height: 48, borderRadius: '50%', background: `${color}22`, border: `2px solid ${color}66`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: 800, color }}>
+                        {ini}
+                      </div>
+                    )
+                  })()}
+                  <div>
+                    <p style={{ margin: 0, fontWeight: 700, fontSize: '0.9rem', color: '#fff' }}>{active.name}</p>
+                    <p style={{ margin: '2px 0 0', fontSize: '0.62rem', color: 'rgba(255,255,255,0.28)', letterSpacing: '0.04em' }}>{timeAgo(active.created_at, lang)}</p>
+                  </div>
                 </div>
-              </div>
 
-              {/* Message */}
-              <p style={{ margin: 0, fontSize: '0.88rem', color: 'rgba(255,255,255,0.7)', lineHeight: 1.7, wordBreak: 'break-word' }}>
-                {active.message}
-              </p>
+                {/* Message */}
+                <p style={{ margin: 0, fontSize: '0.875rem', color: 'rgba(255,255,255,0.75)', lineHeight: 1.75, wordBreak: 'break-word', whiteSpace: 'pre-wrap' }}>
+                  {active.message}
+                </p>
 
-              {/* Admin delete */}
-              {isAdmin && (
-                <div style={{ marginTop: '1.25rem', paddingTop: '1rem', borderTop: '1px solid rgba(255,255,255,0.06)', display: 'flex', justifyContent: 'flex-end' }}>
-                  <button
-                    onClick={() => deleteEntry(active.id)}
-                    style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '0.5rem 1rem', borderRadius: 8, border: '1px solid rgba(248,113,113,0.25)', background: 'rgba(248,113,113,0.06)', color: '#f87171', fontSize: '0.72rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.18s' }}
-                    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(248,113,113,0.18)' }}
-                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(248,113,113,0.06)' }}
-                  >
-                    <Trash2 size={12} /> Apagar
-                  </button>
-                </div>
-              )}
+                {/* Admin delete */}
+                {isAdmin && (
+                  <div style={{ marginTop: '1.25rem', paddingTop: '1rem', borderTop: '1px solid rgba(255,255,255,0.06)', display: 'flex', justifyContent: 'flex-end' }}>
+                    <button
+                      onClick={() => deleteEntry(active.id)}
+                      style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '0.5rem 1rem', borderRadius: 8, border: '1px solid rgba(248,113,113,0.25)', background: 'rgba(248,113,113,0.06)', color: '#f87171', fontSize: '0.72rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.18s' }}
+                    >
+                      <Trash2 size={12} /> Apagar
+                    </button>
+                  </div>
+                )}
+              </motion.div>
             </motion.div>
           </>
         )}
