@@ -4,6 +4,7 @@ import { Send, Trash2, X } from 'lucide-react'
 import { SITE } from '@/lib/constants'
 import { useT } from '@/hooks/useTranslation'
 import { useLanguageStore } from '@/store/useLanguageStore'
+import { LiquidMetalButton } from '@/components/ui/LiquidMetalButton'
 
 const SB_URL     = import.meta.env.VITE_SUPABASE_URL  as string | undefined
 const SB_KEY     = import.meta.env.VITE_SUPABASE_ANON as string | undefined
@@ -212,12 +213,14 @@ CREATE POLICY "delete_all" ON guestbook FOR DELETE USING (true);`}
                       style={{ fontSize: '0.75rem', color: '#4ade80', fontWeight: 600 }}>{gb.sent}</motion.span>
                   )}
                 </AnimatePresence>
-                <button type="submit" disabled={submitting || !name.trim() || !message.trim()}
-                  style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: 8, padding: '0.62rem 1.25rem', borderRadius: 999, background: submitting ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.9)', border: 'none', color: '#0d0d0d', fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', cursor: submitting ? 'not-allowed' : 'pointer', transition: 'all 0.2s', opacity: submitting ? 0.5 : 1 }}
-                  onMouseEnter={e => { if (!submitting) (e.currentTarget as HTMLElement).style.background = '#fff' }}
-                  onMouseLeave={e => { if (!submitting) (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.9)' }}>
-                  <Send size={12} />{submitting ? gb.sending : gb.send}
-                </button>
+                <div style={{ marginLeft: 'auto' }}>
+                  <LiquidMetalButton
+                    type="submit"
+                    disabled={submitting || !name.trim() || !message.trim()}
+                  >
+                    {submitting ? gb.sending : gb.send}
+                  </LiquidMetalButton>
+                </div>
               </div>
             </motion.form>
           )}

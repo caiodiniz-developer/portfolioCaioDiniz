@@ -8,6 +8,7 @@ import { useLanguageStore } from '@/store/useLanguageStore'
 import { useCursorStore } from '@/store/useCursorStore'
 import { usePresentationStore } from '@/store/usePresentationStore'
 import { NAV_LINKS, SITE } from '@/lib/constants'
+import { CubertoBtn } from '@/components/sections/Hero'
 
 export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false)
@@ -191,32 +192,12 @@ export default function Header() {
               to="/contact"
               onMouseEnter={() => setCursor('pointer')}
               onMouseLeave={() => setCursor('default')}
-              className="hidden lg:flex items-center gap-1.5 flex-shrink-0"
-              style={{
-                padding:       '0.625rem 1.125rem',
-                borderRadius:  '999px',
-                background:    '#ffffff',
-                color:         '#0d0d0d',
-                fontSize:      '0.675rem',
-                fontWeight:    700,
-                letterSpacing: '0.04em',
-                textDecoration:'none',
-                whiteSpace:    'nowrap',
-                transition:    'background 0.25s, opacity 0.25s',
-              }}
+              className="hidden lg:block flex-shrink-0"
+              style={{ textDecoration: 'none' }}
             >
-              <AnimatePresence mode="wait">
-                <motion.span
-                  key={lang}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  {lang === 'en' ? "Let's talk" : 'Vamos conversar'}
-                </motion.span>
-              </AnimatePresence>
-              <span aria-hidden>↗</span>
+              <CubertoBtn>
+                {lang === 'en' ? "Let's talk" : 'Vamos conversar'}
+              </CubertoBtn>
             </Link>
 
             {/* Language toggle on mobile (hamburger replaced by bottom nav) */}
