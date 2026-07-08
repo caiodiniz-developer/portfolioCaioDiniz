@@ -179,48 +179,6 @@ export default function AboutPage() {
             </div>
           </div>
 
-          {/* Tag cloud below — quick scan of all skills */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: '-30px' }}
-            transition={{ duration: 0.6, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            style={{ marginTop: 'clamp(2rem,4vw,3rem)', display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}
-          >
-            {STACK.flatMap((cat) =>
-              cat.items.map((item) => (
-                <span
-                  key={item}
-                  style={{
-                    padding:       '0.375rem 0.875rem',
-                    borderRadius:  '999px',
-                    border:        '1px solid rgba(255,255,255,0.08)',
-                    background:    'rgba(255,255,255,0.03)',
-                    fontSize:      '0.7rem',
-                    fontWeight:    600,
-                    color:         'rgba(255,255,255,0.35)',
-                    letterSpacing: '0.04em',
-                    transition:    'color 0.25s, border-color 0.25s, background 0.25s',
-                    cursor:        'default',
-                  }}
-                  onMouseEnter={(e) => {
-                    const el = e.currentTarget as HTMLElement
-                    el.style.color = '#fff'
-                    el.style.borderColor = 'rgba(255,255,255,0.25)'
-                    el.style.background = 'rgba(255,255,255,0.07)'
-                  }}
-                  onMouseLeave={(e) => {
-                    const el = e.currentTarget as HTMLElement
-                    el.style.color = 'rgba(255,255,255,0.35)'
-                    el.style.borderColor = 'rgba(255,255,255,0.08)'
-                    el.style.background = 'rgba(255,255,255,0.03)'
-                  }}
-                >
-                  {item}
-                </span>
-              ))
-            )}
-          </motion.div>
         </div>
 
         <style>{`@keyframes stackBlink { 0%,100%{opacity:1} 50%{opacity:0} }`}</style>

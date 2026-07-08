@@ -40,7 +40,7 @@ export const projects: Project[] = [
       "/assets/foto-finix-3.jpeg",
       "/assets/foto-finix-1.jpeg",
     ],
-    liveUrl: "",
+    liveUrl: "https://caiodiniz.dev", // mude o link aqui
     githubUrl: "",
     role: "Full Stack Developer",
     problem:
@@ -83,7 +83,7 @@ export const projects: Project[] = [
       "/assets/foto-refound-2.jpeg",
       "/assets/foto-refound-3.jpeg",
     ],
-    liveUrl: "",
+    liveUrl: "https://caiodiniz.dev", // mude o link aqui
     githubUrl: "",
     role: "Full Stack Developer",
     problem:
@@ -126,7 +126,7 @@ export const projects: Project[] = [
       "/assets/foto-santaluzia-2.jpeg",
       "/assets/foto-santaluzia-3.jpeg",
     ],
-    liveUrl: "",
+    liveUrl: "https://caiodiniz.dev", // mude o link aqui
     githubUrl: "",
     role: "Front-end Developer & UI Designer",
     problem:
@@ -169,7 +169,7 @@ export const projects: Project[] = [
       "/assets/foto-matrixtech-2.jpeg",
       "/assets/foto-matrixtech-3.jpeg",
     ],
-    liveUrl: "",
+    liveUrl: "https://caiodiniz.dev", // mude o link aqui
     githubUrl: "",
     role: "Front-end Developer & UI Designer",
     problem:
@@ -211,7 +211,7 @@ export const projects: Project[] = [
       "/assets/foto-ongmpbia-2.jpeg",
       "/assets/foto-ongmpbia-3.jpeg",
     ],
-    liveUrl: "",
+    liveUrl: "https://caiodiniz.dev", // mude o link aqui
     githubUrl: "",
     role: "Web Developer",
     problem:
@@ -251,7 +251,7 @@ export const projects: Project[] = [
       "/assets/projeto-jogoadivinhacao.png",
       "/assets/foto-jogodeadivinhar.jpeg",
     ],
-    liveUrl: "",
+    liveUrl: "https://caiodiniz.dev", // mude o link aqui
     githubUrl: "",
     role: "Front-end Developer",
     problem:
@@ -292,7 +292,7 @@ export const projects: Project[] = [
       "/assets/foto-prime-2.jpeg",
       "/assets/foto-prime-3.jpeg",
     ],
-    liveUrl: "",
+    liveUrl: "https://caiodiniz.dev", // mude o link aqui
     githubUrl: "",
     role: "Front-end Developer",
     problem:
@@ -331,7 +331,7 @@ export const projects: Project[] = [
     gallery: [
       "/assets/projetoeasyton.png",
     ],
-    liveUrl: "",
+    liveUrl: "https://caiodiniz.dev", // mude o link aqui
     githubUrl: "",
     role: "Full Stack Developer",
     problem:

@@ -192,7 +192,7 @@ export default function Header() {
               to="/contact"
               onMouseEnter={() => setCursor('pointer')}
               onMouseLeave={() => setCursor('default')}
-              className="hidden lg:block flex-shrink-0"
+              className="hidden lg:flex items-center flex-shrink-0"
               style={{ textDecoration: 'none' }}
             >
               <CubertoBtn>

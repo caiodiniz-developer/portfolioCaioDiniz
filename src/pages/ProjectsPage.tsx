@@ -1,7 +1,6 @@
 import { useEffect, useState, useCallback } from 'react'
-import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowUpRight, List, LayoutGrid, ShoppingBag, Monitor, ChevronLeft, ChevronRight, ExternalLink } from 'lucide-react'
+import { List, LayoutGrid, ShoppingBag, Monitor, ChevronLeft, ChevronRight } from 'lucide-react'
 import { projects } from '@/data/projects'
 import { useLanguageStore } from '@/store/useLanguageStore'
 import { useCursorStore } from '@/store/useCursorStore'
@@ -155,7 +154,7 @@ export default function ProjectsPage() {
       {/* ── Filters + View Switcher ── */}
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5, delay: 0.18 }}
         style={{ padding: '1.75rem clamp(1.5rem,5vw,5rem)', display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between' }}>
-        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', justifyContent: 'center' }}>
           {FILTERS.map(f => (
             <button key={f} onClick={() => setActive(f)}
               onMouseEnter={() => setCursor('pointer')} onMouseLeave={() => setCursor('default')}
@@ -194,7 +193,7 @@ export default function ProjectsPage() {
                   <motion.div key={project.id} layout
                     initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }}
                     transition={{ duration: 0.32, delay: i * 0.05, ease: E }}>
-                    <Link to={`/projects/${project.slug}`} style={{ textDecoration: 'none', display: 'block' }}
+                    <a href={project.liveUrl} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', display: 'block' }}
                       onMouseEnter={() => { setHoveredId(project.id); setCursor('view'); setLabel('Ver') }}
                       onMouseLeave={() => { setHoveredId(null); setCursor('default'); setLabel('') }}>
                       <motion.div whileHover={{ backgroundColor: 'rgba(255,255,255,0.02)' }} transition={{ duration: 0.15 }}
@@ -234,12 +233,9 @@ export default function ProjectsPage() {
                           <span className="proj-year" style={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.18)', fontWeight: 600, letterSpacing: '0.08em', fontFamily: '"JetBrains Mono", monospace' }}>
                             {project.year}
                           </span>
-                          <motion.div animate={{ x: hoveredId === project.id ? 3 : 0 }} transition={{ duration: 0.18 }}>
-                            <ArrowUpRight size={15} style={{ color: hoveredId === project.id ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.12)', transition: 'color 0.2s' }} />
-                          </motion.div>
                         </div>
                       </motion.div>
-                    </Link>
+                    </a>
                   </motion.div>
                 ))}
               </AnimatePresence>
@@ -343,11 +339,11 @@ export default function ProjectsPage() {
                           </span>
                         ))}
                       </div>
-                      <Link to={`/projects/${currentCard.slug}`} style={{ marginTop: 2, display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: '#fff', textDecoration: 'none', border: '1px solid rgba(255,255,255,0.14)', background: 'rgba(255,255,255,0.05)', padding: '0.5rem 1.1rem', borderRadius: 999, width: 'fit-content', transition: 'all 0.2s' }}
+                      <a href={currentCard.liveUrl} target="_blank" rel="noopener noreferrer" style={{ marginTop: 2, display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: '#fff', textDecoration: 'none', border: '1px solid rgba(255,255,255,0.14)', background: 'rgba(255,255,255,0.05)', padding: '0.5rem 1.1rem', borderRadius: 999, width: 'fit-content', transition: 'all 0.2s' }}
                         onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.1)'; setCursor('pointer') }}
                         onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.05)'; setCursor('default') }}>
-                        Ver projeto <ArrowUpRight size={11} />
-                      </Link>
+                        Ver projeto →
+                      </a>
                     </div>
                   </motion.div>
                 </AnimatePresence>
@@ -385,7 +381,7 @@ export default function ProjectsPage() {
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '1.1rem' }}>
                 {filtered.map((project, i) => (
                   <motion.div key={project.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: i * 0.04, ease: E }}>
-                    <Link to={`/projects/${project.slug}`} style={{ textDecoration: 'none', display: 'block' }}
+                    <a href={project.liveUrl} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', display: 'block' }}
                       onMouseEnter={() => setCursor('pointer')} onMouseLeave={() => setCursor('default')}>
                       <div className="store-card"
                         style={{ background: '#111', borderRadius: 16, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.07)', transition: 'border-color 0.25s, transform 0.3s', cursor: 'pointer' }}
@@ -431,12 +427,12 @@ export default function ProjectsPage() {
 
                           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', paddingTop: '0.75rem', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
                             <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: '0.62rem', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase', color: '#fff', background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)', padding: '0.42rem 0.85rem', borderRadius: 999 }}>
-                              Ver <ArrowUpRight size={10} />
+                              Ver →
                             </span>
                           </div>
                         </div>
                       </div>
-                    </Link>
+                    </a>
                   </motion.div>
                 ))}
               </div>
@@ -524,18 +520,11 @@ export default function ProjectsPage() {
                           ))}
                         </div>
                         <div style={{ display: 'flex', gap: 8 }}>
-                          <Link to={`/projects/${project.slug}`} onClick={() => closeWindow(id)}
+                          <a href={project.liveUrl} target="_blank" rel="noopener noreferrer" onClick={() => closeWindow(id)}
                             style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: '0.63rem', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase', color: '#fff', background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.13)', padding: '0.48rem 0.9rem', borderRadius: 999, textDecoration: 'none' }}
                             onMouseEnter={() => setCursor('pointer')} onMouseLeave={() => setCursor('default')}>
-                            Ver projeto <ArrowUpRight size={10} />
-                          </Link>
-                          {project.liveUrl && (
-                            <a href={project.liveUrl} target="_blank" rel="noopener noreferrer"
-                              style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: '0.63rem', fontWeight: 700, color: 'rgba(255,255,255,0.38)', border: '1px solid rgba(255,255,255,0.08)', padding: '0.48rem 0.9rem', borderRadius: 999, textDecoration: 'none' }}
-                              onMouseEnter={() => setCursor('pointer')} onMouseLeave={() => setCursor('default')}>
-                              Live <ExternalLink size={10} />
-                            </a>
-                          )}
+                            Ver projeto →
+                          </a>
                         </div>
                       </div>
                     </div>

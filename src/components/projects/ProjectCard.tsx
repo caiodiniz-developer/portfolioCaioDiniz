@@ -1,10 +1,7 @@
 import { useRef } from 'react'
-import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { ArrowRight } from 'lucide-react'
 import type { Project } from '@/data/projects'
 import { useCursorStore } from '@/store/useCursorStore'
-import { useT } from '@/hooks/useTranslation'
 import { staggerItem } from '@/lib/animations'
 
 interface ProjectCardProps {
@@ -13,7 +10,6 @@ interface ProjectCardProps {
 }
 
 export default function ProjectCard({ project, index = 0 }: ProjectCardProps) {
-  const t = useT()
   const cardRef = useRef<HTMLDivElement>(null)
   const setCursor = useCursorStore((s) => s.setState)
   const setLabel = useCursorStore((s) => s.setLabel)
@@ -51,7 +47,7 @@ export default function ProjectCard({ project, index = 0 }: ProjectCardProps) {
         setLabel('View')
       }}
     >
-      <Link to={`/projects/${project.slug}`}>
+      <a href={project.liveUrl} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', display: 'block' }}>
         {/* Image */}
         <div className="relative h-56 overflow-hidden">
           <img
@@ -75,10 +71,6 @@ export default function ProjectCard({ project, index = 0 }: ProjectCardProps) {
             <h3 className="font-bold text-white group-hover:text-white/70 transition-colors duration-300">
               {project.title}
             </h3>
-            <ArrowRight
-              size={16}
-              className="text-slate-text flex-shrink-0 -rotate-45 opacity-0 group-hover:opacity-100 transition-all duration-300"
-            />
           </div>
 
           <p className="text-sm text-slate-text line-clamp-2 leading-relaxed">
@@ -96,7 +88,7 @@ export default function ProjectCard({ project, index = 0 }: ProjectCardProps) {
             ))}
           </div>
         </div>
-      </Link>
+      </a>
     </motion.div>
   )
 }

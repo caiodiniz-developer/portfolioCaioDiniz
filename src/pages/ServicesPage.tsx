@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react'
+import { useEffect, useState, useMemo, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Check, MessageCircle, Calculator, ChevronRight, ArrowUpRight,
@@ -240,11 +240,23 @@ function BudgetCalculator({ lang, setCursor }: { lang: string; setCursor: (s: Cu
 
 /* ── Services Section ── */
 function ServicesSection({ lang, setCursor }: { lang: string; setCursor: (s: CursorState) => void }) {
-  const [hovered, setHovered] = useState<number | null>(null)
+  const [hovered,    setHovered]    = useState<number | null>(null)
+  const [autoIdx,    setAutoIdx]    = useState(0)
   const [openMobile, setOpenMobile] = useState<number | null>(null)
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const pt  = lang === 'pt'
-  const svc = hovered !== null ? SERVICES_DATA[hovered] : null
   const E   = [0.22, 1, 0.36, 1] as const
+
+  // Infinite auto-cycle when nothing is hovered
+  useEffect(() => {
+    intervalRef.current = setInterval(() => {
+      if (hovered === null) setAutoIdx(i => (i + 1) % SERVICES_DATA.length)
+    }, 2400)
+    return () => { if (intervalRef.current) clearInterval(intervalRef.current) }
+  }, [hovered])
+
+  const activeIdx = hovered !== null ? hovered : autoIdx
+  const svc = SERVICES_DATA[activeIdx]
 
   return (
     <section style={{ padding: 'clamp(4rem,8vw,6rem) clamp(1.5rem,5vw,5rem)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
@@ -285,13 +297,13 @@ function ServicesSection({ lang, setCursor }: { lang: string; setCursor: (s: Cur
                   padding: 'clamp(1.2rem,2.5vw,1.8rem) clamp(1.5rem,3vw,2.5rem)',
                   borderBottom: '1px solid rgba(255,255,255,0.06)',
                   cursor: 'default',
-                  opacity: hovered === null || hovered === i ? 1 : 0.28,
+                  opacity: activeIdx === i ? 1 : 0.28,
                   transition: 'opacity 0.35s ease',
                 }}
               >
                 {/* Active left bar */}
                 <motion.div
-                  animate={{ scaleY: hovered === i ? 1 : 0 }}
+                  animate={{ scaleY: activeIdx === i ? 1 : 0 }}
                   transition={{ duration: 0.32, ease: E }}
                   style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 2, background: '#fff', transformOrigin: 'top', borderRadius: 1 }}
                 />
@@ -300,7 +312,7 @@ function ServicesSection({ lang, setCursor }: { lang: string; setCursor: (s: Cur
                 <span style={{
                   fontFamily: '"JetBrains Mono","Fira Code",monospace',
                   fontSize: '0.55rem', fontWeight: 700, letterSpacing: '0.12em',
-                  color: hovered === i ? 'rgba(255,255,255,0.55)' : 'rgba(255,255,255,0.18)',
+                  color: activeIdx === i ? 'rgba(255,255,255,0.55)' : 'rgba(255,255,255,0.18)',
                   transition: 'color 0.25s', flexShrink: 0, minWidth: '2rem',
                 }}>
                   {String(i + 1).padStart(2, '0')}
@@ -310,9 +322,9 @@ function ServicesSection({ lang, setCursor }: { lang: string; setCursor: (s: Cur
                 <span style={{
                   fontFamily: 'Syne, sans-serif', fontWeight: 900,
                   fontSize: 'clamp(1.1rem,1.9vw,1.55rem)', letterSpacing: '-0.035em',
-                  color: hovered === i ? '#fff' : 'rgba(255,255,255,0.52)',
+                  color: activeIdx === i ? '#fff' : 'rgba(255,255,255,0.52)',
                   transition: 'color 0.25s, transform 0.35s cubic-bezier(0.22,1,0.36,1)',
-                  transform: hovered === i ? 'translateX(6px)' : 'translateX(0)',
+                  transform: activeIdx === i ? 'translateX(6px)' : 'translateX(0)',
                 }}>
                   {pt ? s.titlePt : s.titleEn}
                 </span>
@@ -321,8 +333,8 @@ function ServicesSection({ lang, setCursor }: { lang: string; setCursor: (s: Cur
                 <span style={{
                   marginLeft: 'auto', fontSize: '0.9rem',
                   color: 'rgba(255,255,255,0.25)',
-                  transform: hovered === i ? 'translate(4px,0)' : 'translate(0,0)',
-                  opacity: hovered === i ? 1 : 0,
+                  transform: activeIdx === i ? 'translate(4px,0)' : 'translate(0,0)',
+                  opacity: activeIdx === i ? 1 : 0,
                   transition: 'opacity 0.25s, transform 0.35s cubic-bezier(0.22,1,0.36,1)',
                 }}>→</span>
               </motion.div>
@@ -332,36 +344,36 @@ function ServicesSection({ lang, setCursor }: { lang: string; setCursor: (s: Cur
           {/* Right — detail panel */}
           <div style={{ display: 'flex', alignItems: 'center', padding: 'clamp(2rem,4vw,3.5rem) clamp(2rem,4vw,3rem)' }}>
             <AnimatePresence mode="wait">
-              {svc ? (
-                <motion.div
-                  key={hovered}
-                  initial={{ opacity: 0, y: 22 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -16 }}
-                  transition={{ duration: 0.38, ease: E }}
-                  style={{ display: 'flex', flexDirection: 'column', gap: '1.8rem' }}
-                >
-                  {/* Big number watermark */}
-                  <p style={{ fontFamily: 'Syne, sans-serif', fontWeight: 900, fontSize: 'clamp(5rem,12vw,9rem)', letterSpacing: '-0.07em', lineHeight: 0.82, color: 'rgba(255,255,255,0.04)', margin: 0, userSelect: 'none' as const, pointerEvents: 'none' as const }}>
-                    {String((hovered ?? 0) + 1).padStart(2, '0')}
+              <motion.div
+                key={activeIdx}
+                initial={{ opacity: 0, y: 22 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -16 }}
+                transition={{ duration: 0.45, ease: E }}
+                style={{ display: 'flex', flexDirection: 'column', gap: '1.8rem' }}
+              >
+                {/* Big number watermark */}
+                <p style={{ fontFamily: 'Syne, sans-serif', fontWeight: 900, fontSize: 'clamp(5rem,12vw,9rem)', letterSpacing: '-0.07em', lineHeight: 0.82, color: 'rgba(255,255,255,0.04)', margin: 0, userSelect: 'none' as const, pointerEvents: 'none' as const }}>
+                  {String(activeIdx + 1).padStart(2, '0')}
+                </p>
+                <div style={{ marginTop: '-1.4rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 900, fontSize: 'clamp(1.6rem,2.8vw,2.4rem)', letterSpacing: '-0.044em', lineHeight: 1.1, color: '#fff', margin: 0 }}>
+                    {pt ? svc.titlePt : svc.titleEn}
+                  </h3>
+                  <p style={{ fontSize: 'clamp(0.82rem,1.2vw,0.95rem)', color: 'rgba(255,255,255,0.34)', lineHeight: 1.82, margin: 0 }}>
+                    {pt ? svc.descPt : svc.descEn}
                   </p>
-                  <div style={{ marginTop: '-1.4rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                    <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 900, fontSize: 'clamp(1.6rem,2.8vw,2.4rem)', letterSpacing: '-0.044em', lineHeight: 1.1, color: '#fff', margin: 0 }}>
-                      {pt ? svc.titlePt : svc.titleEn}
-                    </h3>
-                    <p style={{ fontSize: 'clamp(0.82rem,1.2vw,0.95rem)', color: 'rgba(255,255,255,0.34)', lineHeight: 1.82, margin: 0 }}>
-                      {pt ? svc.descPt : svc.descEn}
-                    </p>
+                  {/* Progress dots */}
+                  <div style={{ display: 'flex', gap: 6, marginTop: '0.5rem' }}>
+                    {SERVICES_DATA.map((_, di) => (
+                      <motion.div
+                        key={di}
+                        animate={{ background: di === activeIdx ? '#fff' : 'rgba(255,255,255,0.15)', width: di === activeIdx ? 20 : 6 }}
+                        transition={{ duration: 0.35, ease: E }}
+                        style={{ height: 2, borderRadius: 999 }}
+                      />
+                    ))}
                   </div>
-                </motion.div>
-              ) : (
-                <motion.p
-                  key="idle"
-                  initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                  transition={{ duration: 0.3 }}
-                  style={{ fontFamily: 'Syne, sans-serif', fontWeight: 900, fontSize: 'clamp(1.2rem,2.5vw,2rem)', letterSpacing: '-0.04em', color: 'rgba(255,255,255,0.07)', lineHeight: 1.3, margin: 0, userSelect: 'none' as const }}
-                >
-                  {pt ? 'Passe o cursor\npela lista.' : 'Hover the list\nto explore.'}
-                </motion.p>
-              )}
+                </div>
+              </motion.div>
             </AnimatePresence>
           </div>
         </div>

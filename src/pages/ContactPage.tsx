@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef, useCallback } from 'react'
 import { motion, AnimatePresence, useInView } from 'framer-motion'
-import { ArrowRight, RotateCcw } from 'lucide-react'
+import { ArrowRight, RotateCcw, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useLanguageStore } from '@/store/useLanguageStore'
 import { useCursorStore } from '@/store/useCursorStore'
 import { SITE } from '@/lib/constants'
@@ -74,7 +74,6 @@ function TerminalSection({ lang }: { lang: string }) {
   useEffect(() => {
     if (lineIdx >= LINES.length) { setDone(true); return }
     const line = LINES[lineIdx]
-
     if (line.kind === 'blank') {
       const t = setTimeout(() => { setShown(p => [...p, line]); setLineIdx(i => i + 1); setCharIdx(0) }, 70)
       return () => clearTimeout(t)
@@ -83,11 +82,9 @@ function TerminalSection({ lang }: { lang: string }) {
       const t = setTimeout(() => { setShown(p => [...p, line]); setLineIdx(i => i + 1); setCharIdx(0) }, 380)
       return () => clearTimeout(t)
     }
-
     const isCmd  = line.kind === 'cmd'
     const speed  = isCmd ? 88 : 28
     const init   = lineIdx === 0 ? 600 : isCmd ? 500 : 55
-
     if (charIdx === 0) {
       const t = setTimeout(() => setCharIdx(1), init)
       return () => clearTimeout(t)
@@ -105,12 +102,10 @@ function TerminalSection({ lang }: { lang: string }) {
   const typingOther = curLine && curLine.kind !== 'cmd' && curLine.kind !== 'blank' && curLine.kind !== 'info'
 
   return (
-    <section style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 'clamp(6rem,10vw,8rem) clamp(1.5rem,5vw,4rem)' }}>
-      <div style={{ width: '100%', maxWidth: 700 }}>
-        <motion.div initial={{ opacity: 0, y: 32 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.85, ease: E }}
+    <section style={{ padding: 'clamp(5rem,8vw,7rem) clamp(1.5rem,5vw,4rem)', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+      <div style={{ width: '100%', maxWidth: 700, margin: '0 auto' }}>
+        <motion.div initial={{ opacity: 0, y: 32 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-80px' }} transition={{ duration: 0.85, ease: E }}
           style={{ background: 'rgba(255,255,255,0.026)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 14, overflow: 'hidden', boxShadow: '0 48px 96px rgba(0,0,0,0.55)' }}>
-
-          {/* Chrome bar */}
           <div style={{ padding: '0.75rem 1.1rem', background: 'rgba(255,255,255,0.04)', borderBottom: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', gap: 7 }}>
             <button onClick={skipAll} style={{ width: 12, height: 12, borderRadius: '50%', background: '#ff5f56', border: 'none', cursor: 'pointer', padding: 0, flexShrink: 0 }} />
             <span style={{ width: 12, height: 12, borderRadius: '50%', background: '#ffbd2e', display: 'block' }} />
@@ -119,39 +114,27 @@ function TerminalSection({ lang }: { lang: string }) {
               bash — caio@portfolio — 80×24
             </span>
           </div>
-
-          {/* Terminal body */}
           <div style={{ padding: 'clamp(1.2rem,3vw,1.8rem)', fontFamily: '"SF Mono","Fira Code","Cascadia Code",monospace', fontSize: 'clamp(0.72rem,1.35vw,0.86rem)', lineHeight: 1.88, minHeight: 340 }}>
-
-            {/* Prompt row */}
             <div style={{ display: 'flex', gap: '0.55em', marginBottom: 2 }}>
               <span style={{ color: '#4ade80', userSelect: 'none' }}>caio@portfolio</span>
               <span style={{ color: 'rgba(255,255,255,0.25)', userSelect: 'none' }}>:~$</span>
               <span style={{ color: '#fff' }}>
-                {typingCmd
-                  ? LINES[0].text.slice(0, charIdx)
-                  : shown.some(l => l.kind === 'cmd') ? 'caio --contact' : ''}
+                {typingCmd ? LINES[0].text.slice(0, charIdx) : shown.some(l => l.kind === 'cmd') ? 'caio --contact' : ''}
                 {typingCmd && <span style={{ display: 'inline-block', width: 7, height: '1em', background: '#fff', verticalAlign: 'text-bottom', animation: 'tblink .9s step-end infinite' }} />}
               </span>
             </div>
-
-            {/* Output lines */}
             {shown.filter(l => l.kind !== 'cmd').map((line, i) => (
               <motion.div key={i} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.12 }}
                 style={{ color: lineColor(line.kind), whiteSpace: 'pre', minHeight: line.kind === 'blank' ? '0.4em' : undefined }}>
                 {line.text}
               </motion.div>
             ))}
-
-            {/* Typing in progress (non-cmd) */}
             {typingOther && curLine && (
               <div style={{ color: lineColor(curLine.kind), whiteSpace: 'pre' }}>
                 {curLine.text.slice(0, charIdx)}
                 <span style={{ display: 'inline-block', width: 7, height: '1em', background: 'currentColor', opacity: 0.7, verticalAlign: 'text-bottom', animation: 'tblink .9s step-end infinite' }} />
               </div>
             )}
-
-            {/* Idle cursor */}
             {done && (
               <div style={{ display: 'flex', gap: '0.55em', marginTop: 4 }}>
                 <span style={{ color: '#4ade80' }}>caio@portfolio</span>
@@ -161,7 +144,6 @@ function TerminalSection({ lang }: { lang: string }) {
             )}
           </div>
         </motion.div>
-
         {!done && (
           <motion.button initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.8 }}
             onClick={skipAll}
@@ -177,20 +159,13 @@ function TerminalSection({ lang }: { lang: string }) {
 }
 
 /* ═══════════════════════════════════════
-   AVAILABILITY
+   CALENDAR AVAILABILITY
 ═══════════════════════════════════════ */
-const DAYS_PT = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta']
-const DAYS_EN = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
-const SLOTS   = ['09:00', '10:00', '11:00', '14:00', '15:00', '16:00', '17:00']
-
-type SlotStatus = 'free' | 'busy'
-const AVAIL: Record<string, Record<string, SlotStatus>> = {
-  'Segunda': { '09:00':'free', '10:00':'free', '11:00':'free', '14:00':'free', '15:00':'free', '16:00':'free', '17:00':'free' },
-  'Terça':   { '09:00':'free', '10:00':'free', '11:00':'free', '14:00':'free', '15:00':'free', '16:00':'free', '17:00':'free' },
-  'Quarta':  { '09:00':'free', '10:00':'free', '11:00':'free', '14:00':'free', '15:00':'free', '16:00':'free', '17:00':'free' },
-  'Quinta':  { '09:00':'free', '10:00':'free', '11:00':'free', '14:00':'free', '15:00':'free', '16:00':'free', '17:00':'free' },
-  'Sexta':   { '09:00':'free', '10:00':'free', '11:00':'free', '14:00':'free', '15:00':'free', '16:00':'free', '17:00':'free' },
-}
+const MONTH_NAMES_PT = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro']
+const MONTH_NAMES_EN = ['January','February','March','April','May','June','July','August','September','October','November','December']
+const WDAYS_PT = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb']
+const WDAYS_EN = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat']
+const TIME_SLOTS = ['09:00','10:00','11:00','14:00','15:00','16:00','17:00']
 
 function useClock() {
   const [t, setT] = useState('')
@@ -205,102 +180,258 @@ function useClock() {
 
 function AvailabilitySection({ onSelect, lang }: { onSelect: (slot: string) => void; lang: string }) {
   const ref    = useRef<HTMLElement>(null)
-  const inView = useInView(ref, { once: true, margin: '-80px' })
+  const inView = useInView(ref, { once: true, margin: '-60px' })
   const clock  = useClock()
-  const [hovered, setHovered] = useState<string | null>(null)
   const setCursor = useCursorStore(s => s.setState)
-  const pt  = lang === 'pt'
-  const days = pt ? DAYS_PT : DAYS_EN
+  const pt = lang === 'pt'
+
+  const today = new Date()
+  const [viewDate,     setViewDate]     = useState(new Date(today.getFullYear(), today.getMonth(), 1))
+  const [selectedDay,  setSelectedDay]  = useState<number | null>(null)
+  const [selectedTime, setSelectedTime] = useState<string | null>(null)
+  const [hoveredDay,   setHoveredDay]   = useState<number | null>(null)
+  const [hoveredTime,  setHoveredTime]  = useState<string | null>(null)
+
+  const year  = viewDate.getFullYear()
+  const month = viewDate.getMonth()
+  const daysInMonth = new Date(year, month + 1, 0).getDate()
+  const firstDow    = new Date(year, month, 1).getDay() // 0=Sun
+
+  // Build grid: fill leading empty cells, then days, pad to multiple of 7
+  const cells: Array<number | null> = Array(firstDow).fill(null)
+  for (let d = 1; d <= daysInMonth; d++) cells.push(d)
+  while (cells.length % 7 !== 0) cells.push(null)
+
+  const getDoW = (d: number) => new Date(year, month, d).getDay()
+  const isWeekend = (d: number) => { const dow = getDoW(d); return dow === 0 || dow === 6 }
+  const isPast    = (d: number) => {
+    const date = new Date(year, month, d)
+    date.setHours(23, 59, 59)
+    return date < today
+  }
+  const isToday   = (d: number) => d === today.getDate() && month === today.getMonth() && year === today.getFullYear()
+  const isAvail   = (d: number) => !isWeekend(d) && !isPast(d)
+
+  function prevMonth() {
+    setViewDate(new Date(year, month - 1, 1))
+    setSelectedDay(null); setSelectedTime(null)
+  }
+  function nextMonth() {
+    setViewDate(new Date(year, month + 1, 1))
+    setSelectedDay(null); setSelectedTime(null)
+  }
+
+  function handleDayClick(d: number) {
+    if (!isAvail(d)) return
+    if (d === selectedDay) { setSelectedDay(null); setSelectedTime(null); return }
+    setSelectedDay(d)
+    setSelectedTime(null)
+  }
+
+  function handleTimeClick(time: string) {
+    if (!selectedDay) return
+    setSelectedTime(time)
+    const date   = new Date(year, month, selectedDay)
+    const dowPt  = ['domingo','segunda-feira','terça-feira','quarta-feira','quinta-feira','sexta-feira','sábado'][date.getDay()]
+    const dowEn  = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][date.getDay()]
+    const label  = pt
+      ? `${dowPt}, ${selectedDay} de ${MONTH_NAMES_PT[month].toLowerCase()} — ${time}`
+      : `${dowEn}, ${MONTH_NAMES_EN[month]} ${selectedDay} — ${time}`
+    onSelect(label)
+  }
+
+  const weeks = []
+  for (let i = 0; i < cells.length; i += 7) weeks.push(cells.slice(i, i + 7))
+
+  const wdays = pt ? WDAYS_PT : WDAYS_EN
 
   return (
-    <section ref={ref} style={{ padding: 'clamp(4rem,8vw,7rem) clamp(1.5rem,5vw,4rem)', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-      {/* Header */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6, ease: E }}
-        style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1.5rem', marginBottom: 'clamp(2rem,4vw,3rem)' }}>
-        <div>
-          <p style={{ fontSize: '0.52rem', fontWeight: 700, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.22)', margin: '0 0 0.65rem', display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ display: 'inline-block', width: 20, height: 1, background: 'rgba(255,255,255,0.15)' }} />
-            {pt ? 'Disponibilidade' : 'Availability'}
-          </p>
-          <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 900, fontSize: 'clamp(1.8rem,4.5vw,3.5rem)', letterSpacing: '-0.048em', lineHeight: 0.95, color: '#fff', margin: 0 }}>
-            {pt ? 'Quando quer\nconversar?' : 'When would you\nlike to talk?'}
-          </h2>
-        </div>
-        {/* Live clock */}
-        <div style={{ textAlign: 'right' }}>
-          <p style={{ fontSize: '0.5rem', fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.2)', margin: '0 0 5px' }}>
-            {pt ? 'Horário em Campinas, SP' : 'Campinas, SP time'}
-          </p>
-          <div style={{ fontFamily: '"SF Mono","Fira Code",monospace', fontSize: 'clamp(1.1rem,2.2vw,1.6rem)', fontWeight: 700, color: '#fff', letterSpacing: '0.06em', display: 'flex', alignItems: 'center', gap: 9, justifyContent: 'flex-end' }}>
-            <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#22c55e', boxShadow: '0 0 10px #22c55e80', flexShrink: 0, animation: 'cpulse 2.2s ease-in-out infinite' }} />
-            {clock}
+    <section ref={ref} style={{ padding: 'clamp(5rem,9vw,8rem) clamp(1.5rem,5vw,4rem)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+      <motion.div
+        initial={{ opacity: 0, y: 24 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.7, ease: E }}
+        style={{ maxWidth: 820, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 'clamp(2rem,4vw,3rem)' }}
+      >
+        {/* Header row */}
+        <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1.25rem' }}>
+          <div>
+            <p style={{ fontSize: '0.52rem', fontWeight: 700, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.22)', margin: '0 0 0.65rem', display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ display: 'inline-block', width: 20, height: 1, background: 'rgba(255,255,255,0.15)' }} />
+              {pt ? 'Disponibilidade' : 'Availability'}
+            </p>
+            <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 900, fontSize: 'clamp(1.8rem,4.5vw,3.5rem)', letterSpacing: '-0.048em', lineHeight: 0.95, color: '#fff', margin: 0 }}>
+              {pt ? 'Quando quer\nconversar?' : 'When would you\nlike to talk?'}
+            </h2>
+          </div>
+          <div style={{ textAlign: 'right' }}>
+            <p style={{ fontSize: '0.5rem', fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.2)', margin: '0 0 5px' }}>
+              {pt ? 'Horário em Campinas, SP' : 'Campinas, SP time'}
+            </p>
+            <div style={{ fontFamily: '"SF Mono","Fira Code",monospace', fontSize: 'clamp(1.1rem,2.2vw,1.6rem)', fontWeight: 700, color: '#fff', letterSpacing: '0.06em', display: 'flex', alignItems: 'center', gap: 9, justifyContent: 'flex-end' }}>
+              <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#22c55e', boxShadow: '0 0 10px #22c55e80', flexShrink: 0, animation: 'cpulse 2.2s ease-in-out infinite' }} />
+              {clock}
+            </div>
           </div>
         </div>
-      </motion.div>
 
-      {/* Grid */}
-      <motion.div initial={{ opacity: 0, y: 24 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.7, ease: E, delay: 0.15 }}
-        style={{ overflowX: 'auto', paddingBottom: '0.5rem' }}>
-        <table style={{ borderCollapse: 'collapse', width: '100%', minWidth: 460 }}>
-          <thead>
-            <tr>
-              <th style={{ width: 60, padding: '0 0 0.9rem', textAlign: 'left' }} />
-              {days.map(d => (
-                <th key={d} style={{ padding: '0 5px 0.9rem', textAlign: 'center', fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.1em', color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase' }}>
-                  {d.slice(0, 3)}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {SLOTS.map((slot, si) => (
-              <tr key={slot}>
-                <td style={{ padding: '4px 12px 4px 0', fontFamily: '"SF Mono","Fira Code",monospace', fontSize: '0.62rem', color: 'rgba(255,255,255,0.26)', whiteSpace: 'nowrap' }}>
-                  {slot}
-                </td>
-                {DAYS_PT.map((day, di) => {
-                  const status = AVAIL[day]?.[slot] ?? 'free'
-                  const isFree = status === 'free'
-                  const key    = `${day}-${slot}`
-                  const isHov  = hovered === key
-                  return (
-                    <td key={day} style={{ padding: '4px 5px', textAlign: 'center' }}>
-                      <motion.button
-                        initial={{ opacity: 0, scale: 0.75 }}
-                        animate={inView ? { opacity: 1, scale: 1 } : {}}
-                        transition={{ duration: 0.35, ease: E, delay: 0.2 + si * 0.035 + di * 0.018 }}
-                        onClick={() => isFree && onSelect(`${DAYS_PT[di]}, ${slot}`)}
-                        onMouseEnter={() => { if (isFree) { setHovered(key); setCursor('pointer') } }}
-                        onMouseLeave={() => { setHovered(null); setCursor('default') }}
-                        disabled={!isFree}
-                        style={{
-                          width: 36, height: 36, borderRadius: 9,
-                          background: isFree ? isHov ? 'rgba(255,255,255,0.14)' : 'rgba(255,255,255,0.055)' : 'rgba(255,255,255,0.018)',
-                          border: `1px solid ${isFree ? isHov ? 'rgba(255,255,255,0.32)' : 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.035)'}`,
-                          cursor: isFree ? 'pointer' : 'not-allowed',
-                          display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                          transition: 'all 0.18s',
-                        }}
-                        title={isFree ? `${pt ? 'Disponível' : 'Available'} — ${DAYS_PT[di]}, ${slot}` : pt ? 'Ocupado' : 'Busy'}
-                      >
-                        {isFree
-                          ? <span style={{ width: 6, height: 6, borderRadius: '50%', background: isHov ? '#4ade80' : 'rgba(255,255,255,0.32)', transition: 'background 0.18s' }} />
-                          : <span style={{ width: 14, height: 1, background: 'rgba(255,255,255,0.09)' }} />}
-                      </motion.button>
-                    </td>
-                  )
-                })}
-              </tr>
+        {/* Calendar card */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6, ease: E, delay: 0.12 }}
+          style={{ background: 'rgba(255,255,255,0.026)', border: '1px solid rgba(255,255,255,0.09)', borderRadius: 20, overflow: 'hidden', boxShadow: '0 32px 80px rgba(0,0,0,0.4)' }}
+        >
+          {/* Month navigation bar */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1.1rem 1.4rem', borderBottom: '1px solid rgba(255,255,255,0.07)', background: 'rgba(255,255,255,0.02)' }}>
+            <button onClick={prevMonth} onMouseEnter={() => setCursor('pointer')} onMouseLeave={() => setCursor('default')}
+              style={{ width: 34, height: 34, borderRadius: 8, border: '1px solid rgba(255,255,255,0.1)', background: 'transparent', color: 'rgba(255,255,255,0.45)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.18s' }}
+              onMouseOver={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.08)'; (e.currentTarget as HTMLElement).style.color = '#fff' }}
+              onMouseOut={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.45)' }}>
+              <ChevronLeft size={15} />
+            </button>
+
+            <AnimatePresence mode="wait">
+              <motion.div key={`${year}-${month}`}
+                initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }}
+                transition={{ duration: 0.22, ease: E }}
+                style={{ textAlign: 'center' }}>
+                <span style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 'clamp(0.9rem,2vw,1.15rem)', letterSpacing: '-0.03em', color: '#fff' }}>
+                  {pt ? MONTH_NAMES_PT[month] : MONTH_NAMES_EN[month]}
+                </span>
+                <span style={{ marginLeft: 8, fontFamily: '"SF Mono",monospace', fontSize: '0.65rem', color: 'rgba(255,255,255,0.28)', fontWeight: 600 }}>
+                  {year}
+                </span>
+              </motion.div>
+            </AnimatePresence>
+
+            <button onClick={nextMonth} onMouseEnter={() => setCursor('pointer')} onMouseLeave={() => setCursor('default')}
+              style={{ width: 34, height: 34, borderRadius: 8, border: '1px solid rgba(255,255,255,0.1)', background: 'transparent', color: 'rgba(255,255,255,0.45)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.18s' }}
+              onMouseOver={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.08)'; (e.currentTarget as HTMLElement).style.color = '#fff' }}
+              onMouseOut={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.45)' }}>
+              <ChevronRight size={15} />
+            </button>
+          </div>
+
+          {/* Weekday headers */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', padding: '0.8rem 1rem 0.4rem', gap: 0 }}>
+            {wdays.map(d => (
+              <div key={d} style={{ textAlign: 'center', fontSize: '0.52rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.22)', paddingBottom: '0.5rem' }}>
+                {d}
+              </div>
             ))}
-          </tbody>
-        </table>
-      </motion.div>
+          </div>
 
-      {/* Legend */}
-      <motion.p initial={{ opacity: 0 }} animate={inView ? { opacity: 1 } : {}} transition={{ delay: 0.55 }}
-        style={{ fontSize: '0.55rem', color: 'rgba(255,255,255,0.18)', marginTop: '1.1rem', letterSpacing: '0.06em' }}>
-        {pt ? '● disponível — clique para pré-preencher o formulário abaixo' : '● available — click to pre-fill the form below'}
-      </motion.p>
+          {/* Calendar grid */}
+          <AnimatePresence mode="wait">
+            <motion.div key={`${year}-${month}`}
+              initial={{ opacity: 0, x: 18 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -18 }}
+              transition={{ duration: 0.28, ease: E }}
+              style={{ padding: '0 1rem 1.2rem', display: 'flex', flexDirection: 'column', gap: 4 }}>
+              {weeks.map((week, wi) => (
+                <div key={wi} style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 4 }}>
+                  {week.map((d, di) => {
+                    if (!d) return <div key={di} />
+                    const avail   = isAvail(d)
+                    const today_  = isToday(d)
+                    const sel     = selectedDay === d
+                    const hov     = hoveredDay === d
+                    return (
+                      <motion.button
+                        key={di}
+                        onClick={() => handleDayClick(d)}
+                        onMouseEnter={() => { if (avail) { setHoveredDay(d); setCursor('pointer') } }}
+                        onMouseLeave={() => { setHoveredDay(null); setCursor('default') }}
+                        disabled={!avail}
+                        whileHover={avail ? { scale: 1.08 } : {}}
+                        whileTap={avail ? { scale: 0.96 } : {}}
+                        transition={{ duration: 0.15 }}
+                        style={{
+                          height: 44, borderRadius: 10, border: `1px solid ${sel ? 'rgba(255,255,255,0.55)' : today_ ? 'rgba(255,255,255,0.35)' : avail ? hov ? 'rgba(255,255,255,0.22)' : 'rgba(255,255,255,0.06)' : 'transparent'}`,
+                          background: sel ? '#fff' : today_ ? 'rgba(255,255,255,0.08)' : avail && hov ? 'rgba(255,255,255,0.07)' : 'transparent',
+                          cursor: avail ? 'pointer' : 'default',
+                          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 3,
+                          transition: 'background 0.18s, border-color 0.18s',
+                          boxShadow: sel ? '0 8px 24px rgba(255,255,255,0.18)' : 'none',
+                        }}
+                      >
+                        <span style={{ fontSize: '0.78rem', fontWeight: sel ? 800 : today_ ? 700 : avail ? 600 : 400, color: sel ? '#0d0d0d' : today_ ? '#fff' : avail ? 'rgba(255,255,255,0.75)' : 'rgba(255,255,255,0.15)', lineHeight: 1, transition: 'color 0.18s' }}>
+                          {d}
+                        </span>
+                        {avail && !sel && (
+                          <span style={{ width: 4, height: 4, borderRadius: '50%', background: today_ ? '#22c55e' : 'rgba(255,255,255,0.25)', transition: 'background 0.18s' }} />
+                        )}
+                      </motion.button>
+                    )
+                  })}
+                </div>
+              ))}
+            </motion.div>
+          </AnimatePresence>
+
+          {/* Time slots — shown when day selected */}
+          <AnimatePresence>
+            {selectedDay && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.35, ease: E }}
+                style={{ overflow: 'hidden', borderTop: '1px solid rgba(255,255,255,0.07)' }}
+              >
+                <div style={{ padding: '1.2rem 1.4rem 1.4rem' }}>
+                  <p style={{ fontSize: '0.52rem', fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.28)', marginBottom: '0.85rem' }}>
+                    {pt
+                      ? `Horários disponíveis — ${selectedDay} de ${MONTH_NAMES_PT[month].slice(0, 3).toLowerCase()}`
+                      : `Available times — ${MONTH_NAMES_EN[month].slice(0, 3)} ${selectedDay}`}
+                  </p>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                    {TIME_SLOTS.map(time => {
+                      const isSel = selectedTime === time
+                      const isHov = hoveredTime === time
+                      return (
+                        <motion.button
+                          key={time}
+                          onClick={() => handleTimeClick(time)}
+                          onMouseEnter={() => { setHoveredTime(time); setCursor('pointer') }}
+                          onMouseLeave={() => { setHoveredTime(null); setCursor('default') }}
+                          whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.96 }}
+                          style={{
+                            padding: '0.5rem 1rem', borderRadius: 8,
+                            border: `1px solid ${isSel ? '#22c55e' : isHov ? 'rgba(255,255,255,0.22)' : 'rgba(255,255,255,0.1)'}`,
+                            background: isSel ? 'rgba(34,197,94,0.12)' : isHov ? 'rgba(255,255,255,0.07)' : 'transparent',
+                            color: isSel ? '#22c55e' : isHov ? '#fff' : 'rgba(255,255,255,0.45)',
+                            fontFamily: '"SF Mono","Fira Code",monospace', fontSize: '0.76rem', fontWeight: 600,
+                            cursor: 'pointer', transition: 'all 0.18s',
+                            boxShadow: isSel ? '0 4px 16px rgba(34,197,94,0.2)' : 'none',
+                          }}
+                        >
+                          {time}
+                          {isSel && <span style={{ marginLeft: 6, fontSize: '0.6rem' }}>✓</span>}
+                        </motion.button>
+                      )
+                    })}
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </motion.div>
+
+        {/* Selected summary */}
+        <AnimatePresence>
+          {selectedTime && selectedDay && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.3, ease: E }}
+              style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '0.75rem 1.1rem', borderRadius: 10, background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.2)' }}
+            >
+              <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#22c55e', boxShadow: '0 0 10px #22c55e60', flexShrink: 0, animation: 'cpulse 2.2s infinite' }} />
+              <span style={{ fontSize: '0.72rem', color: '#4ade80', fontFamily: '"SF Mono","Fira Code",monospace', fontWeight: 600 }}>
+                {pt ? 'Horário selecionado:' : 'Selected slot:'} <span style={{ color: '#fff' }}>{selectedDay} {pt ? MONTH_NAMES_PT[month] : MONTH_NAMES_EN[month]}, {selectedTime}</span>
+              </span>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <p style={{ fontSize: '0.55rem', color: 'rgba(255,255,255,0.18)', letterSpacing: '0.06em', margin: 0 }}>
+          {pt ? '● disponível — clique para selecionar e preencher o formulário abaixo' : '● available — click to select and pre-fill the form below'}
+        </p>
+      </motion.div>
     </section>
   )
 }
@@ -361,12 +492,10 @@ function LivePreview({ values, slot, lang }: { values: FormVals; slot: string; l
         <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#22c55e', animation: 'cpulse 2.2s infinite' }} />
         {pt ? 'prévia da mensagem' : 'message preview'}
       </p>
-
       <div style={{ borderBottom: '1px solid rgba(255,255,255,0.07)', paddingBottom: '0.65rem', marginBottom: '0.65rem' }}>
         <div><span style={{ color: 'rgba(255,255,255,0.25)' }}>Para:  </span><span style={{ color: '#fff' }}>Caio Diniz</span></div>
         {values.name && <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}><span style={{ color: 'rgba(255,255,255,0.25)' }}>De:    </span><span style={{ color: '#fff' }}>{values.name}</span></motion.div>}
       </div>
-
       <div style={{ color: 'rgba(255,255,255,0.5)', whiteSpace: 'pre-wrap', lineHeight: 1.85 }}>
         {!any && <span style={{ color: 'rgba(255,255,255,0.14)', fontStyle: 'italic' }}>{pt ? '// Aguardando...' : '// Waiting...'}</span>}
         {values.name && <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ margin: '0 0 0.4rem', color: 'rgba(255,255,255,0.8)' }}>{pt ? `Oi Caio! Me chamo ${values.name}.` : `Hey Caio! My name is ${values.name}.`}</motion.p>}
@@ -395,7 +524,6 @@ function ChatForm({ slot, lang }: { slot: string; lang: string }) {
   const pt      = lang === 'pt'
   const current = STEPS[step]
 
-  // Build displayed bubbles
   const bubbles: { from: 'caio' | 'user'; text: string }[] = []
   for (let i = 0; i < step; i++) {
     bubbles.push({ from: 'caio', text: pt ? STEPS[i].qPt : STEPS[i].qEn })
@@ -455,7 +583,7 @@ function ChatForm({ slot, lang }: { slot: string; lang: string }) {
   }
 
   return (
-    <section ref={ref} style={{ padding: 'clamp(4rem,8vw,7rem) clamp(1.5rem,5vw,4rem)', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+    <section ref={ref} style={{ padding: 'clamp(4rem,8vw,7rem) clamp(1.5rem,5vw,4rem)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
       <motion.div initial={{ opacity: 0, y: 16 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6, ease: E }}
         style={{ marginBottom: 'clamp(2rem,4vw,3.5rem)' }}>
         <p style={{ fontSize: '0.52rem', fontWeight: 700, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.22)', margin: '0 0 0.65rem', display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -473,10 +601,7 @@ function ChatForm({ slot, lang }: { slot: string; lang: string }) {
       </motion.div>
 
       <div className="chat-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'clamp(2rem,5vw,5rem)', alignItems: 'start' }}>
-
-        {/* LEFT — chat */}
         <motion.div initial={{ opacity: 0, x: -18 }} animate={inView ? { opacity: 1, x: 0 } : {}} transition={{ duration: 0.7, ease: E, delay: 0.1 }}>
-          {/* Bubble scroll area */}
           <div ref={chatRef} style={{ maxHeight: 380, overflowY: 'auto', paddingBottom: '1rem', scrollbarWidth: 'none' }}>
             <AnimatePresence>
               {sent ? (
@@ -497,11 +622,9 @@ function ChatForm({ slot, lang }: { slot: string; lang: string }) {
             </AnimatePresence>
           </div>
 
-          {/* Input area */}
           {!sent && (
             <motion.div key={step} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.28, ease: E }}
               style={{ borderTop: '1px solid rgba(255,255,255,0.07)', paddingTop: '0.9rem', marginTop: '0.4rem' }}>
-
               {current.type === 'options' ? (
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
                   {current.opts?.map(opt => (
@@ -535,7 +658,6 @@ function ChatForm({ slot, lang }: { slot: string; lang: string }) {
                   </button>
                 </div>
               )}
-
               {step > 0 && (
                 <button onClick={() => { setStep(s => s - 1); setInput('') }}
                   style={{ marginTop: '0.6rem', fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.18)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, transition: 'color 0.2s' }}
@@ -548,7 +670,6 @@ function ChatForm({ slot, lang }: { slot: string; lang: string }) {
           )}
         </motion.div>
 
-        {/* RIGHT — live preview */}
         <motion.div className="preview-col" initial={{ opacity: 0, x: 18 }} animate={inView ? { opacity: 1, x: 0 } : {}} transition={{ duration: 0.7, ease: E, delay: 0.2 }}>
           <LivePreview values={values} slot={slot} lang={lang} />
         </motion.div>
@@ -558,7 +679,7 @@ function ChatForm({ slot, lang }: { slot: string; lang: string }) {
 }
 
 /* ═══════════════════════════════════════
-   PAGE
+   PAGE  — new order: Calendar → Form → Terminal
 ═══════════════════════════════════════ */
 export default function ContactPage() {
   const lang = useLanguageStore(s => s.lang)
@@ -574,11 +695,11 @@ export default function ContactPage() {
 
   return (
     <main style={{ background: '#0d0d0d', minHeight: '100vh', overflowX: 'hidden' }}>
-      <TerminalSection lang={lang} />
       <AvailabilitySection onSelect={handleSlot} lang={lang} />
       <div ref={formRef}>
         <ChatForm slot={slot} lang={lang} />
       </div>
+      <TerminalSection lang={lang} />
       <style>{`
         @keyframes tblink  { 0%,100%{opacity:1} 50%{opacity:0} }
         @keyframes cpulse  { 0%,100%{box-shadow:0 0 0 0 rgba(34,197,94,.5)} 50%{box-shadow:0 0 0 7px rgba(34,197,94,0)} }
