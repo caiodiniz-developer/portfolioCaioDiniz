@@ -21,8 +21,10 @@ function ProjectCard({ project, index, aspectRatio }: {
 
   return (
     <article className="fp-card group">
-      <Link
-        to={`/projects/${project.slug}`}
+      <a
+        href={project.liveUrl}
+        target="_blank"
+        rel="noopener noreferrer"
         onMouseEnter={() => { setCursor('view'); setLabel('Ver') }}
         onMouseLeave={() => { setCursor('default'); setLabel('') }}
         className="block"
@@ -87,7 +89,7 @@ function ProjectCard({ project, index, aspectRatio }: {
           </div>
           <p className="text-[0.78rem] text-white/32 leading-relaxed line-clamp-2">{project.description}</p>
         </div>
-      </Link>
+      </a>
     </article>
   )
 }
