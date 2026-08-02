@@ -15,16 +15,14 @@ const E: [number, number, number, number] = [0.16, 1, 0.3, 1]
 interface Entry { id: string; name: string; message: string; created_at: string }
 
 function sbFetch(path: string, opts?: RequestInit) {
-  return fetch(`${SB_URL}/rest/v1/${path}`, {
-    ...opts,
-    headers: {
-      apikey:        SB_KEY ?? '',
-      Authorization: `Bearer ${SB_KEY ?? ''}`,
-      'Content-Type': 'application/json',
-      Prefer:        opts?.method === 'POST' ? 'return=representation' : '',
-      ...(opts?.headers ?? {}),
-    },
-  })
+  const headers: Record<string, string> = {
+    apikey:         SB_KEY ?? '',
+    Authorization:  `Bearer ${SB_KEY ?? ''}`,
+    'Content-Type': 'application/json',
+    ...((opts?.headers as Record<string, string>) ?? {}),
+  }
+  if (opts?.method === 'POST') headers.Prefer = 'return=representation'
+  return fetch(`${SB_URL}/rest/v1/${path}`, { ...opts, headers })
 }
 
 function avatarColor(name: string) {
@@ -77,7 +75,7 @@ export default function GuestbookPage() {
     if (!CONFIGURED) return
     setLoading(true)
     sbFetch(`${TABLE}?select=*&order=created_at.desc&limit=200`)
-      .then(r => r.json())
+      .then(r => { if (!r.ok) throw new Error(`${r.status}`); return r.json() })
       .then((data: Entry[]) => setEntries(Array.isArray(data) ? data : []))
       .catch(() => setError(gb.errorLoad))
       .finally(() => setLoading(false))
