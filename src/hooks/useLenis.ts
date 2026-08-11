@@ -1,7 +1,8 @@
-import { useEffect, useRef } from 'react'
+import { useEffect } from 'react'
 import Lenis from 'lenis'
 import gsap from 'gsap'
 import ScrollTrigger from 'gsap/ScrollTrigger'
+import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
 
 let lenisInstance: Lenis | null = null
 
@@ -10,9 +11,12 @@ export function getLenis(): Lenis | null {
 }
 
 export function useLenis() {
-  const rafRef = useRef<number | null>(null)
+  const prefersReducedMotion = usePrefersReducedMotion()
 
   useEffect(() => {
+    // Respect reduced-motion preference — skip Lenis entirely
+    if (prefersReducedMotion) return
+
     gsap.registerPlugin(ScrollTrigger)
 
     const lenis = new Lenis({
@@ -24,21 +28,20 @@ export function useLenis() {
 
     lenisInstance = lenis
 
+    // Keep ScrollTrigger in sync with Lenis scroll position
     lenis.on('scroll', ScrollTrigger.update)
 
-    gsap.ticker.add((time) => {
-      lenis.raf(time * 1000)
-    })
-
-    gsap.ticker.lagSmoothing(0)
+    // Drive Lenis from GSAP's ticker — single unified RAF loop
+    const tickerFn = (time: number) => {
+      lenis.raf(time * 1000) // GSAP passes seconds; Lenis expects ms
+    }
+    gsap.ticker.add(tickerFn)
+    gsap.ticker.lagSmoothing(0) // prevent large jumps after tab switches
 
     return () => {
-      if (rafRef.current) cancelAnimationFrame(rafRef.current)
-      gsap.ticker.remove(() => {})
+      gsap.ticker.remove(tickerFn)
       lenis.destroy()
       lenisInstance = null
     }
-  }, [])
-
-  return lenisInstance
+  }, [prefersReducedMotion])
 }

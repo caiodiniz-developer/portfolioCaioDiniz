@@ -3,11 +3,12 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useLocation } from 'react-router-dom'
 
 const ROUTE_NAMES: Record<string, string> = {
-  '/':          'home.tsx',
-  '/about':     'about.tsx',
-  '/projects':  'projects.tsx',
-  '/services':  'services.tsx',
-  '/contact':   'contact.tsx',
+  '/':           'home.tsx',
+  '/about':      'about.tsx',
+  '/projects':   'projects.tsx',
+  '/services':   'services.tsx',
+  '/contact':    'contact.tsx',
+  '/guestbook':  'guestbook.tsx',
 }
 
 function IdeTab({ pathname }: { pathname: string }) {
@@ -18,7 +19,9 @@ function IdeTab({ pathname }: { pathname: string }) {
     return () => clearTimeout(t)
   }, [])
 
-  const name = ROUTE_NAMES[pathname] ?? `${pathname.split('/').filter(Boolean).pop() ?? 'page'}.tsx`
+  const name =
+    ROUTE_NAMES[pathname] ??
+    `${pathname.split('/').filter(Boolean).pop() ?? 'page'}.tsx`
 
   return (
     <AnimatePresence>
@@ -30,28 +33,50 @@ function IdeTab({ pathname }: { pathname: string }) {
           exit={{ opacity: 0, y: -6 }}
           transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
           style={{
-            position: 'fixed', top: 0, left: 0, right: 0, zIndex: 9998,
-            pointerEvents: 'none',
-            display: 'flex', alignItems: 'center', gap: 7,
-            padding: '0 clamp(1rem,3vw,2.5rem)',
-            height: 32,
-            background: 'rgba(8,8,10,0.96)',
-            borderBottom: '1px solid rgba(255,255,255,0.05)',
+            position:       'fixed',
+            top:            0,
+            left:           0,
+            right:          0,
+            zIndex:         9998,
+            pointerEvents:  'none',
+            display:        'flex',
+            alignItems:     'center',
+            gap:            7,
+            padding:        '0 clamp(1rem,3vw,2.5rem)',
+            height:         32,
+            background:     'rgba(8,8,10,0.96)',
+            borderBottom:   '1px solid rgba(255,255,255,0.05)',
             backdropFilter: 'blur(12px)',
           }}
         >
-          <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#22c55e', flexShrink: 0 }} />
-          <span style={{
-            fontFamily: '"JetBrains Mono","Fira Code",monospace',
-            fontSize: '0.62rem', color: 'rgba(255,255,255,0.3)', letterSpacing: '0.04em',
-          }}>
+          <span
+            style={{
+              width:      7,
+              height:     7,
+              borderRadius: '50%',
+              background: '#22c55e',
+              flexShrink: 0,
+            }}
+          />
+          <span
+            style={{
+              fontFamily:    '"JetBrains Mono","Fira Code",monospace',
+              fontSize:      '0.62rem',
+              color:         'rgba(255,255,255,0.3)',
+              letterSpacing: '0.04em',
+            }}
+          >
             {name}
           </span>
-          <span style={{
-            marginLeft: 'auto',
-            fontFamily: '"JetBrains Mono","Fira Code",monospace',
-            fontSize: '0.58rem', color: 'rgba(255,255,255,0.12)', letterSpacing: '0.04em',
-          }}>
+          <span
+            style={{
+              marginLeft:    'auto',
+              fontFamily:    '"JetBrains Mono","Fira Code",monospace',
+              fontSize:      '0.58rem',
+              color:         'rgba(255,255,255,0.12)',
+              letterSpacing: '0.04em',
+            }}
+          >
             TypeScript React
           </span>
         </motion.div>
@@ -60,18 +85,46 @@ function IdeTab({ pathname }: { pathname: string }) {
   )
 }
 
+/**
+ * Full-screen wipe transition:
+ *  - Page content fades + slides in/out
+ *  - A solid overlay panel wipes from bottom-to-top on enter,
+ *    then collapses upward once the content is ready
+ */
 export default function PageTransition({ children }: { children: ReactNode }) {
   const { pathname } = useLocation()
 
   return (
     <>
       <IdeTab pathname={pathname} />
+
       <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -16 }}
-        transition={{ duration: 0.42, ease: [0.16, 1, 0.3, 1] }}
+        key={pathname}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.28, ease: 'easeOut' }}
+        style={{ position: 'relative' }}
       >
+        {/* Wipe panel — slides DOWN from top to reveal page on enter */}
+        <motion.div
+          initial={{ scaleY: 1, transformOrigin: 'top' }}
+          animate={{ scaleY: 0, transformOrigin: 'top' }}
+          transition={{
+            duration: 0.72,
+            ease:     [0.87, 0, 0.13, 1], // --ease-in-out-expo
+            delay:    0.04,
+          }}
+          aria-hidden
+          style={{
+            position:      'fixed',
+            inset:         0,
+            zIndex:        9995,
+            background:    '#0a0a0a',
+            pointerEvents: 'none',
+          }}
+        />
+
         {children}
       </motion.div>
     </>

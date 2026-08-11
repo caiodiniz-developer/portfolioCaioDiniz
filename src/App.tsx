@@ -9,6 +9,7 @@ import CurrentlyWidget from "./components/ui/CurrentlyWidget";
 import ReturnVisitor from "./components/animations/ReturnVisitor";
 import PresentationMode from "./components/animations/PresentationMode";
 import ClickSound from "./components/animations/ClickSound";
+import SectionCounter from "./components/animations/SectionCounter";
 
 export default function App() {
   useEffect(() => {
@@ -56,6 +57,7 @@ export default function App() {
       <ReturnVisitor />
       <PresentationMode />
       <ClickSound />
+      <SectionCounter />
       <RouterProvider router={router} />
     </>
   );

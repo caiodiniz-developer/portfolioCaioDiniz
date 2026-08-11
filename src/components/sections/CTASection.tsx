@@ -3,47 +3,93 @@ import { Link } from "react-router-dom";
 import { ArrowUpRight } from "lucide-react";
 import gsap from "gsap";
 import ScrollTrigger from "gsap/ScrollTrigger";
+import SplitType from "split-type";
 import { useT } from "@/hooks/useTranslation";
 import { useLanguageStore } from "@/store/useLanguageStore";
 import { useCursorStore } from "@/store/useCursorStore";
+import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 import Magnetic from "@/components/animations/Magnetic";
 import { CubertoBtn } from "./Hero";
 
 gsap.registerPlugin(ScrollTrigger);
 
 export default function CTASection() {
-  const t = useT();
+  const t    = useT();
   const lang = useLanguageStore((s) => s.lang);
   const setCursor = useCursorStore((s) => s.setState);
-  const ref = useRef<HTMLElement>(null);
+  const ref  = useRef<HTMLElement>(null);
+  const prefersReducedMotion = usePrefersReducedMotion();
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      gsap.set(".cta-tag", { y: 14, opacity: 0 });
-      gsap.set(".cta-h", { y: "105%" });
-      gsap.set(".cta-sub", { y: 22, opacity: 0 });
+      if (prefersReducedMotion) {
+        // Skip animation, show everything immediately
+        gsap.set(".cta-tag, .cta-h, .cta-sub, .cta-btns", {
+          clearProps: "all",
+        });
+        return;
+      }
+
+      // ── 1. Full-section clip-path reveal (the signature move)
+      gsap.fromTo(
+        ref.current!,
+        { clipPath: "inset(100% 0 0 0)" },
+        {
+          clipPath:  "inset(0% 0 0 0)",
+          duration:  1.1,
+          ease:      "power4.out",
+          scrollTrigger: {
+            trigger: ref.current!,
+            start:   "top 85%",
+            once:    true,
+          },
+        },
+      );
+
+      // ── 2. Headline — SplitType word-by-word reveal
+      const headings = ref.current!.querySelectorAll<HTMLElement>(".cta-h");
+      headings.forEach((h) => {
+        const split = new SplitType(h, { types: "words" });
+        gsap.from(split.words!, {
+          y:        "120%",
+          opacity:  0,
+          duration: 0.75,
+          ease:     "power3.out",
+          stagger:  0.06,
+          scrollTrigger: {
+            trigger: h,
+            start:   "top 90%",
+            once:    true,
+          },
+        });
+      });
+
+      // ── 3. Supporting elements
+      gsap.set(".cta-tag",  { y: 14, opacity: 0 });
+      gsap.set(".cta-sub",  { y: 22, opacity: 0 });
       gsap.set(".cta-btns", { y: 22, opacity: 0 });
 
       const tl = gsap.timeline({
         scrollTrigger: { trigger: ref.current!, start: "top 72%", once: true },
         defaults: { ease: "power3.out" },
       });
-      tl.to(".cta-tag", { y: 0, opacity: 1, duration: 0.55 }, 0);
-      tl.to(".cta-h", { y: "0%", duration: 0.95 }, 0.15);
-      tl.to(".cta-sub", { y: 0, opacity: 1, duration: 0.7 }, 0.5);
-      tl.to(".cta-btns", { y: 0, opacity: 1, duration: 0.65 }, 0.62);
+      tl.to(".cta-tag",  { y: 0, opacity: 1, duration: 0.55 }, 0.1);
+      tl.to(".cta-sub",  { y: 0, opacity: 1, duration: 0.7  }, 0.45);
+      tl.to(".cta-btns", { y: 0, opacity: 1, duration: 0.65 }, 0.58);
     }, ref);
 
     return () => ctx.revert();
-  }, []);
+  }, [prefersReducedMotion, lang]);
 
   const HL: React.CSSProperties = {
-    fontFamily: "Syne, sans-serif",
-    fontSize: "clamp(3rem, 9vw, 8rem)",
+    fontFamily:    "Syne, sans-serif",
+    fontSize:      "clamp(3rem, 9vw, 8rem)",
     letterSpacing: "-0.055em",
-    lineHeight: "0.88",
-    fontWeight: 900,
-    color: "#ffffff",
+    lineHeight:    "0.88",
+    fontWeight:    900,
+    color:         "#ffffff",
+    overflow:      "hidden",
+    display:       "block",
   };
 
   return (
@@ -51,11 +97,11 @@ export default function CTASection() {
       ref={ref}
       className="relative overflow-hidden"
       style={{
-        background: "#0d0d0d",
-        borderTop: "1px solid rgba(255,255,255,0.06)",
-        minHeight: "70vh",
-        display: "flex",
-        alignItems: "center",
+        background:  "#0d0d0d",
+        borderTop:   "1px solid rgba(255,255,255,0.06)",
+        minHeight:   "70vh",
+        display:     "flex",
+        alignItems:  "center",
       }}
     >
       {/* Video background */}
@@ -83,7 +129,7 @@ export default function CTASection() {
           {t.contact.badge}
         </span>
 
-        {/* Big headline — no "Have an idea?" */}
+        {/* Overflow-hidden wrapper per line so SplitType words clip correctly */}
         <div className="overflow-hidden mb-3">
           <h2 className="cta-h" style={HL}>
             {lang === "en" ? "Let's work" : "Vamos"}

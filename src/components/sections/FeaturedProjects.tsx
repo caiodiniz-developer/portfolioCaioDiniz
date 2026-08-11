@@ -3,9 +3,12 @@ import { Link } from 'react-router-dom'
 import { ArrowUpRight } from 'lucide-react'
 import gsap from 'gsap'
 import ScrollTrigger from 'gsap/ScrollTrigger'
+import SplitType from 'split-type'
 import { useT } from '@/hooks/useTranslation'
+import { useLanguageStore } from '@/store/useLanguageStore'
 import { projects } from '@/data/projects'
 import { useCursorStore } from '@/store/useCursorStore'
+import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
 import { CubertoBtn } from './Hero'
 
 gsap.registerPlugin(ScrollTrigger)
@@ -96,24 +99,50 @@ function ProjectCard({ project, index, aspectRatio }: {
 
 export default function FeaturedProjects() {
   const t         = useT()
+  const lang      = useLanguageStore((s) => s.lang)
   const ref       = useRef<HTMLElement>(null)
   const setCursor = useCursorStore((s) => s.setState)
+  const prefersReducedMotion = usePrefersReducedMotion()
 
   /* Alternate aspect ratios create visual rhythm */
   const aspectRatios = ['3/4', '4/3', '3/4', '4/3']
 
-  const leftCol  = projects.filter((_, i) => i % 2 === 0)  /* 0,2,4,6 */
-  const rightCol = projects.filter((_, i) => i % 2 === 1)  /* 1,3,5,7 */
+  const leftCol  = projects.filter((_, i) => i % 2 === 0)
+  const rightCol = projects.filter((_, i) => i % 2 === 1)
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      gsap.set('.fp-hdr', { y: 24, opacity: 0 })
-      gsap.to('.fp-hdr', {
-        y: 0, opacity: 1, duration: 0.75, ease: 'power3.out',
+      if (prefersReducedMotion) {
+        gsap.set('.fp-hdr, .fp-card', { clearProps: 'all' })
+        return
+      }
+
+      // ── Section heading: word-by-word SplitType reveal
+      const headline = ref.current!.querySelector<HTMLElement>('.fp-headline')
+      if (headline) {
+        const split = new SplitType(headline, { types: 'words' })
+        gsap.from(split.words!, {
+          y:        '115%',
+          opacity:  0,
+          duration: 0.8,
+          ease:     'power3.out',
+          stagger:  0.055,
+          scrollTrigger: {
+            trigger: ref.current!,
+            start:   'top 80%',
+            once:    true,
+          },
+        })
+      }
+
+      // ── Badge fade-in
+      gsap.set('.fp-hdr-badge', { y: 18, opacity: 0 })
+      gsap.to('.fp-hdr-badge', {
+        y: 0, opacity: 1, duration: 0.65, ease: 'power3.out',
         scrollTrigger: { trigger: ref.current!, start: 'top 82%', once: true },
       })
 
-      /* Staggered entrance for each card */
+      /* ── Staggered wipe entrance for each card */
       ref.current!.querySelectorAll<HTMLElement>('.fp-card').forEach((card) => {
         const wipe = card.querySelector<HTMLElement>('.fp-wipe')
         const img  = card.querySelector<HTMLElement>('.fp-img')
@@ -131,18 +160,23 @@ export default function FeaturedProjects() {
         if (img)  tl.to(img,  { scale: 1, duration: 1.3, ease: 'power3.out' }, 0)
         if (text) tl.to(text, { y: 0, opacity: 1, duration: 0.6, ease: 'power3.out' }, 0.5)
 
-        /* Scroll parallax */
+        /* Scroll parallax on image */
         if (img) {
           gsap.to(img, {
             yPercent: -7, ease: 'none',
-            scrollTrigger: { trigger: card, start: 'top bottom', end: 'bottom top', scrub: 1.2 },
+            scrollTrigger: {
+              trigger: card,
+              start:   'top bottom',
+              end:     'bottom top',
+              scrub:   1.2,
+            },
           })
         }
       })
     }, ref)
 
     return () => ctx.revert()
-  }, [])
+  }, [prefersReducedMotion, lang])
 
   return (
     <section
@@ -154,16 +188,18 @@ export default function FeaturedProjects() {
         {/* Header */}
         <div className="fp-hdr flex items-end justify-between mb-16 gap-6">
           <div className="flex flex-col gap-4">
-            <span className="inline-flex items-center gap-3 text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-white/30">
+            <span className="fp-hdr-badge inline-flex items-center gap-3 text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-white/30">
               <span className="w-5 h-px bg-white/15" />
               {t.projects.badge}
             </span>
-            <h2
-              className="font-black text-white"
-              style={{ fontFamily: 'Syne, sans-serif', fontSize: 'clamp(2rem, 4vw, 3.5rem)', letterSpacing: '-0.04em', lineHeight: '0.95' }}
-            >
-              {t.projects.headline}
-            </h2>
+            <div style={{ overflow: 'hidden' }}>
+              <h2
+                className="fp-headline font-black text-white"
+                style={{ fontFamily: 'Syne, sans-serif', fontSize: 'clamp(2rem, 4vw, 3.5rem)', letterSpacing: '-0.04em', lineHeight: '0.95', display: 'block' }}
+              >
+                {t.projects.headline}
+              </h2>
+            </div>
           </div>
           <Link
             to="/projects"
