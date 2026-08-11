@@ -82,6 +82,7 @@ export function useLenis() {
     // Scan runs once DOM has settled after route mount
     const scanHandle = setTimeout(() => {
       document.querySelectorAll('[data-sr]').forEach(el => io.observe(el))
+      ScrollTrigger.refresh()
     }, 120)
 
     return () => {

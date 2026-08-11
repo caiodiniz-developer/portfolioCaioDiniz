@@ -56,9 +56,10 @@ export default function Footer() {
           <div className="flex flex-col gap-3">
             <Link
               to="/"
-              className="font-black text-white text-sm tracking-[-0.03em] select-none"
+              className="inline-flex items-center gap-2.5 select-none"
             >
-              Caio Diniz
+              <img src="/icon.svg" alt="Caio Diniz" className="w-6 h-auto" style={{ filter: isGuestbook ? 'brightness(1.4)' : 'brightness(0.55)' }} />
+              <span className="font-black text-white text-sm tracking-[-0.03em]">Caio Diniz</span>
             </Link>
             <p className={isGuestbook ? 'text-[0.6875rem] text-white/40 tracking-wide' : 'text-[0.6875rem] text-white/20 tracking-wide'}>
               {t.footer.tagline}
