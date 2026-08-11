@@ -46,16 +46,15 @@ export default function CTASection() {
         },
       );
 
-      // ── 2. Headline — SplitType word-by-word reveal
+      // ── 2. Headline — char-by-char reveal (clip from below)
       const headings = ref.current!.querySelectorAll<HTMLElement>(".cta-h");
       headings.forEach((h) => {
-        const split = new SplitType(h, { types: "words" });
-        gsap.from(split.words!, {
-          y:        "120%",
-          opacity:  0,
-          duration: 0.75,
+        const split = new SplitType(h, { types: "chars" });
+        gsap.from(split.chars!, {
+          yPercent: 110,
+          duration: 0.85,
           ease:     "power3.out",
-          stagger:  0.06,
+          stagger:  0.018,
           scrollTrigger: {
             trigger: h,
             start:   "top 90%",

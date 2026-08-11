@@ -1,5 +1,10 @@
 import { useRef, useEffect, useState } from 'react'
+import gsap from 'gsap'
+import ScrollTrigger from 'gsap/ScrollTrigger'
+import SplitType from 'split-type'
 import { useLanguageStore } from '@/store/useLanguageStore'
+
+gsap.registerPlugin(ScrollTrigger)
 
 const DEV = 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons'
 
@@ -134,9 +139,41 @@ function Track() {
 
 export default function StackCarousel() {
   const lang = useLanguageStore((s) => s.lang)
+  const ref  = useRef<HTMLElement>(null)
+
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      const badge = ref.current!.querySelector<HTMLElement>('.sc-badge')
+      if (badge) {
+        gsap.set(badge, { y: 18, opacity: 0 })
+        gsap.to(badge, {
+          y: 0, opacity: 1, duration: 0.6, ease: 'power3.out',
+          scrollTrigger: { trigger: ref.current!, start: 'top 85%', once: true },
+        })
+      }
+
+      const h2El = ref.current!.querySelector<HTMLElement>('.sc-heading')
+      if (h2El) {
+        gsap.set(h2El, { overflow: 'hidden' })
+        const split = new SplitType(h2El, { types: 'words' })
+        gsap.from(split.words!, {
+          y: '115%',
+          opacity: 0,
+          duration: 0.8,
+          ease: 'power3.out',
+          stagger: 0.06,
+          onComplete: () => gsap.set(h2El, { clearProps: 'overflow' }),
+          scrollTrigger: { trigger: ref.current!, start: 'top 80%', once: true },
+        })
+      }
+    }, ref)
+
+    return () => ctx.revert()
+  }, [lang])
 
   return (
     <section
+      ref={ref}
       style={{
         background:   '#111111',
         borderTop:    '1px solid rgba(255,255,255,0.06)',
@@ -147,13 +184,12 @@ export default function StackCarousel() {
       {/* Header */}
       <div className="container-custom pt-16 pb-4">
         <div className="flex flex-col gap-4">
-          <span data-sr className="inline-flex items-center gap-3 text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-white/30">
+          <span className="sc-badge inline-flex items-center gap-3 text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-white/30">
             <span className="w-5 h-px bg-white/15" />
             {lang === 'en' ? 'Tech stack' : 'Tecnologias'}
           </span>
           <h2
-            data-sr data-sr-d="1"
-            className="font-black text-white"
+            className="sc-heading font-black text-white"
             style={{
               fontFamily:    'Syne, sans-serif',
               fontSize:      'clamp(1.8rem, 3.5vw, 3rem)',

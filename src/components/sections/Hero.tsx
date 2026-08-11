@@ -10,6 +10,7 @@ import { useLanguageStore } from "@/store/useLanguageStore";
 import { useCursorStore } from "@/store/useCursorStore";
 import Magnetic from "@/components/animations/Magnetic";
 import PaintReveal from "@/components/animations/PaintReveal";
+import { projects } from "@/data/projects";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -229,6 +230,20 @@ export default function Hero() {
           scrub: 1.6,
         },
       });
+
+      const numEl = ref.current!.querySelector<HTMLElement>(".hero-proj-num");
+      if (numEl) {
+        const obj = { val: 0 };
+        gsap.to(obj, {
+          val: projects.length,
+          duration: 1.4,
+          ease: "power2.out",
+          delay: 1.0,
+          onUpdate() {
+            numEl.textContent = String(Math.round(obj.val));
+          },
+        });
+      }
     }, ref);
     return () => ctx.revert();
   }, []);
@@ -324,6 +339,21 @@ export default function Hero() {
               </span>
             </div>
             <DevUptime lang={lang} />
+            <span
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                fontFamily: '"JetBrains Mono","Fira Code",monospace',
+                fontSize: "0.58rem",
+                color: "rgba(255,255,255,0.18)",
+                letterSpacing: "0.04em",
+              }}
+            >
+              <span style={{ color: "rgba(255,255,255,0.1)" }}>$</span>
+              {`count ./projects → `}
+              <span className="hero-proj-num">0</span>
+            </span>
           </div>
 
           {/* Headline — smooth lang crossfade, GSAP entrance only on mount */}

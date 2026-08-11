@@ -1,9 +1,14 @@
+import { useRef, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { Github, Linkedin } from 'lucide-react'
+import gsap from 'gsap'
+import ScrollTrigger from 'gsap/ScrollTrigger'
 import { useT } from '@/hooks/useTranslation'
 import { NAV_LINKS, SITE } from '@/lib/constants'
 import { useCursorStore } from '@/store/useCursorStore'
 import { usePresentationStore } from '@/store/usePresentationStore'
+
+gsap.registerPlugin(ScrollTrigger)
 
 function TikTokIcon({ size = 16 }: { size?: number }) {
   return (
@@ -26,6 +31,26 @@ export default function Footer() {
   const { pathname} = useLocation()
   const year        = new Date().getFullYear()
   const isGuestbook = pathname === '/guestbook'
+  const footerRef   = useRef<HTMLElement>(null)
+  const lineRef     = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!lineRef.current || !footerRef.current) return
+    gsap.set(lineRef.current, { scaleX: 0, transformOrigin: 'left center' })
+    gsap.to(lineRef.current, {
+      scaleX: 1,
+      duration: 1.2,
+      ease: 'power3.inOut',
+      scrollTrigger: {
+        trigger: footerRef.current,
+        start: 'top 92%',
+        once: true,
+      },
+    })
+    return () => ScrollTrigger.getAll().forEach((t) => {
+      if (t.trigger === footerRef.current) t.kill()
+    })
+  }, [])
 
   if (presenting) return null
 
@@ -38,18 +63,31 @@ export default function Footer() {
   }
 
   return (
-    <footer style={isGuestbook ? {
-      position:        'relative',
-      zIndex:          3,
-      background:      'rgba(8,8,8,0.75)',
-      backdropFilter:  'blur(20px)',
-      WebkitBackdropFilter: 'blur(20px)',
-      borderTop:       '1px solid rgba(255,255,255,0.18)',
-      boxShadow:       '0 -1px 40px rgba(0,0,0,0.6)',
-    } : {
-      background: '#080808',
-      borderTop:  '1px solid rgba(255,255,255,0.06)',
-    }}>
+    <footer
+      ref={footerRef}
+      style={isGuestbook ? {
+        position:        'relative',
+        zIndex:          3,
+        background:      'rgba(8,8,8,0.75)',
+        backdropFilter:  'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)',
+        borderTop:       '1px solid rgba(255,255,255,0.18)',
+        boxShadow:       '0 -1px 40px rgba(0,0,0,0.6)',
+      } : {
+        background: '#080808',
+        borderTop:  '1px solid rgba(255,255,255,0.06)',
+      }}
+    >
+      <div
+        ref={lineRef}
+        style={{
+          height:     '1px',
+          background: isGuestbook
+            ? 'rgba(255,255,255,0.22)'
+            : 'rgba(255,255,255,0.14)',
+          willChange: 'transform',
+        }}
+      />
       <div className="container-custom py-8">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
           {/* Left */}

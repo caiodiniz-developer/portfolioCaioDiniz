@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { ArrowUpRight } from 'lucide-react'
 import gsap from 'gsap'
 import ScrollTrigger from 'gsap/ScrollTrigger'
+import SplitType from 'split-type'
 import { useT } from '@/hooks/useTranslation'
 import { useLanguageStore } from '@/store/useLanguageStore'
 import { services } from '@/data/services'
@@ -121,7 +122,7 @@ export default function Services() {
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      gsap.set(['.svc-label', '.svc-h2'], { y: 22, opacity: 0 })
+      gsap.set('.svc-label',  { y: 22, opacity: 0 })
       gsap.set('.svc-accent', { y: 18, opacity: 0 })
 
       const tl = gsap.timeline({
@@ -129,8 +130,24 @@ export default function Services() {
         defaults: { ease: 'power3.out' },
       })
       tl.to('.svc-label',  { y: 0, opacity: 1, duration: 0.55 }, 0)
-      tl.to('.svc-h2',     { y: 0, opacity: 1, duration: 0.7  }, 0.1)
       tl.to('.svc-accent', { y: 0, opacity: 1, duration: 0.65 }, 0.25)
+
+      const h2El = ref.current!.querySelector<HTMLElement>('.svc-h2')
+      if (h2El) {
+        const split = new SplitType(h2El, { types: 'lines,chars', lineClass: 'svc-char-line' })
+        split.lines?.forEach((line) => {
+          const el = line as HTMLElement
+          el.style.overflow = 'hidden'
+          el.style.paddingBottom = '0.12em'
+        })
+        gsap.from(split.chars!, {
+          yPercent: 110,
+          duration: 0.75,
+          ease: 'power3.out',
+          stagger: 0.012,
+          scrollTrigger: { trigger: h2El, start: 'top 80%', once: true },
+        })
+      }
 
       /* Card entrance: wipe + scale like FeaturedProjects */
       ref.current!.querySelectorAll<HTMLElement>('.svc-card').forEach((card) => {

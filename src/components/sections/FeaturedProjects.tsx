@@ -14,16 +14,48 @@ import { CubertoBtn } from './Hero'
 gsap.registerPlugin(ScrollTrigger)
 
 /* ── Single project card ── */
-function ProjectCard({ project, index, aspectRatio }: {
+function ProjectCard({ project, index, aspectRatio, disableTilt }: {
   project: typeof projects[0]
   index: number
   aspectRatio: string
+  disableTilt?: boolean
 }) {
   const setCursor = useCursorStore((s) => s.setState)
   const setLabel  = useCursorStore((s) => s.setLabel)
+  const cardRef   = useRef<HTMLElement>(null)
+
+  function handleMouseMove(e: React.MouseEvent<HTMLElement>) {
+    if (disableTilt || !cardRef.current) return
+    const rect = cardRef.current.getBoundingClientRect()
+    const dx = (e.clientX - (rect.left + rect.width  / 2)) / (rect.width  / 2)
+    const dy = (e.clientY - (rect.top  + rect.height / 2)) / (rect.height / 2)
+    gsap.to(cardRef.current, {
+      rotateX: -dy * 5,
+      rotateY:  dx * 5,
+      transformPerspective: 900,
+      duration: 0.35,
+      ease: 'power2.out',
+    })
+  }
+
+  function handleMouseLeave() {
+    if (disableTilt || !cardRef.current) return
+    gsap.to(cardRef.current, {
+      rotateX: 0,
+      rotateY: 0,
+      duration: 0.65,
+      ease: 'power3.out',
+    })
+  }
 
   return (
-    <article className="fp-card group">
+    <article
+      ref={cardRef}
+      className="fp-card group"
+      style={{ transformStyle: 'preserve-3d' }}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+    >
       <a
         href={project.liveUrl}
         target="_blank"
@@ -223,6 +255,7 @@ export default function FeaturedProjects() {
                 project={p}
                 index={i * 2}
                 aspectRatio={aspectRatios[i % aspectRatios.length]}
+                disableTilt={prefersReducedMotion}
               />
             ))}
           </div>
@@ -235,6 +268,7 @@ export default function FeaturedProjects() {
                 project={p}
                 index={i * 2 + 1}
                 aspectRatio={aspectRatios[(i + 1) % aspectRatios.length]}
+                disableTilt={prefersReducedMotion}
               />
             ))}
           </div>
@@ -243,7 +277,7 @@ export default function FeaturedProjects() {
         {/* Mobile: single column */}
         <div className="flex sm:hidden flex-col gap-10">
           {projects.map((p, i) => (
-            <ProjectCard key={p.id} project={p} index={i} aspectRatio="4/3" />
+            <ProjectCard key={p.id} project={p} index={i} aspectRatio="4/3" disableTilt />
           ))}
         </div>
 

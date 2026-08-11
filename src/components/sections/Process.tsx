@@ -39,6 +39,21 @@ export default function Process() {
           scrollTrigger: { trigger: line, start: 'top 85%', once: true },
         })
       })
+
+      const numEls = ref.current!.querySelectorAll<HTMLElement>('.prc-num')
+      numEls.forEach((el, i) => {
+        const target = i + 1
+        const obj = { val: 0 }
+        gsap.to(obj, {
+          val: target,
+          duration: 0.8,
+          ease: 'power2.out',
+          onUpdate() {
+            el.textContent = String(Math.round(obj.val)).padStart(2, '0')
+          },
+          scrollTrigger: { trigger: el, start: 'top 85%', once: true },
+        })
+      })
     }, ref)
 
     return () => ctx.revert()
@@ -94,7 +109,7 @@ export default function Process() {
                   <div className="py-5 grid grid-cols-[2rem_1fr_auto] md:grid-cols-[3rem_1fr_auto] gap-3 md:gap-10 items-start">
                     {/* Number */}
                     <span
-                      className="font-black tabular-nums text-white/18 mt-1"
+                      className="prc-num font-black tabular-nums text-white/18 mt-1"
                       style={{ fontSize: '0.625rem', letterSpacing: '0.1em' }}
                     >
                       {String(i + 1).padStart(2, '0')}
