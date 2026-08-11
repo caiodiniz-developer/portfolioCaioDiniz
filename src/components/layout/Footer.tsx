@@ -61,7 +61,10 @@ export default function Footer() {
               Caio Diniz
             </Link>
             <p className={isGuestbook ? 'text-[0.6875rem] text-white/40 tracking-wide' : 'text-[0.6875rem] text-white/20 tracking-wide'}>
-              © {year} — Full Stack Developer
+              {t.footer.tagline}
+            </p>
+            <p className={isGuestbook ? 'text-[0.6rem] text-white/25 tracking-wide' : 'text-[0.6rem] text-white/12 tracking-wide'}>
+              © {year} Caio Diniz
             </p>
           </div>
 

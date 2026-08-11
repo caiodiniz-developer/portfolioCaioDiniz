@@ -147,11 +147,12 @@ export default function StackCarousel() {
       {/* Header */}
       <div className="container-custom pt-16 pb-4">
         <div className="flex flex-col gap-4">
-          <span className="inline-flex items-center gap-3 text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-white/30">
+          <span data-sr className="inline-flex items-center gap-3 text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-white/30">
             <span className="w-5 h-px bg-white/15" />
             {lang === 'en' ? 'Tech stack' : 'Tecnologias'}
           </span>
           <h2
+            data-sr data-sr-d="1"
             className="font-black text-white"
             style={{
               fontFamily:    'Syne, sans-serif',
