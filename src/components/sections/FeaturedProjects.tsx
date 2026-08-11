@@ -69,10 +69,6 @@ function ProjectCard({ project, index, aspectRatio, disableTilt }: {
           className="relative overflow-hidden rounded-2xl"
           style={{ aspectRatio, background: '#111' }}
         >
-          <div
-            className="fp-wipe absolute inset-0 z-10"
-            style={{ background: '#0d0d0d', transformOrigin: 'bottom' }}
-          />
           <img
             src={project.image}
             alt={project.title}
@@ -174,34 +170,27 @@ export default function FeaturedProjects() {
         scrollTrigger: { trigger: ref.current!, start: 'top 82%', once: true },
       })
 
-      /* ── Staggered wipe entrance for each card */
+      /* ── Card entrance + parallax */
       ref.current!.querySelectorAll<HTMLElement>('.fp-card').forEach((card) => {
-        const wipe = card.querySelector<HTMLElement>('.fp-wipe')
         const img  = card.querySelector<HTMLElement>('.fp-img')
         const text = card.querySelector<HTMLElement>('.mt-4')
 
-        if (wipe) gsap.set(wipe, { scaleY: 1 })
-        if (img)  gsap.set(img,  { scale: 1.12 })
-        if (text) gsap.set(text, { y: 16, opacity: 0 })
+        gsap.set(card, { opacity: 0, y: 32 })
+        if (img)  gsap.set(img, { scale: 1.08 })
+        if (text) gsap.set(text, { opacity: 0, y: 14 })
 
         const tl = gsap.timeline({
-          scrollTrigger: { trigger: card, start: 'top 86%', once: true },
-          defaults: { ease: 'power4.inOut' },
+          scrollTrigger: { trigger: card, start: 'top 88%', once: true },
+          defaults: { ease: 'power3.out' },
         })
-        if (wipe) tl.to(wipe, { scaleY: 0, duration: 1.0 }, 0)
-        if (img)  tl.to(img,  { scale: 1, duration: 1.3, ease: 'power3.out' }, 0)
-        if (text) tl.to(text, { y: 0, opacity: 1, duration: 0.6, ease: 'power3.out' }, 0.5)
+        tl.to(card, { opacity: 1, y: 0, duration: 0.75 }, 0)
+        if (img)  tl.to(img,  { scale: 1, duration: 1.1, ease: 'power2.out' }, 0)
+        if (text) tl.to(text, { opacity: 1, y: 0, duration: 0.55 }, 0.45)
 
-        /* Scroll parallax on image */
         if (img) {
           gsap.to(img, {
-            yPercent: -7, ease: 'none',
-            scrollTrigger: {
-              trigger: card,
-              start:   'top bottom',
-              end:     'bottom top',
-              scrub:   1.2,
-            },
+            yPercent: -6, ease: 'none',
+            scrollTrigger: { trigger: card, start: 'top bottom', end: 'bottom top', scrub: 1.2 },
           })
         }
       })

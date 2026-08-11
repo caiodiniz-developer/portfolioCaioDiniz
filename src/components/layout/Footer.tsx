@@ -91,19 +91,16 @@ export default function Footer() {
       <div className="container-custom py-8">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
           {/* Left */}
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-2">
             <Link
               to="/"
               className="inline-flex items-center gap-2.5 select-none"
             >
-              <img src="/icon.svg" alt="Caio Diniz" className="w-6 h-auto" style={{ filter: isGuestbook ? 'brightness(1.4)' : 'brightness(0.55)' }} />
+              <img src="/icon.svg" alt="Caio Diniz" className="w-5 h-auto" style={{ filter: isGuestbook ? 'brightness(1.4)' : 'brightness(0.5)' }} />
               <span className="font-black text-white text-sm tracking-[-0.03em]">Caio Diniz</span>
             </Link>
-            <p className={isGuestbook ? 'text-[0.6875rem] text-white/40 tracking-wide' : 'text-[0.6875rem] text-white/20 tracking-wide'}>
-              {t.footer.tagline}
-            </p>
-            <p className={isGuestbook ? 'text-[0.6rem] text-white/25 tracking-wide' : 'text-[0.6rem] text-white/12 tracking-wide'}>
-              © {year} Caio Diniz
+            <p className={isGuestbook ? 'text-[0.6rem] text-white/30 tracking-wide' : 'text-[0.6rem] text-white/18 tracking-wide'}>
+              © {year} · Full Stack Developer
             </p>
           </div>
 
