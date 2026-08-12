@@ -2,7 +2,7 @@ export interface Project {
   id: number;
   slug: string;
   title: string;
-  category: "Full Stack" | "Front-end" | "Back-end" | "Websites" | "Creative";
+  category: "Full Stack" | "Front-end" | "Back-end";
   type: string;
   year: string;
   description: string;
@@ -142,7 +142,7 @@ export const projects: Project[] = [
     id: 4,
     slug: "forja",
     title: "Forja",
-    category: "Websites",
+    category: "Full Stack",
     type: "Site Institucional",
     year: "2024",
     description:
@@ -180,7 +180,7 @@ export const projects: Project[] = [
     id: 5,
     slug: "cubo3d",
     title: "Cubo3D",
-    category: "Creative",
+    category: "Front-end",
     type: "Experiência 3D",
     year: "2025",
     description:
@@ -227,7 +227,7 @@ export const projects: Project[] = [
     stack: ["React", "TypeScript", "Tailwind CSS", "Framer Motion"],
     image: "/assets/spylt-projeto6.png",
     gallery: ["/assets/spylt-projeto6.png"],
-    liveUrl: "https://caiodiniz.dev.br",
+    liveUrl: "https://spylt-blue.vercel.app/",
     githubUrl: "",
     role: "Front-end Developer & UI Designer",
     problem:
@@ -295,7 +295,7 @@ export const projects: Project[] = [
     id: 8,
     slug: "fruity",
     title: "FRUITY",
-    category: "Creative",
+    category: "Front-end",
     type: "Experiência Web",
     year: "2026",
     description:

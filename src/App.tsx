@@ -1,5 +1,6 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { RouterProvider } from "react-router-dom";
+import { AnimatePresence } from "framer-motion";
 import { router } from "./router";
 import CustomCursor from "./components/animations/CustomCursor";
 import SmoothScroll from "./components/animations/SmoothScroll";
@@ -10,8 +11,11 @@ import ReturnVisitor from "./components/animations/ReturnVisitor";
 import PresentationMode from "./components/animations/PresentationMode";
 import ClickSound from "./components/animations/ClickSound";
 import SectionCounter from "./components/animations/SectionCounter";
+import Preloader from "./components/Preloader";
 
 export default function App() {
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     console.log(
       "%c  CAIO DINIZ  ",
@@ -38,7 +42,7 @@ export default function App() {
       "color:#4ade80;font-size:12px;font-weight:700;padding:4px 0 2px;"
     );
     console.log(
-      "%c 🔗  github.com/caiodiniz-dev",
+      "%c 🔗  github.com/caiodiniz-developer",
       "color:#60a5fa;font-size:11px;padding:0 0 6px;"
     );
     console.log(
@@ -49,6 +53,10 @@ export default function App() {
 
   return (
     <>
+      <AnimatePresence mode="wait">
+        {loading && <Preloader key="preloader" onDone={() => setLoading(false)} />}
+      </AnimatePresence>
+
       <CustomCursor />
       <SmoothScroll />
       <ScrollProgress />

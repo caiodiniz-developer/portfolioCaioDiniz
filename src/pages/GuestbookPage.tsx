@@ -56,6 +56,176 @@ function timeAgo(iso: string, lang: 'en' | 'pt') {
   return new Date(iso).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })
 }
 
+/* ── Custom sticker drawings ── */
+type StickerKey = 'cat' | 'heart' | 'smile' | 'star' | 'zap'
+
+const STICKER_SVGS: Record<StickerKey, JSX.Element> = {
+  cat: (
+    <svg viewBox="0 0 32 32" width="24" height="24" fill="none">
+      <ellipse cx="16" cy="18" rx="10" ry="9" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
+      <path d="M7 13 L4 7 L10 11" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" strokeLinecap="round" />
+      <path d="M25 13 L28 7 L22 11" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" strokeLinecap="round" />
+      <circle cx="12" cy="18" r="1.2" fill="currentColor" />
+      <circle cx="20" cy="18" r="1.2" fill="currentColor" />
+      <path d="M14 21 Q16 23 18 21" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+      <line x1="16" y1="21" x2="16" y2="23.5" stroke="currentColor" strokeWidth="1" strokeLinecap="round" />
+    </svg>
+  ),
+  heart: (
+    <svg viewBox="0 0 32 32" width="24" height="24" fill="none">
+      <path d="M16 26 C16 26 5 19 5 12 C5 8.5 8 6 11 6 C13 6 15 7.5 16 9 C17 7.5 19 6 21 6 C24 6 27 8.5 27 12 C27 19 16 26 16 26Z"
+        stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" fill="none" />
+      <circle cx="11" cy="10" r="1" fill="currentColor" opacity="0.5" />
+    </svg>
+  ),
+  smile: (
+    <svg viewBox="0 0 32 32" width="24" height="24" fill="none">
+      <circle cx="16" cy="16" r="11" stroke="currentColor" strokeWidth="1.5" />
+      <circle cx="12" cy="13" r="1.3" fill="currentColor" />
+      <circle cx="20" cy="13" r="1.3" fill="currentColor" />
+      <path d="M11 19 Q16 24 21 19" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  ),
+  star: (
+    <svg viewBox="0 0 32 32" width="24" height="24" fill="none">
+      <path d="M16 4 L18.5 12 L27 12 L20.5 17.5 L23 25.5 L16 21 L9 25.5 L11.5 17.5 L5 12 L13.5 12 Z"
+        stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
+    </svg>
+  ),
+  zap: (
+    <svg viewBox="0 0 32 32" width="24" height="24" fill="none">
+      <path d="M19 4 L10 18 L16 18 L13 28 L23 14 L17 14 Z"
+        stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" strokeLinecap="round" />
+    </svg>
+  ),
+}
+
+const STICKER_LABELS: Record<StickerKey, { en: string; pt: string }> = {
+  cat:   { en: 'Cat',       pt: 'Gato'      },
+  heart: { en: 'Heart',     pt: 'Coração'   },
+  smile: { en: 'Happy',     pt: 'Feliz'     },
+  star:  { en: 'Star',      pt: 'Estrela'   },
+  zap:   { en: 'Energy',    pt: 'Energia'   },
+}
+
+const STICKER_COLORS: Record<StickerKey, string> = {
+  cat:   '#60a5fa',
+  heart: '#f472b6',
+  smile: '#fbbf24',
+  star:  '#a78bfa',
+  zap:   '#4ade80',
+}
+
+const STICKER_KEYS = Object.keys(STICKER_SVGS) as StickerKey[]
+
+function parseSticker(msg: string): { sticker: StickerKey | null; text: string } {
+  const m = msg.match(/^\[(cat|heart|smile|star|zap)\] ([\s\S]+)/)
+  if (m) return { sticker: m[1] as StickerKey, text: m[2] }
+  return { sticker: null, text: msg }
+}
+
+/* ── AnimatedStickerIcon: draw-on effect for selected sticker ── */
+function AnimatedStickerIcon({ stickerKey, color, size }: { stickerKey: StickerKey; color: string; size: number }) {
+  const dn = (delay: number, dur = 0.5) => ({
+    initial: { pathLength: 0 },
+    animate: { pathLength: 1 },
+    transition: { duration: dur, delay, ease: 'easeOut' as const },
+  })
+
+  const svgProps = {
+    viewBox: '0 0 32 32',
+    width: size,
+    height: size,
+    fill: 'none',
+    strokeLinecap: 'round' as const,
+    strokeLinejoin: 'round' as const,
+  }
+
+  if (stickerKey === 'cat') {
+    return (
+      <svg {...svgProps}>
+        <motion.ellipse cx="16" cy="18" rx="10" ry="9" stroke={color} strokeWidth="1.5" {...dn(0)} />
+        <motion.path d="M7 13 L4 7 L10 11" stroke={color} strokeWidth="1.5" {...dn(0.5)} />
+        <motion.path d="M25 13 L28 7 L22 11" stroke={color} strokeWidth="1.5" {...dn(0.5)} />
+        <motion.circle cx="12" cy="18" r="1.2"
+          stroke={color} strokeWidth="0.8"
+          initial={{ pathLength: 0, fill: 'transparent' }}
+          animate={{ pathLength: 1, fill: color }}
+          transition={{ duration: 0.3, delay: 0.7, ease: 'easeOut' }}
+        />
+        <motion.circle cx="20" cy="18" r="1.2"
+          stroke={color} strokeWidth="0.8"
+          initial={{ pathLength: 0, fill: 'transparent' }}
+          animate={{ pathLength: 1, fill: color }}
+          transition={{ duration: 0.3, delay: 0.7, ease: 'easeOut' }}
+        />
+        <motion.path d="M14 21 Q16 23 18 21" stroke={color} strokeWidth="1.2" {...dn(0.9)} />
+        <motion.line x1="16" y1="21" x2="16" y2="23.5" stroke={color} strokeWidth="1"
+          initial={{ pathLength: 0 }}
+          animate={{ pathLength: 1 }}
+          transition={{ duration: 0.3, delay: 1.1, ease: 'easeOut' }}
+        />
+      </svg>
+    )
+  }
+
+  if (stickerKey === 'heart') {
+    return (
+      <svg {...svgProps}>
+        <motion.path
+          d="M16 26 C16 26 5 19 5 12 C5 8.5 8 6 11 6 C13 6 15 7.5 16 9 C17 7.5 19 6 21 6 C24 6 27 8.5 27 12 C27 19 16 26 16 26Z"
+          stroke={color} strokeWidth="1.5"
+          {...dn(0, 0.8)}
+        />
+      </svg>
+    )
+  }
+
+  if (stickerKey === 'smile') {
+    return (
+      <svg {...svgProps}>
+        <motion.circle cx="16" cy="16" r="11" stroke={color} strokeWidth="1.5" {...dn(0, 0.6)} />
+        <motion.circle cx="12" cy="13" r="1.3"
+          stroke={color} strokeWidth="0.8"
+          initial={{ pathLength: 0, fill: 'transparent' }}
+          animate={{ pathLength: 1, fill: color }}
+          transition={{ duration: 0.25, delay: 0.5, ease: 'easeOut' }}
+        />
+        <motion.circle cx="20" cy="13" r="1.3"
+          stroke={color} strokeWidth="0.8"
+          initial={{ pathLength: 0, fill: 'transparent' }}
+          animate={{ pathLength: 1, fill: color }}
+          transition={{ duration: 0.25, delay: 0.6, ease: 'easeOut' }}
+        />
+        <motion.path d="M11 19 Q16 24 21 19" stroke={color} strokeWidth="1.5" {...dn(0.7)} />
+      </svg>
+    )
+  }
+
+  if (stickerKey === 'star') {
+    return (
+      <svg {...svgProps}>
+        <motion.path
+          d="M16 4 L18.5 12 L27 12 L20.5 17.5 L23 25.5 L16 21 L9 25.5 L11.5 17.5 L5 12 L13.5 12 Z"
+          stroke={color} strokeWidth="1.5"
+          {...dn(0, 0.9)}
+        />
+      </svg>
+    )
+  }
+
+  // zap
+  return (
+    <svg {...svgProps}>
+      <motion.path
+        d="M19 4 L10 18 L16 18 L13 28 L23 14 L17 14 Z"
+        stroke={color} strokeWidth="1.5"
+        {...dn(0, 0.7)}
+      />
+    </svg>
+  )
+}
+
 /* ── Waveform: unique SVG per entry ── */
 function Waveform({ seed, color }: { seed: string; color: string }) {
   const hash = seed.split('').reduce((a, c, i) => a + c.charCodeAt(0) * (i + 1), 7)
@@ -173,20 +343,28 @@ function SignalCard({
             </span>
           </div>
 
-          {/* Message */}
-          <p style={{
-            margin:            0,
-            fontSize:          '0.75rem',
-            color:             'rgba(255,255,255,0.42)',
-            lineHeight:        1.65,
-            display:           '-webkit-box',
-            WebkitLineClamp:   3,
-            WebkitBoxOrient:   'vertical',
-            overflow:          'hidden',
-            wordBreak:         'break-word',
-          }}>
-            {entry.message}
-          </p>
+          {/* Message (with optional sticker) */}
+          {(() => {
+            const { sticker, text } = parseSticker(entry.message)
+            const sColor = sticker ? STICKER_COLORS[sticker] : color
+            return (
+              <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
+                {sticker && (
+                  <span style={{ color: sColor, flexShrink: 0, marginTop: 2, opacity: 0.9 }}>
+                    {STICKER_SVGS[sticker]}
+                  </span>
+                )}
+                <p style={{
+                  margin: 0, fontSize: '0.75rem', color: 'rgba(255,255,255,0.42)',
+                  lineHeight: 1.65, display: '-webkit-box',
+                  WebkitLineClamp: 3, WebkitBoxOrient: 'vertical',
+                  overflow: 'hidden', wordBreak: 'break-word', flex: 1,
+                }}>
+                  {text}
+                </p>
+              </div>
+            )
+          })()}
 
           {isAdmin && (
             <button
@@ -323,6 +501,7 @@ export default function GuestbookPage() {
   const [submitted,  setSubmitted]  = useState(false)
   const [name,       setName]       = useState('')
   const [message,    setMessage]    = useState('')
+  const [sticker,    setSticker]    = useState<StickerKey | null>(null)
   const [error,      setError]      = useState('')
   const [isAdmin,    setIsAdmin]    = useState(() =>
     typeof sessionStorage !== 'undefined' && sessionStorage.getItem('gb_admin') === '1'
@@ -351,14 +530,17 @@ export default function GuestbookPage() {
     if (!name.trim() || !message.trim() || !CONFIGURED) return
     setSubmitting(true); setError('')
     try {
+      const finalMessage = sticker
+        ? `[${sticker}] ${message.trim()}`
+        : message.trim()
       const res = await sbFetch(TABLE, {
         method: 'POST',
-        body:   JSON.stringify({ name: name.trim(), message: message.trim() }),
+        body:   JSON.stringify({ name: name.trim(), message: finalMessage }),
       })
       if (!res.ok) throw new Error()
       const [created]: Entry[] = await res.json()
       setEntries(prev => [created, ...prev])
-      setName(''); setMessage('')
+      setName(''); setMessage(''); setSticker(null)
       setSubmitted(true)
       setTimeout(() => setSubmitted(false), 3000)
     } catch { setError(gb.errorSend) }
@@ -517,6 +699,47 @@ CREATE POLICY "delete_all" ON guestbook FOR DELETE USING (true);`}
                     placeholder={gb.messagePlaceholder}
                     maxLength={280} required rows={3}
                   />
+                </div>
+
+                {/* Sticker picker */}
+                <div style={{ marginTop: '0.85rem', display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.2)', flexShrink: 0 }}>
+                    {lang === 'en' ? 'Add a sticker' : 'Adicionar adesivo'}
+                  </span>
+                  <div style={{ display: 'flex', gap: 6 }}>
+                    {STICKER_KEYS.map((key) => {
+                      const selected = sticker === key
+                      const c = STICKER_COLORS[key]
+                      return (
+                        <button
+                          key={key}
+                          type="button"
+                          title={lang === 'en' ? STICKER_LABELS[key].en : STICKER_LABELS[key].pt}
+                          onClick={() => setSticker(selected ? null : key)}
+                          style={{
+                            width: 38, height: 38, borderRadius: 9, cursor: 'pointer',
+                            background: selected ? `${c}18` : 'rgba(255,255,255,0.04)',
+                            border: `1px solid ${selected ? `${c}55` : 'rgba(255,255,255,0.08)'}`,
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            color: selected ? c : 'rgba(255,255,255,0.35)',
+                            transition: 'all 0.2s',
+                            transform: selected ? 'scale(1.12)' : 'scale(1)',
+                          }}
+                        >
+                          {selected
+                            ? <AnimatedStickerIcon key={`anim-${key}`} stickerKey={key} color={c} size={24} />
+                            : <span style={{ opacity: 0.4 }}>{STICKER_SVGS[key]}</span>
+                          }
+                        </button>
+                      )
+                    })}
+                  </div>
+                  {sticker && (
+                    <button type="button" onClick={() => setSticker(null)}
+                      style={{ fontSize: '0.58rem', color: 'rgba(255,255,255,0.22)', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline', padding: 0 }}>
+                      {lang === 'en' ? 'clear' : 'limpar'}
+                    </button>
+                  )}
                 </div>
 
                 {error && (

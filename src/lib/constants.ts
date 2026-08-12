@@ -6,7 +6,7 @@ export const SITE = {
   url: 'https://caiodiniz.dev',
   email: 'cvdinizramos@gmail.com',
   whatsapp: '+5519994737425',
-  github: 'https://github.com/caiodiniz-dev',
+  github: 'https://github.com/caiodiniz-developer',
   linkedin: 'https://www.linkedin.com/in/caiodinizdev/',
   tiktok: 'https://www.tiktok.com/@caiodinizdev',
 } as const

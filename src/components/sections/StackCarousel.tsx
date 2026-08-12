@@ -184,10 +184,12 @@ export default function StackCarousel() {
       {/* Header */}
       <div className="container-custom pt-16 pb-4">
         <div className="flex flex-col gap-4">
-          <span className="sc-badge inline-flex items-center gap-3 text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-white/30">
-            <span className="w-5 h-px bg-white/15" />
-            {lang === 'en' ? 'Tech stack' : 'Tecnologias'}
-          </span>
+          {/* Section marker */}
+          <div className="sc-badge" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <span style={{ fontFamily: 'monospace', fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.12em', color: 'rgba(255,255,255,0.22)' }}>03</span>
+            <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.08)' }} />
+            <span style={{ fontFamily: 'monospace', fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.18)' }}>{lang === 'en' ? 'tech stack' : 'tecnologias'}</span>
+          </div>
           <h2
             className="sc-heading font-black text-white"
             style={{

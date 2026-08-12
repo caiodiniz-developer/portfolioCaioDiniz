@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo, useRef } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Check, MessageCircle, Calculator, ChevronRight, ArrowUpRight,
@@ -238,25 +238,235 @@ function BudgetCalculator({ lang, setCursor }: { lang: string; setCursor: (s: Cu
   )
 }
 
+/* ── ServiceSketch: SVG drawing animation per service ── */
+function ServiceSketch({ idx }: { idx: number }) {
+  const W = '#ffffff'
+  const A = 'rgba(99,102,241,0.85)'
+  const G = 'rgba(74,222,128,0.85)'
+  const B = 'rgba(96,165,250,0.85)'
+  const D = 'rgba(255,255,255,0.22)'
+
+  const d = (delay: number, dur = 0.65) => ({
+    initial: { pathLength: 0 },
+    animate: { pathLength: 1 },
+    transition: { duration: dur, delay, ease: 'easeOut' as const },
+  })
+
+  const svgProps = {
+    viewBox: '0 0 240 160',
+    width: '100%',
+    height: '100%',
+    fill: 'none',
+    strokeLinecap: 'round' as const,
+    strokeLinejoin: 'round' as const,
+  }
+
+  if (idx === 0) {
+    // Landing Page — laptop + browser chrome + hero + headline + CTA + cards
+    return (
+      <svg {...svgProps}>
+        {/* Laptop body */}
+        <motion.rect x="30" y="20" width="180" height="110" rx="6" stroke={D} strokeWidth="1.5" {...d(0, 0.5)} />
+        {/* Keyboard base */}
+        <motion.rect x="10" y="130" width="220" height="12" rx="3" stroke={D} strokeWidth="1.2" {...d(0.4)} />
+        {/* URL bar */}
+        <motion.rect x="50" y="28" width="140" height="9" rx="2" stroke={D} strokeWidth="1" {...d(0.9)} />
+        {/* Traffic lights */}
+        <motion.circle cx="40" cy="32" r="3" stroke="rgba(255,95,87,0.7)" strokeWidth="1" {...d(0.8)} />
+        <motion.circle cx="50" cy="32" r="3" stroke="rgba(255,189,46,0.7)" strokeWidth="1" {...d(0.85)} />
+        <motion.circle cx="60" cy="32" r="3" stroke="rgba(40,202,65,0.7)" strokeWidth="1" {...d(0.9)} />
+        {/* Hero block */}
+        <motion.rect x="40" y="44" width="160" height="44" rx="3" stroke={A} strokeWidth="1.5" {...d(1.2)} />
+        {/* Headline line 1 */}
+        <motion.line x1="50" y1="55" x2="150" y2="55" stroke={W} strokeWidth="3" strokeOpacity="0.7" {...d(1.6)} />
+        {/* Headline line 2 */}
+        <motion.line x1="50" y1="63" x2="120" y2="63" stroke={W} strokeWidth="2" strokeOpacity="0.35" {...d(1.8)} />
+        {/* CTA button */}
+        <motion.rect x="50" y="72" width="50" height="11" rx="5.5" stroke={A} strokeWidth="1.5" {...d(2.0)} />
+        {/* Feature card 1 */}
+        <motion.rect x="40" y="96" width="48" height="30" rx="3" stroke={D} strokeWidth="1" {...d(2.3)} />
+        {/* Feature card 2 */}
+        <motion.rect x="96" y="96" width="48" height="30" rx="3" stroke={D} strokeWidth="1" {...d(2.5)} />
+        {/* Feature card 3 */}
+        <motion.rect x="152" y="96" width="48" height="30" rx="3" stroke={D} strokeWidth="1" {...d(2.7)} />
+      </svg>
+    )
+  }
+
+  if (idx === 1) {
+    // Business Website — browser + nav + hero + 3 content columns
+    return (
+      <svg {...svgProps}>
+        {/* Browser outline */}
+        <motion.rect x="20" y="15" width="200" height="130" rx="6" stroke={D} strokeWidth="1.5" {...d(0, 0.5)} />
+        {/* Nav bar area */}
+        <motion.line x1="20" y1="38" x2="220" y2="38" stroke={D} strokeWidth="1" {...d(0.4)} />
+        {/* Traffic lights */}
+        <motion.circle cx="33" cy="26" r="3" stroke="rgba(255,95,87,0.7)" strokeWidth="1" {...d(0.3)} />
+        <motion.circle cx="44" cy="26" r="3" stroke="rgba(255,189,46,0.7)" strokeWidth="1" {...d(0.38)} />
+        <motion.circle cx="55" cy="26" r="3" stroke="rgba(40,202,65,0.7)" strokeWidth="1" {...d(0.45)} />
+        {/* Nav links */}
+        <motion.line x1="80" y1="26" x2="106" y2="26" stroke={D} strokeWidth="2" {...d(0.6)} />
+        <motion.line x1="112" y1="26" x2="138" y2="26" stroke={D} strokeWidth="2" {...d(0.7)} />
+        <motion.line x1="144" y1="26" x2="170" y2="26" stroke={D} strokeWidth="2" {...d(0.8)} />
+        {/* Hero headline */}
+        <motion.line x1="30" y1="54" x2="160" y2="54" stroke={W} strokeWidth="4" strokeOpacity="0.7" {...d(1.0)} />
+        <motion.line x1="30" y1="64" x2="120" y2="64" stroke={W} strokeWidth="2.5" strokeOpacity="0.3" {...d(1.2)} />
+        {/* Hero sub */}
+        <motion.line x1="30" y1="74" x2="140" y2="74" stroke={D} strokeWidth="1.5" {...d(1.4)} />
+        <motion.line x1="30" y1="81" x2="110" y2="81" stroke={D} strokeWidth="1.5" {...d(1.5)} />
+        {/* Content columns */}
+        <motion.rect x="30" y="96" width="54" height="40" rx="3" stroke={D} strokeWidth="1" {...d(1.8)} />
+        <motion.rect x="93" y="96" width="54" height="40" rx="3" stroke={D} strokeWidth="1" {...d(2.0)} />
+        <motion.rect x="156" y="96" width="54" height="40" rx="3" stroke={D} strokeWidth="1" {...d(2.2)} />
+      </svg>
+    )
+  }
+
+  if (idx === 2) {
+    // Web App — frame + sidebar + metric cards + line chart + table rows
+    return (
+      <svg {...svgProps}>
+        {/* App frame */}
+        <motion.rect x="15" y="15" width="210" height="130" rx="6" stroke={D} strokeWidth="1.5" {...d(0, 0.5)} />
+        {/* Sidebar */}
+        <motion.rect x="15" y="15" width="42" height="130" rx="6" stroke={D} strokeWidth="1" {...d(0.4)} />
+        {/* Sidebar items */}
+        <motion.line x1="24" y1="34" x2="48" y2="34" stroke={D} strokeWidth="2" {...d(0.6)} />
+        <motion.line x1="24" y1="46" x2="48" y2="46" stroke={D} strokeWidth="2" {...d(0.7)} />
+        <motion.line x1="24" y1="58" x2="48" y2="58" stroke={D} strokeWidth="2" {...d(0.8)} />
+        {/* Metric card 1 */}
+        <motion.rect x="66" y="22" width="46" height="28" rx="3" stroke={B} strokeWidth="1.2" {...d(0.9)} />
+        {/* Metric card 2 */}
+        <motion.rect x="118" y="22" width="46" height="28" rx="3" stroke={G} strokeWidth="1.2" {...d(1.1)} />
+        {/* Metric card 3 */}
+        <motion.rect x="170" y="22" width="46" height="28" rx="3" stroke={A} strokeWidth="1.2" {...d(1.3)} />
+        {/* Line chart frame */}
+        <motion.rect x="66" y="58" width="150" height="50" rx="3" stroke={D} strokeWidth="1" {...d(1.5)} />
+        {/* Chart polyline */}
+        <motion.path d="M72 98 L95 82 L118 90 L141 72 L164 80 L187 65 L210 70" stroke={B} strokeWidth="1.8" {...d(1.7, 0.9)} />
+        {/* Table rows */}
+        <motion.line x1="66" y1="115" x2="216" y2="115" stroke={D} strokeWidth="1" {...d(2.0)} />
+        <motion.line x1="66" y1="123" x2="216" y2="123" stroke={D} strokeWidth="1" {...d(2.1)} />
+        <motion.line x1="66" y1="131" x2="216" y2="131" stroke={D} strokeWidth="1" {...d(2.2)} />
+      </svg>
+    )
+  }
+
+  if (idx === 3) {
+    // API/Backend — terminal + JSON block + code lines + status dot + cursor
+    return (
+      <svg {...svgProps}>
+        {/* Terminal window */}
+        <motion.rect x="20" y="15" width="200" height="130" rx="6" stroke={D} strokeWidth="1.5" {...d(0, 0.5)} />
+        {/* Title bar */}
+        <motion.line x1="20" y1="34" x2="220" y2="34" stroke={D} strokeWidth="1" {...d(0.3)} />
+        {/* Traffic lights */}
+        <motion.circle cx="33" cy="24" r="3" stroke="rgba(255,95,87,0.7)" strokeWidth="1" {...d(0.4)} />
+        <motion.circle cx="44" cy="24" r="3" stroke="rgba(255,189,46,0.7)" strokeWidth="1" {...d(0.45)} />
+        <motion.circle cx="55" cy="24" r="3" stroke="rgba(40,202,65,0.7)" strokeWidth="1" {...d(0.5)} />
+        {/* GET line */}
+        <motion.line x1="30" y1="46" x2="130" y2="46" stroke={G} strokeWidth="2" {...d(0.7)} />
+        {/* JSON block */}
+        <motion.rect x="30" y="56" width="130" height="55" rx="3" stroke={D} strokeWidth="1" {...d(0.9)} />
+        {/* JSON lines */}
+        <motion.line x1="40" y1="68" x2="110" y2="68" stroke={B} strokeWidth="1.5" {...d(1.1)} />
+        <motion.line x1="40" y1="78" x2="130" y2="78" stroke={A} strokeWidth="1.5" {...d(1.3)} />
+        <motion.line x1="40" y1="88" x2="100" y2="88" stroke={B} strokeWidth="1.5" {...d(1.5)} />
+        <motion.line x1="40" y1="98" x2="90" y2="98" stroke={D} strokeWidth="1" {...d(1.7)} />
+        {/* Status dot */}
+        <motion.circle cx="36" cy="120" r="4" stroke={G} strokeWidth="1.5" {...d(1.9)} />
+        {/* Server running text line */}
+        <motion.line x1="46" y1="120" x2="130" y2="120" stroke={G} strokeWidth="1.5" {...d(2.0)} />
+        {/* Cursor blink */}
+        <motion.rect
+          x="132" y="115" width="8" height="10" rx="1"
+          stroke={W} strokeWidth="1" strokeOpacity="0.7"
+          animate={{ opacity: [1, 0, 1] }}
+          transition={{ duration: 0.9, repeat: Infinity, ease: 'easeInOut' }}
+        />
+      </svg>
+    )
+  }
+
+  if (idx === 4) {
+    // UI/UX — design tool + tools panel + swatches + typography + component card + easing curve
+    return (
+      <svg {...svgProps}>
+        {/* Design tool frame */}
+        <motion.rect x="15" y="15" width="210" height="130" rx="6" stroke={D} strokeWidth="1.5" {...d(0, 0.5)} />
+        {/* Top bar */}
+        <motion.line x1="15" y1="34" x2="225" y2="34" stroke={D} strokeWidth="1" {...d(0.3)} />
+        {/* Left tools panel */}
+        <motion.rect x="15" y="34" width="28" height="111" rx="0" stroke={D} strokeWidth="1" {...d(0.5)} />
+        {/* Tool icons (simple lines) */}
+        <motion.line x1="22" y1="45" x2="36" y2="45" stroke={D} strokeWidth="2" {...d(0.65)} />
+        <motion.line x1="22" y1="55" x2="36" y2="55" stroke={D} strokeWidth="2" {...d(0.72)} />
+        <motion.line x1="22" y1="65" x2="36" y2="65" stroke={D} strokeWidth="2" {...d(0.79)} />
+        {/* Color swatches */}
+        <motion.rect x="52" y="42" width="14" height="14" rx="2" stroke="rgba(168,85,247,0.85)" strokeWidth="1.5" {...d(0.9)} />
+        <motion.rect x="72" y="42" width="14" height="14" rx="2" stroke="rgba(236,72,153,0.85)" strokeWidth="1.5" {...d(1.0)} />
+        <motion.rect x="92" y="42" width="14" height="14" rx="2" stroke={A} strokeWidth="1.5" {...d(1.1)} />
+        <motion.rect x="112" y="42" width="14" height="14" rx="2" stroke={G} strokeWidth="1.5" {...d(1.2)} />
+        <motion.rect x="132" y="42" width="14" height="14" rx="2" stroke={B} strokeWidth="1.5" {...d(1.3)} />
+        {/* Typography specimen */}
+        <motion.line x1="52" y1="68" x2="170" y2="68" stroke={W} strokeWidth="4" strokeOpacity="0.6" {...d(1.5)} />
+        <motion.line x1="52" y1="78" x2="130" y2="78" stroke={W} strokeWidth="2" strokeOpacity="0.25" {...d(1.65)} />
+        {/* Component card */}
+        <motion.rect x="52" y="90" width="90" height="45" rx="4" stroke={D} strokeWidth="1.2" {...d(1.8)} />
+        <motion.line x1="62" y1="103" x2="112" y2="103" stroke={D} strokeWidth="2" {...d(1.95)} />
+        <motion.line x1="62" y1="113" x2="100" y2="113" stroke={D} strokeWidth="1.5" {...d(2.05)} />
+        {/* Easing curve */}
+        <motion.path d="M158 128 C168 128 172 92 188 90" stroke={A} strokeWidth="1.8" {...d(2.2, 0.7)} />
+        <motion.circle cx="158" cy="128" r="3" stroke={A} strokeWidth="1.2" {...d(2.2)} />
+        <motion.circle cx="188" cy="90" r="3" stroke={A} strokeWidth="1.2" {...d(2.5)} />
+      </svg>
+    )
+  }
+
+  // idx === 5: SEO/Performance — browser + speedometer arc + metric bars + checkmarks
+  return (
+    <svg {...svgProps}>
+      {/* Browser */}
+      <motion.rect x="15" y="15" width="210" height="130" rx="6" stroke={D} strokeWidth="1.5" {...d(0, 0.5)} />
+      <motion.line x1="15" y1="34" x2="225" y2="34" stroke={D} strokeWidth="1" {...d(0.3)} />
+      <motion.circle cx="28" cy="24" r="3" stroke="rgba(255,95,87,0.7)" strokeWidth="1" {...d(0.4)} />
+      <motion.circle cx="38" cy="24" r="3" stroke="rgba(255,189,46,0.7)" strokeWidth="1" {...d(0.45)} />
+      <motion.circle cx="48" cy="24" r="3" stroke="rgba(40,202,65,0.7)" strokeWidth="1" {...d(0.5)} />
+      {/* Speedometer background arc */}
+      <motion.path d="M 80 110 A 40 40 0 0 1 160 110" stroke={D} strokeWidth="6" strokeLinecap="round" {...d(0.7, 0.6)} />
+      {/* Speedometer fill arc (score ~97) */}
+      <motion.path d="M 80 110 A 40 40 0 0 1 159 111" stroke={G} strokeWidth="6" strokeLinecap="round" {...d(0.9, 0.8)} />
+      {/* Score text line */}
+      <motion.line x1="106" y1="102" x2="134" y2="102" stroke={G} strokeWidth="3" {...d(1.5)} />
+      <motion.line x1="112" y1="109" x2="128" y2="109" stroke={D} strokeWidth="1.5" {...d(1.6)} />
+      {/* Metric bars */}
+      <motion.line x1="176" y1="50" x2="210" y2="50" stroke={D} strokeWidth="1" {...d(1.0)} />
+      <motion.line x1="176" y1="50" x2="208" y2="50" stroke={G} strokeWidth="2.5" {...d(1.1, 0.5)} />
+      <motion.line x1="176" y1="62" x2="210" y2="62" stroke={D} strokeWidth="1" {...d(1.2)} />
+      <motion.line x1="176" y1="62" x2="205" y2="62" stroke={G} strokeWidth="2.5" {...d(1.3, 0.5)} />
+      <motion.line x1="176" y1="74" x2="210" y2="74" stroke={D} strokeWidth="1" {...d(1.4)} />
+      <motion.line x1="176" y1="74" x2="210" y2="74" stroke={G} strokeWidth="2.5" {...d(1.5, 0.5)} />
+      {/* Checkmarks */}
+      <motion.path d="M 26 55 L 30 60 L 38 50" stroke={G} strokeWidth="1.8" {...d(1.7)} />
+      <motion.path d="M 26 72 L 30 77 L 38 67" stroke={G} strokeWidth="1.8" {...d(1.9)} />
+      <motion.path d="M 26 89 L 30 94 L 38 84" stroke={G} strokeWidth="1.8" {...d(2.1)} />
+      {/* Check labels */}
+      <motion.line x1="44" y1="55" x2="90" y2="55" stroke={D} strokeWidth="1.5" {...d(1.8)} />
+      <motion.line x1="44" y1="72" x2="90" y2="72" stroke={D} strokeWidth="1.5" {...d(2.0)} />
+      <motion.line x1="44" y1="89" x2="90" y2="89" stroke={D} strokeWidth="1.5" {...d(2.2)} />
+    </svg>
+  )
+}
+
 /* ── Services Section ── */
 function ServicesSection({ lang, setCursor }: { lang: string; setCursor: (s: CursorState) => void }) {
-  const [hovered,    setHovered]    = useState<number | null>(null)
-  const [autoIdx,    setAutoIdx]    = useState(0)
-  const [openMobile, setOpenMobile] = useState<number | null>(null)
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const [selectedIdx, setSelectedIdx] = useState(0)
+  const [openMobile,  setOpenMobile]  = useState<number | null>(null)
   const pt  = lang === 'pt'
   const E   = [0.22, 1, 0.36, 1] as const
 
-  // Infinite auto-cycle when nothing is hovered
-  useEffect(() => {
-    intervalRef.current = setInterval(() => {
-      if (hovered === null) setAutoIdx(i => (i + 1) % SERVICES_DATA.length)
-    }, 2400)
-    return () => { if (intervalRef.current) clearInterval(intervalRef.current) }
-  }, [hovered])
-
-  const activeIdx = hovered !== null ? hovered : autoIdx
-  const svc = SERVICES_DATA[activeIdx]
+  const svc = SERVICES_DATA[selectedIdx]
 
   return (
     <section style={{ padding: 'clamp(4rem,8vw,6rem) clamp(1.5rem,5vw,5rem)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
@@ -289,21 +499,22 @@ function ServicesSection({ lang, setCursor }: { lang: string; setCursor: (s: Cur
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true, margin: '-20px' }}
                 transition={{ delay: i * 0.07, duration: 0.55, ease: E }}
-                onMouseEnter={() => setHovered(i)}
-                onMouseLeave={() => setHovered(null)}
+                onClick={() => { setSelectedIdx(i); setCursor('default') }}
+                onMouseEnter={() => setCursor('pointer')}
+                onMouseLeave={() => setCursor('default')}
                 style={{
                   position: 'relative',
                   display: 'flex', alignItems: 'center', gap: '1.5rem',
                   padding: 'clamp(1.2rem,2.5vw,1.8rem) clamp(1.5rem,3vw,2.5rem)',
                   borderBottom: '1px solid rgba(255,255,255,0.06)',
-                  cursor: 'default',
-                  opacity: activeIdx === i ? 1 : 0.28,
+                  cursor: 'pointer',
+                  opacity: selectedIdx === i ? 1 : 0.28,
                   transition: 'opacity 0.35s ease',
                 }}
               >
                 {/* Active left bar */}
                 <motion.div
-                  animate={{ scaleY: activeIdx === i ? 1 : 0 }}
+                  animate={{ scaleY: selectedIdx === i ? 1 : 0 }}
                   transition={{ duration: 0.32, ease: E }}
                   style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 2, background: '#fff', transformOrigin: 'top', borderRadius: 1 }}
                 />
@@ -312,7 +523,7 @@ function ServicesSection({ lang, setCursor }: { lang: string; setCursor: (s: Cur
                 <span style={{
                   fontFamily: '"JetBrains Mono","Fira Code",monospace',
                   fontSize: '0.55rem', fontWeight: 700, letterSpacing: '0.12em',
-                  color: activeIdx === i ? 'rgba(255,255,255,0.55)' : 'rgba(255,255,255,0.18)',
+                  color: selectedIdx === i ? 'rgba(255,255,255,0.55)' : 'rgba(255,255,255,0.18)',
                   transition: 'color 0.25s', flexShrink: 0, minWidth: '2rem',
                 }}>
                   {String(i + 1).padStart(2, '0')}
@@ -322,9 +533,9 @@ function ServicesSection({ lang, setCursor }: { lang: string; setCursor: (s: Cur
                 <span style={{
                   fontFamily: 'Syne, sans-serif', fontWeight: 900,
                   fontSize: 'clamp(1.1rem,1.9vw,1.55rem)', letterSpacing: '-0.035em',
-                  color: activeIdx === i ? '#fff' : 'rgba(255,255,255,0.52)',
+                  color: selectedIdx === i ? '#fff' : 'rgba(255,255,255,0.52)',
                   transition: 'color 0.25s, transform 0.35s cubic-bezier(0.22,1,0.36,1)',
-                  transform: activeIdx === i ? 'translateX(6px)' : 'translateX(0)',
+                  transform: selectedIdx === i ? 'translateX(6px)' : 'translateX(0)',
                 }}>
                   {pt ? s.titlePt : s.titleEn}
                 </span>
@@ -333,40 +544,53 @@ function ServicesSection({ lang, setCursor }: { lang: string; setCursor: (s: Cur
                 <span style={{
                   marginLeft: 'auto', fontSize: '0.9rem',
                   color: 'rgba(255,255,255,0.25)',
-                  transform: activeIdx === i ? 'translate(4px,0)' : 'translate(0,0)',
-                  opacity: activeIdx === i ? 1 : 0,
+                  transform: selectedIdx === i ? 'translate(4px,0)' : 'translate(0,0)',
+                  opacity: selectedIdx === i ? 1 : 0,
                   transition: 'opacity 0.25s, transform 0.35s cubic-bezier(0.22,1,0.36,1)',
                 }}>→</span>
               </motion.div>
             ))}
+
+            {/* Hint text */}
+            <p style={{ padding: 'clamp(0.8rem,1.5vw,1rem) clamp(1.5rem,3vw,2.5rem)', fontSize: '0.62rem', color: 'rgba(255,255,255,0.18)', fontStyle: 'italic', margin: 0 }}>
+              {pt ? '↙ clique para ver' : '↙ click to explore'}
+            </p>
           </div>
 
-          {/* Right — detail panel */}
-          <div style={{ display: 'flex', alignItems: 'center', padding: 'clamp(2rem,4vw,3.5rem) clamp(2rem,4vw,3rem)' }}>
+          {/* Right — detail panel with SVG sketch */}
+          <div style={{ display: 'flex', flexDirection: 'column', padding: 'clamp(2rem,4vw,3.5rem) clamp(2rem,4vw,3rem)', gap: '1.5rem' }}>
+            {/* SVG sketch panel */}
+            <div
+              key={selectedIdx}
+              style={{ height: 220, borderRadius: 12, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.08)', background: '#0a0a0a', flexShrink: 0 }}
+            >
+              <ServiceSketch idx={selectedIdx} />
+            </div>
+
+            {/* Text */}
             <AnimatePresence mode="wait">
               <motion.div
-                key={activeIdx}
+                key={selectedIdx}
                 initial={{ opacity: 0, y: 22 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -16 }}
                 transition={{ duration: 0.45, ease: E }}
-                style={{ display: 'flex', flexDirection: 'column', gap: '1.8rem' }}
+                style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}
               >
-                {/* Big number watermark */}
-                <p style={{ fontFamily: 'Syne, sans-serif', fontWeight: 900, fontSize: 'clamp(5rem,12vw,9rem)', letterSpacing: '-0.07em', lineHeight: 0.82, color: 'rgba(255,255,255,0.04)', margin: 0, userSelect: 'none' as const, pointerEvents: 'none' as const }}>
-                  {String(activeIdx + 1).padStart(2, '0')}
+                <p style={{ fontFamily: 'Syne, sans-serif', fontWeight: 900, fontSize: 'clamp(4rem,9vw,7rem)', letterSpacing: '-0.07em', lineHeight: 0.82, color: 'rgba(255,255,255,0.04)', margin: 0, userSelect: 'none' as const, pointerEvents: 'none' as const }}>
+                  {String(selectedIdx + 1).padStart(2, '0')}
                 </p>
-                <div style={{ marginTop: '-1.4rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                  <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 900, fontSize: 'clamp(1.6rem,2.8vw,2.4rem)', letterSpacing: '-0.044em', lineHeight: 1.1, color: '#fff', margin: 0 }}>
+                <div style={{ marginTop: '-0.8rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                  <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 900, fontSize: 'clamp(1.4rem,2.4vw,2.1rem)', letterSpacing: '-0.044em', lineHeight: 1.1, color: '#fff', margin: 0 }}>
                     {pt ? svc.titlePt : svc.titleEn}
                   </h3>
-                  <p style={{ fontSize: 'clamp(0.82rem,1.2vw,0.95rem)', color: 'rgba(255,255,255,0.34)', lineHeight: 1.82, margin: 0 }}>
+                  <p style={{ fontSize: 'clamp(0.78rem,1.1vw,0.88rem)', color: 'rgba(255,255,255,0.34)', lineHeight: 1.82, margin: 0 }}>
                     {pt ? svc.descPt : svc.descEn}
                   </p>
                   {/* Progress dots */}
-                  <div style={{ display: 'flex', gap: 6, marginTop: '0.5rem' }}>
+                  <div style={{ display: 'flex', gap: 6, marginTop: '0.25rem' }}>
                     {SERVICES_DATA.map((_, di) => (
                       <motion.div
                         key={di}
-                        animate={{ background: di === activeIdx ? '#fff' : 'rgba(255,255,255,0.15)', width: di === activeIdx ? 20 : 6 }}
+                        animate={{ background: di === selectedIdx ? '#fff' : 'rgba(255,255,255,0.15)', width: di === selectedIdx ? 20 : 6 }}
                         transition={{ duration: 0.35, ease: E }}
                         style={{ height: 2, borderRadius: 999 }}
                       />
@@ -600,21 +824,80 @@ export default function ServicesPage() {
       </section>
 
       {/* ── CTA ── */}
-      <section style={{ padding: 'clamp(4rem,8vw,6rem) clamp(1.5rem,5vw,5rem)', borderTop: '1px solid rgba(255,255,255,0.06)', textAlign: 'center' }}>
-        <motion.div initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.7, ease: [0.16,1,0.3,1] }}
-          style={{ maxWidth: 640, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '1.5rem', alignItems: 'center' }}>
-          <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 900, fontSize: 'clamp(2.5rem,6vw,4.5rem)', letterSpacing: '-0.05em', lineHeight: 0.9, color: '#fff', margin: 0 }}>
-            {lang === 'en' ? "Let's build something great." : 'Vamos construir algo incrível.'}
-          </h2>
-          <p style={{ fontSize: '0.875rem', color: 'rgba(255,255,255,0.3)', lineHeight: 1.7 }}>
-            {lang === 'en' ? 'Send a message and let\'s talk about your project.' : 'Envie uma mensagem e vamos conversar sobre o seu projeto.'}
-          </p>
-          <a href={waUrl} target="_blank" rel="noopener noreferrer"
-            style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '0.9rem 2rem', borderRadius: 999, background: '#fff', color: '#0d0d0d', fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', textDecoration: 'none', transition: 'opacity 0.25s' }}
-            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.opacity = '0.82'; setCursor('pointer') }}
-            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.opacity = '1'; setCursor('default') }}>
-            <MessageCircle size={14} />
-            {lang === 'en' ? 'Start a project' : 'Iniciar um projeto'}
+      <section style={{ padding: 'clamp(4rem,8vw,6rem) clamp(1.5rem,5vw,5rem)', borderTop: '1px solid rgba(255,255,255,0.06)', overflow: 'hidden' }}>
+        <style>{`@keyframes svc-orbit { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.7, ease: [0.16,1,0.3,1] }}
+          style={{
+            maxWidth: 1100, margin: '0 auto',
+            display: 'grid',
+            gridTemplateColumns: 'minmax(0,1fr) auto',
+            alignItems: 'center',
+            gap: 'clamp(2rem,5vw,5rem)',
+          }}
+        >
+          {/* Left — text */}
+          <div>
+            <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 900, fontSize: 'clamp(2.4rem,6vw,5rem)', letterSpacing: '-0.055em', lineHeight: 0.9, color: '#fff', margin: 0, whiteSpace: 'pre-line' }}>
+              {lang === 'en' ? "Let's build\nsomething great." : 'Vamos construir\nalgo incrível.'}
+            </h2>
+            <p style={{ marginTop: '1.5rem', fontSize: '0.875rem', color: 'rgba(255,255,255,0.28)', lineHeight: 1.75, maxWidth: '42ch' }}>
+              {lang === 'en' ? "Send a message and let's talk about your project — I reply within 24h." : 'Envie uma mensagem e vamos conversar sobre o seu projeto — respondo em até 24h.'}
+            </p>
+            <a
+              href={waUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ marginTop: '2rem', display: 'inline-flex', alignItems: 'center', gap: 8, padding: '1rem 2rem', borderRadius: 999, background: '#fff', color: '#0d0d0d', fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', textDecoration: 'none', transition: 'opacity 0.25s' }}
+              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.opacity = '0.82'; setCursor('pointer') }}
+              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.opacity = '1'; setCursor('default') }}
+            >
+              <MessageCircle size={14} />
+              {lang === 'en' ? 'Start a project' : 'Iniciar um projeto'}
+            </a>
+          </div>
+
+          {/* Right — orbital badge */}
+          <a
+            href={waUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={lang === 'en' ? 'Start a project via WhatsApp' : 'Iniciar projeto pelo WhatsApp'}
+            style={{ display: 'block', position: 'relative', width: 220, height: 220, flexShrink: 0, textDecoration: 'none' }}
+            onMouseEnter={() => setCursor('pointer')}
+            onMouseLeave={() => setCursor('default')}
+          >
+            {/* Spinning text ring */}
+            <svg viewBox="0 0 200 200" width="220" height="220" aria-hidden
+              style={{ position: 'absolute', inset: 0, animation: 'svc-orbit 18s linear infinite' }}
+            >
+              <defs>
+                <path id="svcRing" d="M 100,100 m -78,0 a 78,78 0 1,1 156,0 a 78,78 0 1,1 -156,0"/>
+              </defs>
+              <text fill="rgba(255,255,255,0.28)" fontSize="7.5" fontFamily="monospace" fontWeight="700" letterSpacing="8">
+                <textPath href="#svcRing">
+                  {lang === 'en' ? 'AVAILABLE · FREELANCE · 2026 · ' : 'DISPONÍVEL · FREELANCE · 2026 · '}
+                </textPath>
+              </text>
+            </svg>
+
+            {/* Outer ring */}
+            <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', border: '1px solid rgba(255,255,255,0.07)', pointerEvents: 'none' }} />
+
+            {/* Inner click circle */}
+            <motion.div
+              style={{ position: 'absolute', inset: 24, borderRadius: '50%', border: '1px solid rgba(255,255,255,0.1)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}
+              whileHover={{ borderColor: 'rgba(255,255,255,0.3)', background: 'rgba(255,255,255,0.04)' }}
+              transition={{ duration: 0.3 }}
+            >
+              <MessageCircle size={26} color="#ffffff" />
+              <span style={{ fontSize: '0.44rem', fontWeight: 700, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', textAlign: 'center', lineHeight: 1.5 }}>
+                {lang === 'en' ? 'START\nPROJECT' : 'INICIAR\nPROJETO'}
+              </span>
+            </motion.div>
           </a>
         </motion.div>
       </section>
