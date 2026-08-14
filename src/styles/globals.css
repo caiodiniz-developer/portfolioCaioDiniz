@@ -235,6 +235,23 @@
   }
 }
 
+/* ─── Battery saver ───
+   Set by BatterySaver.tsx when the device is under 20% and unplugged. Unlike
+   reduced-motion this does NOT kill transitions outright — the site should
+   still feel responsive, just stop burning cycles on decorative loops. */
+:root[data-battery-saver] *,
+:root[data-battery-saver] *::before,
+:root[data-battery-saver] *::after {
+  /* Infinite decorative animations (marquees, pulses, spins) are the expensive
+     ones; run them once and stop. */
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.12s !important;
+}
+
+:root[data-battery-saver] .noise-overlay::after {
+  display: none;   /* full-screen noise texture is pure decoration */
+}
+
 /* Custom scrollbar — minimal white */
 ::-webkit-scrollbar { width: 3px; }
 ::-webkit-scrollbar-track { background: #0d0d0d; }

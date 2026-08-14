@@ -1,7 +1,9 @@
-import { useEffect, useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useEffect, useRef, useState, useMemo } from 'react'
+import { Link, useLocation } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
 import { SITE } from '@/lib/constants'
+import { suggestRoute } from '@/lib/routeSuggest'
+import { useLanguageStore } from '@/store/useLanguageStore'
 
 const W = 640, H = 240
 const GY = H - 52          // ground y
@@ -19,6 +21,10 @@ export default function NotFound() {
   const [dead,    setDead]    = useState(false)
   const [score,   setScore]   = useState(0)
   const [best,    setBest]    = useState(0)
+
+  const { pathname } = useLocation()
+  const lang = useLanguageStore(s => s.lang)
+  const suggestion = useMemo(() => suggestRoute(pathname), [pathname])
 
   useEffect(() => { document.title = `404 — ${SITE.name}` }, [])
 
@@ -235,6 +241,23 @@ export default function NotFound() {
         </p>
       </div>
 
+      {/* ── Did you mean …? ──
+          The typed path is compared against every real route by edit distance;
+          a close miss almost always means a typo, so offer the fix rather than
+          leaving the visitor at a dead end. */}
+      {suggestion && (
+        <div className="nf-suggest">
+          <span className="nf-typed">
+            {pathname}
+          </span>
+          <span className="nf-arrow">→</span>
+          <Link to={suggestion.path} className="nf-fix">
+            {lang === 'en' ? 'Did you mean' : 'Você quis dizer'}{' '}
+            <strong>{suggestion.path}</strong>?
+          </Link>
+        </div>
+      )}
+
       {/* Game canvas */}
       <div style={{ position: 'relative' }}>
         <canvas
@@ -328,6 +351,46 @@ export default function NotFound() {
       >
         <ArrowLeft size={13} /> Voltar ao portfólio
       </Link>
+
+      <style>{`
+        .nf-suggest {
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+          flex-wrap: wrap;
+          justify-content: center;
+          padding: 0.75rem 1.25rem;
+          border-radius: 999px;
+          border: 1px solid rgba(255,255,255,0.09);
+          background: rgba(255,255,255,0.025);
+          margin-top: -1rem;
+        }
+        .nf-typed {
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 0.7rem;
+          color: rgba(255,255,255,0.28);
+          text-decoration: line-through;
+          text-decoration-color: rgba(248,113,113,0.6);
+          max-width: 30ch;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+        .nf-arrow { color: rgba(255,255,255,0.18); font-size: 0.75rem; }
+        .nf-fix {
+          font-size: 0.72rem;
+          color: rgba(255,255,255,0.45);
+          text-decoration: none;
+          transition: color 0.22s;
+          white-space: nowrap;
+        }
+        .nf-fix strong {
+          font-family: 'JetBrains Mono', monospace;
+          color: #fff;
+          font-weight: 700;
+        }
+        .nf-fix:hover { color: #fff; }
+      `}</style>
     </main>
   )
 }

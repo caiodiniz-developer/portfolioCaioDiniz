@@ -10,6 +10,8 @@ import ReturnVisitor from "./components/animations/ReturnVisitor";
 import PresentationMode from "./components/animations/PresentationMode";
 import ClickSound from "./components/animations/ClickSound";
 import SectionCounter from "./components/animations/SectionCounter";
+import LiveTab from "./components/animations/LiveTab";
+import BatterySaver from "./components/animations/BatterySaver";
 import Preloader from "./components/Preloader";
 
 export default function App() {
@@ -67,6 +69,8 @@ export default function App() {
       <PresentationMode />
       <ClickSound />
       <SectionCounter />
+      <LiveTab />
+      <BatterySaver />
       <RouterProvider router={router} />
     </>
   );
