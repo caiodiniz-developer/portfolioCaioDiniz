@@ -26,19 +26,15 @@ export default function ProjectsPage() {
   const setCursor = useCursorStore(s => s.setState)
   const setLabel  = useCursorStore(s => s.setLabel)
 
+  const navigate = useNavigate()
+
   const [active,   setActive]   = useState<Filter>('All')
   const [hovered,  setHovered]  = useState<number | null>(null)
-  const [selected, setSelected] = useState<number | null>(null)
   const [isMobile, setIsMobile] = useState(false)
-  /* Live demo inside the modal. Reset whenever the selection changes so an
-     iframe never carries over from the previously opened project. */
-  const [modalDemo, setModalDemo] = useState(false)
-  useEffect(() => { setModalDemo(false) }, [selected])
 
-  const filtered        = active === 'All' ? projects : projects.filter(p => p.category === active)
-  const selectedProject = projects.find(p => p.id === selected) ?? null
-  const hoveredProject  = projects.find(p => p.id === hovered) ?? null
-  const isBackend       = active === 'Back-end'
+  const filtered       = active === 'All' ? projects : projects.filter(p => p.category === active)
+  const hoveredProject = projects.find(p => p.id === hovered) ?? null
+  const isBackend      = active === 'Back-end'
 
   // Floating image ref — follows cursor via GSAP
   const floatRef = useRef<HTMLDivElement>(null)
@@ -51,16 +47,6 @@ export default function ProjectsPage() {
     return () => window.removeEventListener('resize', check)
   }, [])
 
-  useEffect(() => {
-    document.body.style.overflow = selected ? 'hidden' : ''
-    return () => { document.body.style.overflow = '' }
-  }, [selected])
-
-  useEffect(() => {
-    const h = (e: KeyboardEvent) => { if (e.key === 'Escape') setSelected(null) }
-    window.addEventListener('keydown', h)
-    return () => window.removeEventListener('keydown', h)
-  }, [])
 
   // GSAP mouse-following image — uses GSAP ticker which is Lenis-synced
   const handleMouseMove = useCallback((e: MouseEvent) => {
@@ -164,7 +150,7 @@ export default function ProjectsPage() {
         {(['All', 'Full Stack', 'Front-end', 'Back-end'] as Filter[]).map(f => (
           <button
             key={f}
-            onClick={() => { setActive(f); setSelected(null); setHovered(null) }}
+            onClick={() => { setActive(f); setHovered(null) }}
             onMouseEnter={() => setCursor('pointer')}
             onMouseLeave={() => setCursor('default')}
             style={{
