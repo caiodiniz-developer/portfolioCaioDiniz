@@ -704,7 +704,7 @@ export default function ContactPage() {
       {/* A visitor on the contact page is evaluating whether to hire — the CV
           is the single most likely thing they still need. */}
       <RouteCards
-        show={['cv', 'guestbook', 'teardown']}
+        show={['cv', 'guestbook']}
         headingPt="Antes de decidir"
         headingEn="Before you decide"
       />

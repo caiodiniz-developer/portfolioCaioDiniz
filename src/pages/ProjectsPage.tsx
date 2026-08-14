@@ -1,12 +1,12 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import gsap from 'gsap'
-import { X, ExternalLink, Github, ArrowUpRight } from 'lucide-react'
+import { Github, ArrowUpRight } from 'lucide-react'
 import { projects } from '@/data/projects'
 import { useLanguageStore } from '@/store/useLanguageStore'
 import { useCursorStore } from '@/store/useCursorStore'
 import { SITE } from '@/lib/constants'
-import RouteCards from '@/components/ui/RouteCards'
 
 type Filter = 'All' | 'Full Stack' | 'Front-end' | 'Back-end'
 
@@ -30,6 +30,10 @@ export default function ProjectsPage() {
   const [hovered,  setHovered]  = useState<number | null>(null)
   const [selected, setSelected] = useState<number | null>(null)
   const [isMobile, setIsMobile] = useState(false)
+  /* Live demo inside the modal. Reset whenever the selection changes so an
+     iframe never carries over from the previously opened project. */
+  const [modalDemo, setModalDemo] = useState(false)
+  useEffect(() => { setModalDemo(false) }, [selected])
 
   const filtered        = active === 'All' ? projects : projects.filter(p => p.category === active)
   const selectedProject = projects.find(p => p.id === selected) ?? null
@@ -249,7 +253,7 @@ export default function ProjectsPage() {
                   transition={{ duration: 0.48, ease: E, delay: i * 0.06 }}
                   onMouseEnter={() => { setHovered(project.id); setCursor('view'); setLabel('Abrir') }}
                   onMouseLeave={() => { setHovered(null); setCursor('default'); setLabel('') }}
-                  onClick={() => setSelected(project.id)}
+                  onClick={() => navigate(`/projects/${project.slug}`)}
                   style={{
                     display: 'flex', alignItems: 'center',
                     padding: '0 clamp(1.5rem,5vw,5rem)',
@@ -333,138 +337,6 @@ export default function ProjectsPage() {
         </AnimatePresence>
       )}
 
-      {/* Someone who just browsed the work is primed for how it was engineered. */}
-      <RouteCards
-        show={['teardown', 'cv', 'debug']}
-        headingPt="Nos bastidores"
-        headingEn="Behind the scenes"
-      />
-
-      {/* ══ MODAL ══ */}
-      <AnimatePresence>
-        {selectedProject && (
-          <>
-            <motion.div
-              key="backdrop"
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              style={{ position: 'fixed', inset: 0, zIndex: 490, background: 'rgba(0,0,0,0.84)', backdropFilter: 'blur(20px)', cursor: 'pointer' }}
-              onClick={() => setSelected(null)}
-            />
-
-            <motion.div
-              key={`panel-${selectedProject.id}`}
-              initial={{ opacity: 0, y: 48 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 32 }}
-              transition={{ duration: 0.44, ease: E }}
-              style={{
-                position: 'fixed', zIndex: 500,
-                ...(isMobile
-                  ? { inset: '1rem', borderRadius: 16, flexDirection: 'column' }
-                  : { top: '5%', left: '5%', right: '5%', bottom: '5%', borderRadius: 20 }),
-                display: 'flex', overflow: 'hidden',
-                background: '#0f0f0f',
-                border: '1px solid rgba(255,255,255,0.1)',
-                boxShadow: '0 60px 140px rgba(0,0,0,0.9)',
-              }}
-              onClick={e => e.stopPropagation()}
-            >
-              {/* Image */}
-              <div style={{ flex: isMobile ? '0 0 42%' : '0 0 54%', position: 'relative', overflow: 'hidden', minHeight: isMobile ? 200 : 'auto' }}>
-                <motion.img
-                  layoutId={`pimg-${selectedProject.id}`}
-                  src={selectedProject.image}
-                  alt={selectedProject.title}
-                  style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-                />
-                <div style={{ position: 'absolute', inset: 0, background: isMobile ? 'linear-gradient(to bottom, transparent 50%, rgba(15,15,15,0.98) 100%)' : 'linear-gradient(to right, transparent 60%, rgba(15,15,15,0.7) 100%)' }} />
-                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: CAT_COLOR[selectedProject.category] ?? '#fff', opacity: 0.7 }} />
-              </div>
-
-              {/* Info */}
-              <div style={{ flex: 1, padding: 'clamp(1.5rem,3.5vw,3rem)', display: 'flex', flexDirection: 'column', justifyContent: 'center', overflowY: 'auto', position: 'relative' }}>
-                <button
-                  onClick={() => setSelected(null)}
-                  style={{ position: 'absolute', top: '1rem', right: '1rem', width: 36, height: 36, borderRadius: '50%', border: '1px solid rgba(255,255,255,0.12)', background: 'transparent', color: 'rgba(255,255,255,0.45)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s', zIndex: 10 }}
-                  onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = 'rgba(255,255,255,0.4)'; el.style.color = '#fff' }}
-                  onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = 'rgba(255,255,255,0.12)'; el.style.color = 'rgba(255,255,255,0.45)' }}
-                >
-                  <X size={14} />
-                </button>
-
-                <span style={{ fontFamily: 'monospace', fontSize: '0.52rem', fontWeight: 700, letterSpacing: '0.2em', color: 'rgba(255,255,255,0.16)', marginBottom: '0.75rem' }}>
-                  {String(projects.findIndex(p => p.id === selectedProject.id) + 1).padStart(2, '0')} / {String(projects.length).padStart(2, '0')}
-                </span>
-
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.85rem' }}>
-                  <span style={{ width: 6, height: 6, borderRadius: '50%', background: CAT_COLOR[selectedProject.category] ?? '#fff' }} />
-                  <span style={{ fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.32)' }}>
-                    {selectedProject.category} · {selectedProject.year}
-                  </span>
-                </div>
-
-                <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 900, fontSize: 'clamp(1.8rem,3.5vw,3.2rem)', letterSpacing: '-0.045em', color: '#fff', margin: '0 0 1rem', lineHeight: 0.95 }}>
-                  {selectedProject.title}
-                </h2>
-
-                <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', lineHeight: 1.72, margin: '0 0 1.25rem', maxWidth: '44ch' }}>
-                  {selectedProject.longDescription || selectedProject.description}
-                </p>
-
-                <div style={{ display: 'flex', gap: '0.28rem', flexWrap: 'wrap', marginBottom: '1.5rem' }}>
-                  {selectedProject.stack.map(t => (
-                    <span key={t} style={{ fontSize: '0.56rem', fontWeight: 600, padding: '0.24rem 0.6rem', borderRadius: 999, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.09)', color: 'rgba(255,255,255,0.45)' }}>
-                      {t}
-                    </span>
-                  ))}
-                </div>
-
-                {selectedProject.results.length > 0 && (
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.45rem', marginBottom: '1.75rem' }}>
-                    {selectedProject.results.slice(0, 4).map((r, ri) => (
-                      <motion.div
-                        key={ri}
-                        initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.08 + ri * 0.06, duration: 0.3, ease: E }}
-                        style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 10, padding: '0.6rem 0.8rem' }}
-                      >
-                        <span style={{ fontSize: '0.63rem', color: '#4ade80', fontWeight: 700, lineHeight: 1.35, display: 'block' }}>{r}</span>
-                      </motion.div>
-                    ))}
-                  </div>
-                )}
-
-                <div style={{ display: 'flex', gap: '0.65rem', flexWrap: 'wrap' }}>
-                  <a
-                    href={selectedProject.liveUrl} target="_blank" rel="noopener noreferrer"
-                    style={{ display: 'inline-flex', alignItems: 'center', gap: '0.45rem', background: '#ffffff', color: '#0d0d0d', borderRadius: 999, padding: '0.8rem 1.65rem', fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', textDecoration: 'none', transition: 'opacity 0.2s' }}
-                    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.opacity = '0.85'; setCursor('pointer') }}
-                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.opacity = '1'; setCursor('default') }}
-                  >
-                    <ExternalLink size={11} />
-                    {lang === 'en' ? 'Visit site' : 'Ver site'}
-                  </a>
-                  {selectedProject.githubUrl && (
-                    <a
-                      href={selectedProject.githubUrl} target="_blank" rel="noopener noreferrer"
-                      style={{ display: 'inline-flex', alignItems: 'center', gap: '0.45rem', background: 'transparent', color: 'rgba(255,255,255,0.45)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 999, padding: '0.8rem 1.65rem', fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', textDecoration: 'none', transition: 'all 0.2s' }}
-                      onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.color = '#fff'; el.style.borderColor = 'rgba(255,255,255,0.3)'; setCursor('pointer') }}
-                      onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.color = 'rgba(255,255,255,0.45)'; el.style.borderColor = 'rgba(255,255,255,0.12)'; setCursor('default') }}
-                    >
-                      <Github size={11} /> GitHub
-                    </a>
-                  )}
-                </div>
-
-                <span style={{ marginTop: '1.5rem', fontSize: '0.48rem', fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.12)' }}>
-                  ESC {lang === 'en' ? 'to close' : 'para fechar'}
-                </span>
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
     </main>
   )
 }

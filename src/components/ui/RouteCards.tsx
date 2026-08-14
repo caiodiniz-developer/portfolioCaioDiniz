@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import { useRef, useEffect } from 'react'
 import gsap from 'gsap'
 import ScrollTrigger from 'gsap/ScrollTrigger'
-import { FileText, Wrench, BookOpen, Bug, ArrowUpRight } from 'lucide-react'
+import { FileText, BookOpen, ArrowUpRight } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { useCursorStore } from '@/store/useCursorStore'
 import { useLanguageStore } from '@/store/useLanguageStore'
@@ -10,14 +10,12 @@ import { useLanguageStore } from '@/store/useLanguageStore'
 /**
  * Entry points for the site's secondary routes.
  *
- * These pages (/cv, /teardown, /guestbook, /debug) previously existed only in
- * the footer — and /debug had no link anywhere at all, so the page was
- * unreachable unless you typed the URL. Rather than crowd the main nav, each
- * page is surfaced from the section where a visitor would already be in the
- * right frame of mind: the résumé from "about", the teardown from "projects".
+ * Rather than crowd the main nav, each page is surfaced from the section where
+ * a visitor is already in the right frame of mind — the résumé at the end of
+ * "about" and "contact", where someone is deciding whether to hire.
  */
 
-export type RouteKey = 'cv' | 'teardown' | 'guestbook' | 'debug'
+export type RouteKey = 'cv' | 'guestbook'
 
 interface RouteDef {
   path: string
@@ -41,16 +39,6 @@ const ROUTES: Record<RouteKey, RouteDef> = {
     tagPt: 'PDF',
     tagEn: 'PDF',
   },
-  teardown: {
-    path: '/teardown',
-    Icon: Wrench,
-    titlePt: 'Como este site foi feito',
-    titleEn: 'How this site was built',
-    descPt: 'Seis bugs reais que passaram por aqui — causa, correção e o diff de cada um.',
-    descEn: 'Six real defects that shipped here — cause, fix and the diff for each.',
-    tagPt: 'Técnico',
-    tagEn: 'Technical',
-  },
   guestbook: {
     path: '/guestbook',
     Icon: BookOpen,
@@ -60,16 +48,6 @@ const ROUTES: Record<RouteKey, RouteDef> = {
     descEn: 'Leave a note. It really is saved, for whoever comes after you.',
     tagPt: 'Interativo',
     tagEn: 'Interactive',
-  },
-  debug: {
-    path: '/debug',
-    Icon: Bug,
-    titlePt: 'Caça-bugs',
-    titleEn: 'Bug catcher',
-    descPt: 'Um joguinho. Porque nem todo bug precisa ser levado a sério.',
-    descEn: 'A small game. Not every bug deserves to be taken seriously.',
-    tagPt: 'Jogo',
-    tagEn: 'Game',
   },
 }
 

@@ -3,7 +3,7 @@ export const SITE = {
   title: 'Caio Diniz — Full Stack Developer',
   description:
     'Portfolio of Caio Diniz, a Full Stack Developer building premium websites, web apps and digital experiences with React, TypeScript and Node.js.',
-  url: 'https://caiodiniz.dev',
+  url: 'https://www.caiodiniz.dev.br',
   email: 'cvdinizramos@gmail.com',
   whatsapp: '+5519994737425',
   github: 'https://github.com/caiodiniz-developer',

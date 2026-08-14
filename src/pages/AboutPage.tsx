@@ -189,7 +189,7 @@ export default function AboutPage() {
       {/* Someone reading the career section is the person most likely to want
           the résumé and the guestbook. */}
       <RouteCards
-        show={['cv', 'teardown', 'guestbook']}
+        show={['cv', 'guestbook']}
         headingPt="Continue por aqui"
         headingEn="Keep going"
       />

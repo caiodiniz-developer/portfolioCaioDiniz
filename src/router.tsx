@@ -13,9 +13,7 @@ import ProjectDetail from "@/pages/ProjectDetail";
 import ServicesPage from "@/pages/ServicesPage";
 import ContactPage from "@/pages/ContactPage";
 import NotFound from "@/pages/NotFound";
-import BugCatcher from "@/pages/BugCatcher";
 import GuestbookPage from "@/pages/GuestbookPage";
-import TeardownPage from "@/pages/TeardownPage";
 import CVPage from "@/pages/CVPage";
 import { getLenis } from "@/hooks/useLenis";
 import { initAnalytics, pageview } from "@/lib/analytics";
@@ -90,9 +88,7 @@ export const router = createBrowserRouter([
       { path: "projects/:slug", element: <ProjectDetail /> },
       { path: "services", element: <ServicesPage /> },
       { path: "contact", element: <ContactPage /> },
-      { path: "debug",      element: <BugCatcher /> },
       { path: "guestbook",  element: <GuestbookPage /> },
-      { path: "teardown",   element: <TeardownPage /> },
       { path: "cv",         element: <CVPage /> },
       { path: "*", element: <NotFound /> },
     ],

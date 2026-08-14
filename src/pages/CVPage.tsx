@@ -80,6 +80,14 @@ export default function CVPage() {
               ? 'Full Stack Developer focused on building web products end to end — from database schema and API design through to interface and motion. I care about the parts users feel: load time, input latency, and interfaces that stay legible under real conditions.'
               : 'Desenvolvedor Full Stack focado em construir produtos web de ponta a ponta — do schema do banco e desenho da API até a interface e o movimento. Me importo com o que o usuário sente: tempo de carregamento, latência de interação e interfaces que continuam legíveis em condições reais.'}
           </p>
+
+          {/* Availability — the first thing a recruiter checks after the name. */}
+          <p className="cv-avail">
+            <span className="cv-dot" />
+            {en
+              ? 'Available for full-time, contract or freelance · Remote or Campinas/São Paulo'
+              : 'Disponível para CLT, PJ ou freelance · Remoto ou Campinas/São Paulo'}
+          </p>
         </section>
 
         {/* Experience */}
@@ -115,6 +123,21 @@ export default function CVPage() {
                 <p className="cv-tags">{p.stack.join(' · ')}</p>
                 {p.results?.length > 0 && (
                   <p className="cv-results">{p.results.slice(0, 3).join('  ·  ')}</p>
+                )}
+                {/* One decision per project — this is what turns a list of
+                    projects into evidence of judgement. */}
+                {p.tradeoffs?.[0] && (
+                  <p className="cv-tradeoff">
+                    <strong>{p.tradeoffs[0].chose}</strong>
+                    {en ? ' over ' : ' em vez de '}
+                    <span className="cv-rejected">{p.tradeoffs[0].over}</span>
+                    {' — '}{p.tradeoffs[0].why}
+                  </p>
+                )}
+                {p.liveUrl && p.liveUrl !== '#' && !p.liveUrl.includes('caiodiniz.dev') && (
+                  <p className="cv-link">
+                    <a href={p.liveUrl}>{p.liveUrl.replace(/^https?:\/\//, '').replace(/\/$/, '')}</a>
+                  </p>
                 )}
               </div>
             ))}
@@ -276,6 +299,32 @@ export default function CVPage() {
         .cv-results {
           margin: 0.3rem 0 0;
           font-size: 0.68rem; font-weight: 600; color: #16161a;
+        }
+        .cv-tradeoff {
+          margin: 0.4rem 0 0;
+          padding-left: 0.7rem;
+          border-left: 2px solid #e0e0e6;
+          font-size: 0.7rem;
+          line-height: 1.6;
+          color: #55555d;
+        }
+        .cv-tradeoff strong { color: #16161a; font-weight: 700; }
+        .cv-rejected { text-decoration: line-through; color: #9a9aa2; }
+        .cv-link { margin: 0.3rem 0 0; font-size: 0.68rem; }
+        .cv-link a { color: #45454d; text-decoration: underline; text-underline-offset: 2px; }
+
+        .cv-avail {
+          display: flex; align-items: center; gap: 0.45rem;
+          margin: 0.7rem 0 0;
+          font-size: 0.72rem; font-weight: 600; color: #16161a;
+        }
+        .cv-dot {
+          width: 6px; height: 6px; border-radius: 50%;
+          background: #16a34a; flex-shrink: 0;
+          /* print-color-adjust keeps the dot from vanishing in the PDF, since
+             browsers strip backgrounds when printing by default */
+          -webkit-print-color-adjust: exact;
+          print-color-adjust: exact;
         }
 
         .cv-skills { display: flex; flex-direction: column; gap: 0.5rem; }
