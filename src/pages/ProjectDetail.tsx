@@ -3,6 +3,7 @@ import { useParams, Navigate, Link } from 'react-router-dom'
 import { ArrowLeft, ArrowRight, ExternalLink, Github } from 'lucide-react'
 import { getProjectBySlug, projects } from '@/data/projects'
 import LiveDemo from '@/components/projects/LiveDemo'
+import TechStack from '@/components/projects/TechStack'
 import { SITE } from '@/lib/constants'
 import { useLanguageStore } from '@/store/useLanguageStore'
 import { useCursorStore } from '@/store/useCursorStore'
@@ -105,11 +106,7 @@ export default function ProjectDetail() {
         {/* ── Stack ── */}
         <section className="pd-stack-wrap">
           <h2 className="pd-label">{en ? 'Built with' : 'Tecnologias usadas'}</h2>
-          <div className="pd-stack">
-            {project.stack.map(tech => (
-              <span key={tech} className="pd-pill">{tech}</span>
-            ))}
-          </div>
+          <TechStack stack={project.stack} />
         </section>
 
         {/* Next */}

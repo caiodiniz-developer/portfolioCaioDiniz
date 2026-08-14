@@ -50,11 +50,11 @@ export default function Footer() {
       <div
         className="container-custom ft-bar"
         style={{
-          paddingTop:    'clamp(1.5rem, 3vw, 2.25rem)',
+          paddingTop:    'clamp(1.25rem, 2.5vw, 1.75rem)',
           /* The secret-terminal button (bottom-left) and the clock widget
              (bottom-right) are position:fixed and would otherwise sit on top of
-             this row. Reserve enough height for it to clear both. */
-          paddingBottom: 'clamp(4.5rem, 7vw, 5.5rem)',
+             this row — this clears them without leaving a dead band. */
+          paddingBottom: 'clamp(3.5rem, 5vw, 4.25rem)',
         }}
       >
         {/* Identity */}

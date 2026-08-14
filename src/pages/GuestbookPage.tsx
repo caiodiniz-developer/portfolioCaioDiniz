@@ -401,30 +401,37 @@ function Headline({ text }: { text: string }) {
 
   useEffect(() => {
     if (!ref.current || prefersReducedMotion) return
-    const split = new SplitType(ref.current, { types: 'chars' })
-    gsap.from(split.chars!, {
-      y: '110%', opacity: 0, duration: 0.65, ease: 'power3.out', stagger: 0.022, delay: 0.12,
+    /* 'words, chars' — NOT 'chars' alone. Splitting only into characters gives
+       the browser a break opportunity between every letter, which is why
+       "marca" was wrapping as "mar / ca". The word wrappers keep each word
+       atomic while the chars still animate individually. */
+    const split = new SplitType(ref.current, { types: 'words,chars' })
+    gsap.set(split.chars!, { yPercent: 110, opacity: 0 })
+    gsap.to(split.chars!, {
+      yPercent: 0, opacity: 1,
+      duration: 0.65, ease: 'power3.out', stagger: 0.022, delay: 0.12,
     })
     return () => split.revert()
   }, [text, prefersReducedMotion])
 
   return (
-    <div style={{ overflow: 'hidden' }}>
-      <h1
-        ref={ref}
-        style={{
-          fontFamily:    'Syne, sans-serif',
-          fontWeight:    900,
-          fontSize:      'clamp(2.8rem,7vw,5.5rem)',
-          letterSpacing: '-0.05em',
-          lineHeight:    0.9,
-          color:         '#fff',
-          margin:        0,
-        }}
-      >
-        {text}
-      </h1>
-    </div>
+    <h1
+      ref={ref}
+      style={{
+        fontFamily:    'Syne, sans-serif',
+        fontWeight:    800,
+        fontSize:      'clamp(2.6rem,6.5vw,5rem)',
+        letterSpacing: '-0.05em',
+        lineHeight:    0.95,
+        color:         '#fff',
+        margin:        0,
+        /* The per-word wrappers need their own overflow clipping; a single
+           clip on the outer block cut the descenders of the lower line. */
+        overflow:      'hidden',
+      }}
+    >
+      {text}
+    </h1>
   )
 }
 
@@ -588,11 +595,11 @@ export default function GuestbookPage() {
         backgroundSize: '48px 48px',
       }} />
 
-      <div style={{ position: 'relative', zIndex: 1, paddingTop: '6rem', paddingBottom: '6rem' }}>
+      <div style={{ position: 'relative', zIndex: 1, paddingTop: 'clamp(6rem,10vw,8rem)', paddingBottom: 'clamp(2.5rem,5vw,4rem)' }}>
         <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 clamp(1.25rem,4vw,3rem)' }}>
 
           {/* ── HERO ── */}
-          <div style={{ marginBottom: 'clamp(3rem,6vw,5rem)' }}>
+          <div style={{ marginBottom: 'clamp(2rem,4vw,3rem)' }}>
             <motion.div
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1,  y: 0  }}
@@ -642,7 +649,7 @@ export default function GuestbookPage() {
               border:         '1px solid rgba(255,255,255,0.09)',
               background:     'rgba(255,255,255,0.02)',
               padding:        'clamp(1.25rem,3vw,2rem)',
-              marginBottom:   'clamp(3rem,6vw,5rem)',
+              marginBottom:   'clamp(2rem,4vw,3rem)',
             }}
           >
             {/* Form header */}
@@ -856,7 +863,7 @@ CREATE POLICY "delete_all" ON guestbook FOR DELETE USING (true);`}
           </div>
 
           {/* Admin toggle */}
-          <div style={{ marginTop: '4rem', display: 'flex', justifyContent: 'center' }}>
+          <div style={{ marginTop: '2.25rem', display: 'flex', justifyContent: 'center' }}>
             <button
               onClick={activateAdmin}
               title={isAdmin ? 'Exit admin' : 'Admin'}

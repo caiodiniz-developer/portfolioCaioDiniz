@@ -84,8 +84,10 @@ export default function CTASection() {
       <div
         className="container-custom cta-wrap"
         style={{
-          paddingTop:    'clamp(5rem,11vw,10rem)',
-          paddingBottom: 'clamp(5rem,11vw,10rem)',
+          paddingTop:    'clamp(4rem,8vw,7rem)',
+          /* Tighter than the top: the footer sits directly below and the two
+             paddings were stacking into a large empty band. */
+          paddingBottom: 'clamp(2rem,4vw,3.5rem)',
         }}
       >
         {/* Eyebrow */}
@@ -320,8 +322,8 @@ export default function CTASection() {
           flex-direction: column;
           gap: 1.5rem;
           align-items: flex-start;
-          margin-top: clamp(2.5rem, 5vw, 4rem);
-          padding-top: clamp(1.5rem, 3vw, 2.5rem);
+          margin-top: clamp(2rem, 4vw, 3rem);
+          padding-top: clamp(1.25rem, 2.5vw, 2rem);
           border-top: 1px solid rgba(255,255,255,0.06);
         }
         @media (min-width: 720px) {
@@ -370,7 +372,7 @@ export default function CTASection() {
           align-items: center;
           flex-wrap: wrap;
           gap: 0.75rem;
-          margin-top: clamp(1.5rem, 3vw, 2rem);
+          margin-top: clamp(1.25rem, 2.5vw, 1.75rem);
           font-size: 0.57rem;
           font-weight: 600;
           letter-spacing: 0.14em;
