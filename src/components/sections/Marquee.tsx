@@ -30,21 +30,32 @@ function Track({ items, reverse = false }: { items: string[]; reverse?: boolean 
     if (!el) return
 
     const speed   = reverse ? -0.45 : 0.45   /* px per frame */
-    let pos       = reverse ? -el.scrollWidth / 2 : 0
     let paused    = false
     let rafId: number
+
+    /* Measure ONCE. Reading scrollWidth inside the loop forced a synchronous
+       layout flush every frame, which stalled the whole scroll pipeline. */
+    let half = el.scrollWidth / 2
+    let pos  = reverse ? -half : 0
 
     function tick() {
       if (!paused) {
         pos += speed
-        /* Seamlessly wrap: content is doubled so at half we reset */
-        const half = el!.scrollWidth / 2
+        /* Seamlessly wrap: content is doubled, so at half we reset */
         if (!reverse && pos <= -half) pos = 0
-        if (reverse  && pos >= 0)    pos = -half
+        if (reverse  && pos >= 0)     pos = -half
         el!.style.transform = `translate3d(${pos}px, 0, 0)`
       }
       rafId = requestAnimationFrame(tick)
     }
+
+    /* Re-measure only when the element's box actually changes (fonts loading,
+       resize, content swap) — not on every frame. */
+    const ro = new ResizeObserver(() => {
+      half = el.scrollWidth / 2
+      if (pos < -half) pos = 0
+    })
+    ro.observe(el)
 
     rafId = requestAnimationFrame(tick)
 
@@ -58,6 +69,7 @@ function Track({ items, reverse = false }: { items: string[]; reverse?: boolean 
 
     return () => {
       cancelAnimationFrame(rafId)
+      ro.disconnect()
       el.removeEventListener('mouseenter', pause)
       el.removeEventListener('mouseleave', resume)
       el.removeEventListener('touchstart', pause)

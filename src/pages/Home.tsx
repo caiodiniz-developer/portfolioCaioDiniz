@@ -6,6 +6,7 @@ import Services      from '@/components/sections/Services'
 import StackCarousel from '@/components/sections/StackCarousel'
 import Process       from '@/components/sections/Process'
 import Testimonials  from '@/components/sections/Testimonials'
+import GitHubActivity from '@/components/sections/GitHubActivity'
 import CTASection    from '@/components/sections/CTASection'
 
 export default function Home() {
@@ -21,6 +22,7 @@ export default function Home() {
       <StackCarousel />
       <Process />
       <Testimonials />
+      <GitHubActivity />
       <CTASection />
     </>
   )

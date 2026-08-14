@@ -825,23 +825,15 @@ export default function ServicesPage() {
 
       {/* ── CTA ── */}
       <section style={{ padding: 'clamp(4rem,8vw,6rem) clamp(1.5rem,5vw,5rem)', borderTop: '1px solid rgba(255,255,255,0.06)', overflow: 'hidden' }}>
-        <style>{`@keyframes svc-orbit { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.7, ease: [0.16,1,0.3,1] }}
-          style={{
-            maxWidth: 1100, margin: '0 auto',
-            display: 'grid',
-            gridTemplateColumns: 'minmax(0,1fr) auto',
-            alignItems: 'center',
-            gap: 'clamp(2rem,5vw,5rem)',
-          }}
+          style={{ maxWidth: 1100, margin: '0 auto' }}
         >
-          {/* Left — text */}
           <div>
-            <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 900, fontSize: 'clamp(2.4rem,6vw,5rem)', letterSpacing: '-0.055em', lineHeight: 0.9, color: '#fff', margin: 0, whiteSpace: 'pre-line' }}>
+            <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 'clamp(2.4rem,6vw,5rem)', letterSpacing: '-0.055em', lineHeight: 0.9, color: '#fff', margin: 0, whiteSpace: 'pre-line' }}>
               {lang === 'en' ? "Let's build\nsomething great." : 'Vamos construir\nalgo incrível.'}
             </h2>
             <p style={{ marginTop: '1.5rem', fontSize: '0.875rem', color: 'rgba(255,255,255,0.28)', lineHeight: 1.75, maxWidth: '42ch' }}>
@@ -859,46 +851,6 @@ export default function ServicesPage() {
               {lang === 'en' ? 'Start a project' : 'Iniciar um projeto'}
             </a>
           </div>
-
-          {/* Right — orbital badge */}
-          <a
-            href={waUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label={lang === 'en' ? 'Start a project via WhatsApp' : 'Iniciar projeto pelo WhatsApp'}
-            style={{ display: 'block', position: 'relative', width: 220, height: 220, flexShrink: 0, textDecoration: 'none' }}
-            onMouseEnter={() => setCursor('pointer')}
-            onMouseLeave={() => setCursor('default')}
-          >
-            {/* Spinning text ring */}
-            <svg viewBox="0 0 200 200" width="220" height="220" aria-hidden
-              style={{ position: 'absolute', inset: 0, animation: 'svc-orbit 18s linear infinite' }}
-            >
-              <defs>
-                <path id="svcRing" d="M 100,100 m -78,0 a 78,78 0 1,1 156,0 a 78,78 0 1,1 -156,0"/>
-              </defs>
-              <text fill="rgba(255,255,255,0.28)" fontSize="7.5" fontFamily="monospace" fontWeight="700" letterSpacing="8">
-                <textPath href="#svcRing">
-                  {lang === 'en' ? 'AVAILABLE · FREELANCE · 2026 · ' : 'DISPONÍVEL · FREELANCE · 2026 · '}
-                </textPath>
-              </text>
-            </svg>
-
-            {/* Outer ring */}
-            <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', border: '1px solid rgba(255,255,255,0.07)', pointerEvents: 'none' }} />
-
-            {/* Inner click circle */}
-            <motion.div
-              style={{ position: 'absolute', inset: 24, borderRadius: '50%', border: '1px solid rgba(255,255,255,0.1)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}
-              whileHover={{ borderColor: 'rgba(255,255,255,0.3)', background: 'rgba(255,255,255,0.04)' }}
-              transition={{ duration: 0.3 }}
-            >
-              <MessageCircle size={26} color="#ffffff" />
-              <span style={{ fontSize: '0.44rem', fontWeight: 700, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', textAlign: 'center', lineHeight: 1.5 }}>
-                {lang === 'en' ? 'START\nPROJECT' : 'INICIAR\nPROJETO'}
-              </span>
-            </motion.div>
-          </a>
         </motion.div>
       </section>
 

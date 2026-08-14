@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef, useCallback } from 'react'
+import type { ReactElement } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Trash2, X, Radio, Send } from 'lucide-react'
 import gsap from 'gsap'
@@ -59,7 +60,8 @@ function timeAgo(iso: string, lang: 'en' | 'pt') {
 /* ── Custom sticker drawings ── */
 type StickerKey = 'cat' | 'heart' | 'smile' | 'star' | 'zap'
 
-const STICKER_SVGS: Record<StickerKey, JSX.Element> = {
+// React 19 removed the global `JSX` namespace — use the React type directly.
+const STICKER_SVGS: Record<StickerKey, ReactElement> = {
   cat: (
     <svg viewBox="0 0 32 32" width="24" height="24" fill="none">
       <ellipse cx="16" cy="18" rx="10" ry="9" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />

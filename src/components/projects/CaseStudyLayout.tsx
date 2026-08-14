@@ -8,6 +8,7 @@ import type { Project } from '@/data/projects'
 import { useLanguageStore } from '@/store/useLanguageStore'
 import { useCursorStore } from '@/store/useCursorStore'
 import { useT } from '@/hooks/useTranslation'
+import LiveDemo from '@/components/projects/LiveDemo'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -18,7 +19,7 @@ export default function CaseStudyLayout({ project, nextProject }: Props) {
   const lang      = useLanguageStore((s) => s.lang)
   const setCursor = useCursorStore((s) => s.setState)
   const galleryRef = useRef<HTMLDivElement>(null)
-  const galleryImages = project.gallery.slice(1)
+  const galleryImages = project.embedUrl ? project.gallery : project.gallery.slice(1)
   const isLive = project.liveUrl && project.liveUrl !== '#'
 
   async function shareProject() {
@@ -127,7 +128,16 @@ export default function CaseStudyLayout({ project, nextProject }: Props) {
 
         <div style={S.divider} />
 
-        {/* Hero image — clickable, with persistent "Visit site" badge */}
+        {/* Hero — a runnable instance when the project allows framing,
+            otherwise the screenshot. */}
+        {project.embedUrl ? (
+          <LiveDemo
+            embedUrl={project.embedUrl}
+            posterSrc={project.image}
+            title={project.title}
+            liveUrl={project.liveUrl}
+          />
+        ) : (
         <div style={{ borderRadius: 'clamp(12px,2vw,20px)', overflow: 'hidden', aspectRatio: '16/9', position: 'relative', marginBottom: 'clamp(2.5rem,5vw,4rem)' }}>
           {isLive ? (
             <a href={project.liveUrl} target="_blank" rel="noopener noreferrer" style={{ display: 'block', width: '100%', height: '100%', position: 'relative' }}
@@ -162,6 +172,7 @@ export default function CaseStudyLayout({ project, nextProject }: Props) {
               style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
           )}
         </div>
+        )}
 
         {/* Two-column content */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(340px,100%), 1fr))', gap: 'clamp(2rem,5vw,4rem)', alignItems: 'start' }}>
@@ -178,6 +189,53 @@ export default function CaseStudyLayout({ project, nextProject }: Props) {
                 <p style={{ fontSize: '0.875rem', color: 'rgba(255,255,255,0.38)', lineHeight: 1.8 }}>{body}</p>
               </section>
             ))}
+
+            {/* ── Technical decisions ──
+                The part of a case study that shows judgement rather than output:
+                what was chosen, what credible option lost, and why. */}
+            {project.tradeoffs?.length > 0 && (
+              <section>
+                <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 'clamp(1.2rem,2.5vw,1.6rem)', color: '#fff', letterSpacing: '-0.03em', marginBottom: '0.4rem' }}>
+                  {lang === 'en' ? 'Technical decisions' : 'Decisões técnicas'}
+                </h2>
+                <p style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.22)', lineHeight: 1.6, marginBottom: '1.25rem' }}>
+                  {lang === 'en'
+                    ? 'What I picked, what I turned down, and the reasoning.'
+                    : 'O que escolhi, o que descartei, e o porquê.'}
+                </p>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.7rem' }}>
+                  {project.tradeoffs.map((td, i) => (
+                    <article
+                      key={i}
+                      style={{
+                        borderRadius: 14,
+                        padding: 'clamp(1rem,2.2vw,1.4rem)',
+                        background: 'rgba(255,255,255,0.02)',
+                        border: '1px solid rgba(255,255,255,0.06)',
+                      }}
+                    >
+                      {/* chose ── over */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap', marginBottom: '0.7rem' }}>
+                        <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#fff', letterSpacing: '-0.01em' }}>
+                          {td.chose}
+                        </span>
+                        <span style={{ fontSize: '0.55rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.2)' }}>
+                          {lang === 'en' ? 'over' : 'em vez de'}
+                        </span>
+                        <span style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.3)', textDecoration: 'line-through', textDecorationColor: 'rgba(255,255,255,0.18)' }}>
+                          {td.over}
+                        </span>
+                      </div>
+
+                      <p style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.4)', lineHeight: 1.75, margin: 0 }}>
+                        {td.why}
+                      </p>
+                    </article>
+                  ))}
+                </div>
+              </section>
+            )}
 
             {/* Gallery */}
             {galleryImages.length > 0 && (

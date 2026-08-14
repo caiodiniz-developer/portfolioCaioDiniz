@@ -53,6 +53,15 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
+    /* Syne's variable axis stops at 800, but the codebase asks for 900 in ~40
+       places. Without this the browser FAKES the extra weight (synthetic bold),
+       which renders visibly heavier and rounder than the real 800 used by
+       h1/h2/h3 — the headings looked like a different typeface. Disabling
+       synthesis makes every 900 fall back to the real 800 file instead. */
+    font-synthesis-weight: none;
+    /* overflow-x clip on html propagates to viewport without creating a scroll container.
+       Critically, it does NOT force overflow-y:auto — so Lenis can own the window scroll. */
+    overflow-x: clip;
   }
 
   body {
@@ -60,11 +69,8 @@
     color: #ffffff;
     font-family: 'Inter', system-ui, sans-serif;
     line-height: 1.6;
-    overflow-x: hidden;
-  }
-
-  body.cursor-hidden * {
-    cursor: none !important;
+    /* REMOVED overflow-x:hidden — it was silently setting overflow-y:auto on body,
+       turning body into a scroll container and bypassing Lenis entirely. */
   }
 
   ::selection {

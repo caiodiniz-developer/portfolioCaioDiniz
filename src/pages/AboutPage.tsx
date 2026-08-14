@@ -6,6 +6,7 @@ import About from '@/components/sections/About'
 import DevAnatomy from '@/components/sections/DevAnatomy'
 import Experience from '@/components/sections/Experience'
 import CTASection from '@/components/sections/CTASection'
+import RouteCards from '@/components/ui/RouteCards'
 import { SITE } from '@/lib/constants'
 
 /* ─── Tech stack data ─── */
@@ -185,6 +186,13 @@ export default function AboutPage() {
       </section>
 
       <Experience />
+      {/* Someone reading the career section is the person most likely to want
+          the résumé and the guestbook. */}
+      <RouteCards
+        show={['cv', 'teardown', 'guestbook']}
+        headingPt="Continue por aqui"
+        headingEn="Keep going"
+      />
       <CTASection />
     </main>
   )

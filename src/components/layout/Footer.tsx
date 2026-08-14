@@ -1,159 +1,113 @@
-import { useRef, useEffect } from 'react'
-import { Link, useLocation } from 'react-router-dom'
-import { Github, Linkedin } from 'lucide-react'
-import gsap from 'gsap'
-import ScrollTrigger from 'gsap/ScrollTrigger'
-import { useT } from '@/hooks/useTranslation'
-import { NAV_LINKS, SITE } from '@/lib/constants'
+import { useLocation } from 'react-router-dom'
+import { useLanguageStore } from '@/store/useLanguageStore'
 import { useCursorStore } from '@/store/useCursorStore'
 import { usePresentationStore } from '@/store/usePresentationStore'
+import { getLenis } from '@/hooks/useLenis'
 
-gsap.registerPlugin(ScrollTrigger)
-
-function TikTokIcon({ size = 16 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
-      <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.32 6.32 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.68a8.27 8.27 0 0 0 4.84 1.55V6.78a4.85 4.85 0 0 1-1.07-.09z" />
-    </svg>
-  )
-}
-
-const socials = [
-  { icon: Github,       href: SITE.github,   label: 'GitHub'   },
-  { icon: Linkedin,     href: SITE.linkedin, label: 'LinkedIn' },
-  { icon: TikTokIcon,   href: SITE.tiktok,   label: 'TikTok'   },
-]
-
+/**
+ * Minimal closing bar.
+ *
+ * The large footer block (name, email, socials, nav) used to live here, but it
+ * repeated everything the CTA section directly above it already says. Contact
+ * details and the secondary links now belong to that section, and the footer is
+ * just the legal line and a way back up.
+ */
 export default function Footer() {
-  const t           = useT()
-  const setCursor   = useCursorStore((s) => s.setState)
-  const presenting  = usePresentationStore((s) => s.active)
-  const { pathname} = useLocation()
-  const year        = new Date().getFullYear()
+  const lang       = useLanguageStore((s) => s.lang)
+  const pt         = lang === 'pt'
+  const setCursor  = useCursorStore((s) => s.setState)
+  const presenting = usePresentationStore((s) => s.active)
+  const { pathname } = useLocation()
+  const year       = new Date().getFullYear()
   const isGuestbook = pathname === '/guestbook'
-  const footerRef   = useRef<HTMLElement>(null)
-  const lineRef     = useRef<HTMLDivElement>(null)
 
-  useEffect(() => {
-    if (!lineRef.current || !footerRef.current) return
-    gsap.set(lineRef.current, { scaleX: 0, transformOrigin: 'left center' })
-    gsap.to(lineRef.current, {
-      scaleX: 1,
-      duration: 1.2,
-      ease: 'power3.inOut',
-      scrollTrigger: {
-        trigger: footerRef.current,
-        start: 'top 92%',
-        once: true,
-      },
-    })
-    return () => ScrollTrigger.getAll().forEach((t) => {
-      if (t.trigger === footerRef.current) t.kill()
-    })
-  }, [])
+  function scrollToTop() {
+    const lenis = getLenis()
+    if (lenis) lenis.scrollTo(0, { duration: 1.8 })
+    else window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
 
   if (presenting) return null
 
-  const navLabels: Record<string, string> = {
-    home:     t.nav.home,
-    about:    t.nav.about,
-    projects: t.nav.projects,
-    services: t.nav.services,
-    contact:  t.nav.contact,
-  }
-
   return (
     <footer
-      ref={footerRef}
-      style={isGuestbook ? {
-        position:        'relative',
-        zIndex:          3,
-        background:      'rgba(8,8,8,0.75)',
-        backdropFilter:  'blur(20px)',
-        WebkitBackdropFilter: 'blur(20px)',
-        borderTop:       '1px solid rgba(255,255,255,0.18)',
-        boxShadow:       '0 -1px 40px rgba(0,0,0,0.6)',
-      } : {
-        background: '#080808',
-        borderTop:  '1px solid rgba(255,255,255,0.06)',
+      style={{
+        background: isGuestbook ? 'rgba(8,8,8,0.85)' : '#080808',
+        backdropFilter: isGuestbook ? 'blur(20px)' : undefined,
+        borderTop: '1px solid rgba(255,255,255,0.05)',
+        position: 'relative',
       }}
     >
       <div
-        ref={lineRef}
+        className="container-custom"
         style={{
-          height:     '1px',
-          background: isGuestbook
-            ? 'rgba(255,255,255,0.22)'
-            : 'rgba(255,255,255,0.14)',
-          willChange: 'transform',
+          paddingTop:    '1.1rem',
+          /* The secret-terminal button (bottom-left) and the clock widget
+             (bottom-right) are position:fixed and would otherwise sit on top of
+             this row. Reserve enough height for it to clear both. */
+          paddingBottom: 'clamp(4.5rem, 7vw, 5.5rem)',
+          display:       'flex',
+          alignItems:    'center',
+          justifyContent: 'space-between',
+          gap:           '1rem',
+          flexWrap:      'wrap',
         }}
-      />
-      <div className="container-custom py-8">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
-          {/* Left */}
-          <div className="flex flex-col gap-2">
-            <Link
-              to="/"
-              className="inline-flex items-center gap-2.5 select-none"
-            >
-              <img src="/icon.svg" alt="Caio Diniz" className="w-5 h-auto" style={{ filter: isGuestbook ? 'brightness(1.4)' : 'brightness(0.5)' }} />
-              <span className="font-black text-white text-sm tracking-[-0.03em]">Caio Diniz</span>
-            </Link>
-            <p className={isGuestbook ? 'text-[0.6rem] text-white/30 tracking-wide' : 'text-[0.6rem] text-white/18 tracking-wide'}>
-              © {year} · Full Stack Developer
-            </p>
-          </div>
-
-          {/* Center: nav */}
-          <nav className="hidden md:flex items-center gap-6">
-            {NAV_LINKS.map((link) => (
-              <Link
-                key={link.path}
-                to={link.path}
-                className={isGuestbook
-                  ? 'text-[0.6875rem] font-semibold uppercase tracking-[0.1em] text-white/50 hover:text-white transition-colors duration-200'
-                  : 'text-[0.6875rem] font-semibold uppercase tracking-[0.1em] text-white/25 hover:text-white transition-colors duration-200'
-                }
-                onMouseEnter={() => setCursor('pointer')}
-                onMouseLeave={() => setCursor('default')}
-              >
-                {navLabels[link.label]}
-              </Link>
-            ))}
-            <Link
-              to="/guestbook"
-              className={isGuestbook
-                ? 'text-[0.6875rem] font-semibold uppercase tracking-[0.1em] text-white hover:text-white transition-colors duration-200'
-                : 'text-[0.6875rem] font-semibold uppercase tracking-[0.1em] text-white/25 hover:text-white transition-colors duration-200'
-              }
-              onMouseEnter={() => setCursor('pointer')}
-              onMouseLeave={() => setCursor('default')}
-            >
-              Livro de Visitas
-            </Link>
-          </nav>
-
-          {/* Right: socials */}
-          <div className="flex items-center gap-4">
-            {socials.map(({ icon: Icon, href, label }) => (
-              <a
-                key={label}
-                href={href}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={label}
-                className={isGuestbook
-                  ? 'text-white/45 hover:text-white transition-colors duration-200'
-                  : 'text-white/20 hover:text-white transition-colors duration-200'
-                }
-                onMouseEnter={() => setCursor('pointer')}
-                onMouseLeave={() => setCursor('default')}
-              >
-                <Icon size={16} />
-              </a>
-            ))}
-          </div>
+      >
+        {/* Copyright */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+          <img
+            src="/icon.svg"
+            alt=""
+            style={{ width: 14, height: 14, opacity: 0.3, filter: 'brightness(2)' }}
+          />
+          <span style={{
+            fontSize: '0.6rem', fontWeight: 600, letterSpacing: '0.08em',
+            color: 'rgba(255,255,255,0.18)', textTransform: 'uppercase',
+          }}>
+            © {year} Caio Diniz · Full Stack Developer
+          </span>
         </div>
+
+        {/* Back to top */}
+        <button
+          onClick={scrollToTop}
+          style={{
+            display:    'inline-flex',
+            alignItems: 'center',
+            gap:        '0.4rem',
+            background: 'transparent',
+            border:     '1px solid rgba(255,255,255,0.1)',
+            borderRadius: 999,
+            padding:    '0.38rem 0.9rem',
+            color:      'rgba(255,255,255,0.2)',
+            fontSize:   '0.58rem',
+            fontWeight: 700,
+            letterSpacing: '0.12em',
+            textTransform: 'uppercase',
+            cursor:     'pointer',
+            transition: 'all 0.22s',
+            fontFamily: 'inherit',
+          }}
+          onMouseEnter={e => {
+            const el = e.currentTarget
+            el.style.color = '#fff'
+            el.style.borderColor = 'rgba(255,255,255,0.3)'
+            el.style.background = 'rgba(255,255,255,0.05)'
+            setCursor('pointer')
+          }}
+          onMouseLeave={e => {
+            const el = e.currentTarget
+            el.style.color = 'rgba(255,255,255,0.2)'
+            el.style.borderColor = 'rgba(255,255,255,0.1)'
+            el.style.background = 'transparent'
+            setCursor('default')
+          }}
+        >
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+            <line x1="12" y1="19" x2="12" y2="5" /><polyline points="5 12 12 5 19 12" />
+          </svg>
+          {pt ? 'Topo' : 'Top'}
+        </button>
       </div>
     </footer>
   )

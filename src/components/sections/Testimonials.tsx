@@ -63,8 +63,12 @@ export default function Testimonials() {
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      gsap.from('.tsm-title', {
-        y: 32, opacity: 0, duration: 0.8, ease: 'power3.out',
+      // set + to, never from(): a from() tween is reverted by every
+      // ScrollTrigger.refresh() and stays reverted once `once: true` kills the trigger.
+      const title = gsap.utils.toArray<HTMLElement>('.tsm-title')
+      gsap.set(title, { y: 32, opacity: 0 })
+      gsap.to(title, {
+        y: 0, opacity: 1, duration: 0.8, ease: 'power3.out',
         scrollTrigger: { trigger: ref.current!, start: 'top 78%', once: true },
       })
     }, ref)

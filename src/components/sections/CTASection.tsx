@@ -1,259 +1,394 @@
+import { useRef, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowUpRight } from 'lucide-react'
-import { motion } from 'framer-motion'
+import { Github, Linkedin } from 'lucide-react'
+import gsap from 'gsap'
+import ScrollTrigger from 'gsap/ScrollTrigger'
 import { useLanguageStore } from '@/store/useLanguageStore'
 import { useCursorStore } from '@/store/useCursorStore'
 import { SITE } from '@/lib/constants'
-import Magnetic from '@/components/animations/Magnetic'
 
-const E: [number, number, number, number] = [0.16, 1, 0.3, 1]
+gsap.registerPlugin(ScrollTrigger)
 
-const MARQUEE_ITEMS = [
-  'DISPONÍVEL', 'FREELANCE', 'OPEN TO WORK', '2026',
-  'BRASIL', 'FULL STACK', 'REACT', 'NODE.JS', 'UI/UX',
-]
-
-/* ── Rotating orbital badge ─────────────────────────────── */
-function OrbitBadge({ lang }: { lang: string }) {
-  const setCursor = useCursorStore((s) => s.setState)
-  const orbitText = lang === 'en'
-    ? 'CAIO DINIZ · AVAILABLE · FREELANCE · 2026 · '
-    : 'CAIO DINIZ · DISPONÍVEL · FREELANCE · 2026 · '
-
+function TikTokIcon({ size = 16 }: { size?: number }) {
   return (
-    <Link
-      to="/contact"
-      aria-label={lang === 'en' ? 'Contact me' : 'Falar comigo'}
-      style={{ display: 'block', position: 'relative', width: 260, height: 260, flexShrink: 0 }}
-      onMouseEnter={() => setCursor('pointer')}
-      onMouseLeave={() => setCursor('default')}
-    >
-      <svg
-        viewBox="0 0 240 240"
-        width="260"
-        height="260"
-        aria-hidden
-        style={{ position: 'absolute', inset: 0, animation: 'orbit-spin 20s linear infinite' }}
-      >
-        <defs>
-          <path id="orbitPath2" d="M 120,120 m -95,0 a 95,95 0 1,1 190,0 a 95,95 0 1,1 -190,0" />
-        </defs>
-        <text fill="rgba(255,255,255,0.28)" fontSize="8" fontFamily="monospace" fontWeight="700" letterSpacing="9">
-          <textPath href="#orbitPath2">{orbitText}</textPath>
-        </text>
-      </svg>
-
-      <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', border: '1px solid rgba(255,255,255,0.07)', pointerEvents: 'none' }} />
-
-      <motion.div
-        style={{
-          position: 'absolute', inset: 28, borderRadius: '50%',
-          border: '1px solid rgba(255,255,255,0.1)',
-          display: 'flex', flexDirection: 'column',
-          alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
-        }}
-        whileHover={{ borderColor: 'rgba(255,255,255,0.32)', background: 'rgba(255,255,255,0.04)' }}
-        transition={{ duration: 0.3 }}
-      >
-        <motion.span
-          style={{ fontSize: '2.4rem', color: '#ffffff', lineHeight: 1, display: 'block' }}
-          whileHover={{ scale: 1.12, rotate: -15 }}
-          transition={{ duration: 0.35, ease: E }}
-        >
-          ↗
-        </motion.span>
-        <span style={{ fontSize: '0.46rem', fontWeight: 700, letterSpacing: '0.24em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', textAlign: 'center', lineHeight: 1.4 }}>
-          FALAR<br />COMIGO
-        </span>
-      </motion.div>
-
-      <motion.div
-        style={{ position: 'absolute', inset: 0, borderRadius: '50%', background: 'radial-gradient(circle, rgba(255,255,255,0.04) 0%, transparent 70%)', opacity: 0, pointerEvents: 'none' }}
-        whileHover={{ opacity: 1 }}
-        transition={{ duration: 0.4 }}
-      />
-    </Link>
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.32 6.32 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.68a8.27 8.27 0 0 0 4.84 1.55V6.78a4.85 4.85 0 0 1-1.07-.09z" />
+    </svg>
   )
 }
 
-/* ── Main section ────────────────────────────────────────── */
+const SOCIALS = [
+  { Icon: Github,     href: SITE.github,   label: 'GitHub'   },
+  { Icon: Linkedin,   href: SITE.linkedin, label: 'LinkedIn' },
+  { Icon: TikTokIcon, href: SITE.tiktok,   label: 'TikTok'   },
+]
+
+const MORE = [
+  { path: '/cv',        pt: 'Currículo',        en: 'Résumé'          },
+  { path: '/teardown',  pt: 'Como foi feito',   en: 'How it’s built'  },
+  { path: '/guestbook', pt: 'Livro de visitas', en: 'Guestbook'       },
+]
+
 export default function CTASection() {
   const lang      = useLanguageStore((s) => s.lang)
   const setCursor = useCursorStore((s) => s.setState)
+  const ref       = useRef<HTMLElement>(null)
 
-  const waUrl = `https://wa.me/${SITE.whatsapp.replace(/\D/g, '')}`
+  const en    = lang === 'en'
+  const lines = en ? ['LET’S', 'TALK?'] : ['VAMOS', 'CONVERSAR?']
+
+  useEffect(() => {
+    if (!ref.current) return
+
+    const ctx = gsap.context(() => {
+      /* NOTE: deliberately NOT gsap.from().
+         `from()` tweens carry immediateRender, and every ScrollTrigger.refresh()
+         reverts them to their start state in order to measure layout. Once the
+         trigger has been killed by `once: true`, that revert is never undone and
+         the element stays invisible forever. Setting the start state explicitly
+         and animating with to() has no such failure mode. */
+      const line  = gsap.utils.toArray<HTMLElement>('.cta-topline')
+      const words = gsap.utils.toArray<HTMLElement>('.cta-word')
+      const subs  = gsap.utils.toArray<HTMLElement>('.cta-sub')
+
+      gsap.set(line,  { scaleX: 0, transformOrigin: 'left' })
+      gsap.set(words, { yPercent: 106 })
+      gsap.set(subs,  { opacity: 0, y: 20 })
+
+      ScrollTrigger.create({
+        trigger: ref.current,
+        start:   'top 88%',
+        once:    true,
+        onEnter: () => {
+          gsap.to(line,  { scaleX: 1, duration: 1.3, ease: 'power4.inOut' })
+          gsap.to(words, { yPercent: 0, duration: 1.05, ease: 'power4.out', stagger: 0.09 })
+          gsap.to(subs,  { opacity: 1, y: 0, duration: 0.7, ease: 'power3.out', stagger: 0.1, delay: 0.15 })
+        },
+      })
+    }, ref)
+
+    return () => ctx.revert()
+  }, [lang])
 
   return (
-    <section style={{ background: '#0d0d0d', borderTop: '1px solid rgba(255,255,255,0.06)', overflow: 'hidden', position: 'relative' }}>
-      <style>{`
-        @keyframes cta-ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
-        @keyframes orbit-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        @keyframes cta-pulse  { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
-      `}</style>
+    <section
+      ref={ref}
+      style={{ background: '#0d0d0d', position: 'relative', overflow: 'hidden' }}
+    >
+      {/* Top divider */}
+      <div
+        className="cta-topline"
+        style={{ height: 1, background: 'rgba(255,255,255,0.08)', willChange: 'transform' }}
+      />
 
-      <div className="container-custom" style={{ paddingTop: 'clamp(3.5rem,7vw,6rem)', paddingBottom: 'clamp(3.5rem,7vw,6rem)' }}>
-
-        {/* ── Status bar ── */}
-        <motion.div
-          className="flex items-center justify-between flex-wrap gap-3"
-          style={{ marginBottom: 'clamp(3rem,6vw,5rem)' }}
-          initial={{ opacity: 0, y: -12 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5, ease: E }}
-        >
-          <div className="flex items-center gap-2.5">
-            <span style={{ display: 'block', width: 6, height: 6, borderRadius: '50%', background: '#4ade80', animation: 'cta-pulse 2s ease-in-out infinite' }} />
-            <span style={{ fontSize: '0.65rem', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.28)' }}>
-              {lang === 'en' ? 'Available for projects' : 'Disponível para projetos'}
-            </span>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-            <span style={{ fontFamily: 'monospace', fontSize: '0.56rem', fontWeight: 700, letterSpacing: '0.12em', color: 'rgba(255,255,255,0.2)' }}>05</span>
-            <div style={{ width: 36, height: 1, background: 'rgba(255,255,255,0.07)' }} />
-            <span style={{ fontFamily: 'monospace', fontSize: '0.56rem', fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.15)' }}>
-              {lang === 'en' ? 'contact' : 'contato'}
-            </span>
-          </div>
-        </motion.div>
-
-        {/* ── Main grid ── */}
+      <div
+        className="container-custom cta-wrap"
+        style={{
+          paddingTop:    'clamp(5rem,11vw,10rem)',
+          paddingBottom: 'clamp(5rem,11vw,10rem)',
+        }}
+      >
+        {/* Eyebrow */}
         <div
-          className="grid grid-cols-1 lg:grid-cols-[1fr_auto] items-center"
-          style={{ gap: 'clamp(3rem,6vw,6rem)' }}
+          className="cta-sub"
+          style={{
+            display: 'inline-flex', alignItems: 'center', gap: '0.6rem',
+            marginBottom: 'clamp(2rem,4vw,3rem)',
+          }}
         >
-          {/* LEFT ── headline + actions */}
-          <div>
-            {/* 2-line headline */}
-            {(lang === 'en' ? ['HAVE A', 'PROJECT?'] : ['TEM UM', 'PROJETO?']).map((word, i) => (
-              <div key={i} style={{ overflow: 'hidden' }}>
-                <motion.h2
-                  style={{
-                    fontFamily: 'Syne, sans-serif',
-                    fontSize: 'clamp(4rem,11vw,11rem)',
-                    fontWeight: 900,
-                    letterSpacing: '-0.055em',
-                    lineHeight: 0.88,
-                    margin: 0,
-                    ...(i === 1
-                      ? { color: 'transparent', WebkitTextStroke: '1.5px rgba(255,255,255,0.28)' }
-                      : { color: '#ffffff' }),
-                  }}
-                  initial={{ y: '110%' }}
-                  whileInView={{ y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.85, delay: i * 0.12, ease: E }}
-                >
-                  {word}
-                </motion.h2>
-              </div>
-            ))}
-
-            {/* Email + buttons */}
-            <motion.div
-              style={{ marginTop: 'clamp(2.5rem,5vw,4rem)', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}
-              initial={{ opacity: 0, y: 16 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.38, ease: E }}
-            >
-              {/* Email address as prominent link */}
-              <a
-                href={`mailto:${SITE.email}`}
-                style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.5rem', width: 'fit-content' }}
-                onMouseEnter={() => setCursor('pointer')}
-                onMouseLeave={() => setCursor('default')}
-              >
-                <span style={{ fontSize: 'clamp(0.85rem,1.5vw,1.1rem)', color: 'rgba(255,255,255,0.38)', letterSpacing: '-0.01em', transition: 'color 0.25s' }}
-                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = '#fff' }}
-                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.38)' }}>
-                  {SITE.email}
-                </span>
-                <ArrowUpRight size={13} style={{ color: 'rgba(255,255,255,0.2)', flexShrink: 0 }} />
-              </a>
-
-              {/* Action buttons */}
-              <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'center' }}>
-                <Magnetic strength={0.3}>
-                  <Link to="/contact">
-                    <button
-                      style={{
-                        display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
-                        background: '#ffffff', color: '#0d0d0d', border: 'none',
-                        borderRadius: '100px', padding: '0.9rem 1.8rem',
-                        fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.06em',
-                        textTransform: 'uppercase', cursor: 'pointer', transition: 'background 0.25s',
-                      }}
-                      onMouseEnter={e => { (e.currentTarget.style.background = '#e0e0e0'); setCursor('pointer') }}
-                      onMouseLeave={e => { (e.currentTarget.style.background = '#ffffff'); setCursor('default') }}
-                    >
-                      {lang === 'en' ? 'Start Project' : 'Iniciar Projeto'} <ArrowUpRight size={12} />
-                    </button>
-                  </Link>
-                </Magnetic>
-
-                <a
-                  href={waUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{
-                    display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
-                    background: 'transparent', color: 'rgba(255,255,255,0.45)',
-                    border: '1px solid rgba(255,255,255,0.12)',
-                    borderRadius: '100px', padding: '0.9rem 1.8rem',
-                    fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.06em',
-                    textTransform: 'uppercase', cursor: 'pointer', transition: 'all 0.25s',
-                    textDecoration: 'none',
-                  }}
-                  onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.color = '#fff'; el.style.borderColor = 'rgba(255,255,255,0.3)'; setCursor('pointer') }}
-                  onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.color = 'rgba(255,255,255,0.45)'; el.style.borderColor = 'rgba(255,255,255,0.12)'; setCursor('default') }}
-                >
-                  WhatsApp
-                </a>
-              </div>
-            </motion.div>
-          </div>
-
-          {/* RIGHT ── orbital badge (desktop) */}
-          <motion.div
-            className="hidden lg:flex justify-center items-center"
-            initial={{ opacity: 0, scale: 0.8, rotate: -12 }}
-            whileInView={{ opacity: 1, scale: 1, rotate: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.9, delay: 0.2, ease: E }}
-          >
-            <OrbitBadge lang={lang} />
-          </motion.div>
+          <span style={{
+            width: 6, height: 6, borderRadius: '50%',
+            background: '#4ade80',
+            animation: 'cta-pulse 2.2s ease-in-out infinite',
+            flexShrink: 0,
+          }} />
+          <span style={{
+            fontSize: '0.6rem', fontWeight: 700,
+            letterSpacing: '0.16em', textTransform: 'uppercase',
+            color: 'rgba(255,255,255,0.26)',
+          }}>
+            {en ? 'Available for projects' : 'Disponível para projetos'}
+          </span>
         </div>
 
-        {/* Mobile: badge centered below */}
-        <motion.div
-          className="flex lg:hidden justify-center mt-12"
-          initial={{ opacity: 0, scale: 0.85 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.7, ease: E }}
-        >
-          <OrbitBadge lang={lang} />
-        </motion.div>
-
-      </div>
-
-      {/* ── Marquee ── */}
-      <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', overflow: 'hidden', padding: '1rem 0' }}>
-        <div style={{ display: 'flex', width: 'max-content', animation: 'cta-ticker 34s linear infinite' }}>
-          {[0, 1].map((set) => (
-            <div key={set} style={{ display: 'flex', alignItems: 'center' }}>
-              {MARQUEE_ITEMS.map((item, i) => (
-                <span key={`${set}-${i}`} style={{ display: 'inline-flex', alignItems: 'center', gap: '2rem', paddingRight: '2rem', whiteSpace: 'nowrap' }}>
-                  <span style={{ fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.1)' }}>{item}</span>
-                  <span style={{ color: 'rgba(255,255,255,0.06)', fontSize: '0.35rem' }}>◆</span>
-                </span>
-              ))}
+        {/* ── Headline — full width on its own row ──
+             It must NOT share a row with the actions: "CONVERSAR?" is a single
+             10-character word that needs ~1530px at this size, and squeezing it
+             into a grid column left it clipped by the mask's overflow:hidden. */}
+        <div className="cta-headline">
+          {lines.map((word, i) => (
+            <div key={i} style={{ overflow: 'hidden', lineHeight: 0.86 }}>
+              <div
+                className="cta-word"
+                style={{
+                  fontFamily:    'Syne, sans-serif',
+                  fontWeight:    800,   /* Syne's real max — 900 would be faked */
+                  letterSpacing: '-0.055em',
+                  lineHeight:    0.86,
+                  willChange:    'transform',
+                  /* Second line is a muted SOLID fill, not an outline.
+                     With -0.055em tracking the glyphs overlap, so an outlined
+                     treatment draws each letter's stroke straight through its
+                     neighbours — the diagonals of V/A/R read as random lines
+                     crossing the word. Solid fill keeps the hierarchy, no noise. */
+                  ...(i === 0
+                    ? { color: '#ffffff' }
+                    : { color: 'rgba(255,255,255,0.17)' }),
+                }}
+              >
+                {word}
+              </div>
             </div>
           ))}
         </div>
+
+        {/* ── Actions row: description left · button + email right ── */}
+        <div className="cta-row">
+          <p className="cta-sub cta-lede">
+            {en
+              ? 'Got an idea, a product, or a problem to solve? Let’s turn it into something real.'
+              : 'Tem uma ideia, um produto ou um problema pra resolver? Bora transformar isso em algo real.'}
+          </p>
+
+          <div className="cta-actions">
+            <Link to="/contact" className="cta-sub" style={{ textDecoration: 'none' }}>
+              <button
+                className="cta-btn"
+                onMouseEnter={e => { e.currentTarget.style.background = '#e2e2e2'; setCursor('pointer') }}
+                onMouseLeave={e => { e.currentTarget.style.background = '#ffffff'; setCursor('default') }}
+              >
+                {en ? 'Get in touch' : 'Entre em contato'}
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="7" y1="17" x2="17" y2="7" /><polyline points="7 7 17 7 17 17" />
+                </svg>
+              </button>
+            </Link>
+
+            <a
+              href={`mailto:${SITE.email}`}
+              className="cta-sub cta-mail"
+              onMouseEnter={() => setCursor('pointer')}
+              onMouseLeave={() => setCursor('default')}
+            >
+              {SITE.email}
+            </a>
+          </div>
+        </div>
+
+        {/* ── Socials + secondary routes ──
+             Moved here from the old footer block: this is where a visitor is
+             already deciding how to reach out, so the channels and the
+             supporting pages belong in the same breath. */}
+        <div className="cta-sub cta-links">
+          <div className="cta-socials">
+            {SOCIALS.map(({ Icon, href, label }) => (
+              <a
+                key={label}
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={label}
+                className="cta-social"
+                onMouseEnter={() => setCursor('pointer')}
+                onMouseLeave={() => setCursor('default')}
+              >
+                <Icon size={15} />
+              </a>
+            ))}
+          </div>
+
+          <nav className="cta-more">
+            {MORE.map(({ path, pt, en: enLabel }) => (
+              <Link
+                key={path}
+                to={path}
+                className="cta-more-link"
+                onMouseEnter={() => setCursor('pointer')}
+                onMouseLeave={() => setCursor('default')}
+              >
+                {en ? enLabel : pt}
+              </Link>
+            ))}
+          </nav>
+        </div>
+
+        {/* Bottom meta */}
+        <div className="cta-sub cta-meta">
+          <span>Campinas, SP · Brasil</span>
+          <span className="cta-dot" />
+          <span>Full Stack Developer</span>
+          <span className="cta-dot" />
+          <span>2026</span>
+        </div>
       </div>
+
+      <style>{`
+        @keyframes cta-pulse {
+          0%,100% { opacity: 1; transform: scale(1); }
+          50%     { opacity: 0.35; transform: scale(0.72); }
+        }
+
+        /* ── Headline ──
+           7.2vw is derived, not guessed: the longest line ("CONVERSAR?") renders
+           at ~11.2× the font size in Syne 800 at -0.055em tracking. The container
+           is ~91vw wide, so 91 / 11.2 ≈ 8.1vw is the absolute ceiling — 7.2vw
+           leaves headroom for the wider glyphs in the English string too. */
+        .cta-headline {
+          margin-bottom: clamp(2.5rem, 5vw, 4rem);
+        }
+        .cta-word {
+          font-size: clamp(2.6rem, 7.2vw, 7.4rem);
+        }
+
+        /* ── Actions row ── */
+        .cta-row {
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: clamp(2rem, 4vw, 3rem);
+          align-items: end;
+          padding-top: clamp(1.5rem, 3vw, 2.5rem);
+          border-top: 1px solid rgba(255,255,255,0.06);
+        }
+        @media (min-width: 860px) {
+          .cta-row {
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: clamp(3rem, 6vw, 6rem);
+          }
+        }
+
+        .cta-lede {
+          font-size: clamp(0.9rem, 1.5vw, 1.15rem);
+          line-height: 1.65;
+          color: rgba(255,255,255,0.35);
+          max-width: 38ch;
+          margin: 0;
+        }
+
+        .cta-actions {
+          display: flex;
+          flex-direction: column;
+          gap: 1rem;
+          align-items: flex-start;
+        }
+        @media (min-width: 860px) {
+          .cta-actions { align-items: flex-end; }
+          .cta-mail    { align-self: flex-end; }
+        }
+
+        /* ── Button ── */
+        .cta-btn {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.55rem;
+          background: #ffffff;
+          color: #0d0d0d;
+          border: none;
+          border-radius: 999px;
+          padding: 1.05rem 2.2rem;
+          font-family: inherit;
+          font-size: 0.72rem;
+          font-weight: 700;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          cursor: pointer;
+          transition: background 0.22s ease, transform 0.22s ease;
+          white-space: nowrap;
+        }
+        .cta-btn:hover  { transform: translateY(-2px); }
+        .cta-btn:active { transform: translateY(0); }
+
+        /* ── Email link ── */
+        .cta-mail {
+          align-self: flex-start;
+          font-size: clamp(0.78rem, 1.3vw, 0.92rem);
+          color: rgba(255,255,255,0.3);
+          text-decoration: none;
+          letter-spacing: -0.01em;
+          border-bottom: 1px solid rgba(255,255,255,0.12);
+          padding-bottom: 2px;
+          transition: color 0.22s ease, border-color 0.22s ease;
+          word-break: break-all;
+        }
+        .cta-mail:hover {
+          color: #ffffff;
+          border-color: rgba(255,255,255,0.4);
+        }
+
+        /* ── Socials + secondary routes ── */
+        .cta-links {
+          display: flex;
+          flex-direction: column;
+          gap: 1.5rem;
+          align-items: flex-start;
+          margin-top: clamp(2.5rem, 5vw, 4rem);
+          padding-top: clamp(1.5rem, 3vw, 2.5rem);
+          border-top: 1px solid rgba(255,255,255,0.06);
+        }
+        @media (min-width: 720px) {
+          .cta-links {
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+          }
+        }
+
+        .cta-socials { display: flex; gap: 0.7rem; }
+        .cta-social {
+          width: 38px; height: 38px;
+          display: flex; align-items: center; justify-content: center;
+          border-radius: 50%;
+          border: 1px solid rgba(255,255,255,0.1);
+          color: rgba(255,255,255,0.32);
+          text-decoration: none;
+          transition: color 0.22s, border-color 0.22s, background 0.22s;
+        }
+        .cta-social:hover {
+          color: #fff;
+          border-color: rgba(255,255,255,0.4);
+          background: rgba(255,255,255,0.05);
+        }
+
+        .cta-more {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 0.6rem 1.5rem;
+        }
+        .cta-more-link {
+          font-size: 0.62rem;
+          font-weight: 700;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+          color: rgba(255,255,255,0.26);
+          text-decoration: none;
+          transition: color 0.22s;
+        }
+        .cta-more-link:hover { color: #fff; }
+
+        /* ── Meta row ── */
+        .cta-meta {
+          display: flex;
+          align-items: center;
+          flex-wrap: wrap;
+          gap: 0.75rem;
+          margin-top: clamp(1.5rem, 3vw, 2rem);
+          font-size: 0.57rem;
+          font-weight: 600;
+          letter-spacing: 0.14em;
+          text-transform: uppercase;
+          color: rgba(255,255,255,0.15);
+        }
+        .cta-dot {
+          width: 3px; height: 3px; border-radius: 50%;
+          background: rgba(255,255,255,0.16);
+          flex-shrink: 0;
+        }
+
+        /* ── Small phones ── */
+        @media (max-width: 420px) {
+          .cta-btn { width: 100%; justify-content: center; padding: 1rem 1.5rem; }
+          .cta-actions { align-items: stretch; }
+        }
+      `}</style>
     </section>
   )
 }

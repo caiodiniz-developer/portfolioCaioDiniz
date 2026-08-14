@@ -24,6 +24,8 @@ export default function HorizontalScrollProjects() {
     // Desktop only — on mobile/tablet the section is hidden via CSS
     if (window.innerWidth < 1024 || prefersReducedMotion) return
 
+    let split: SplitType | null = null
+
     const ctx = gsap.context(() => {
       const track = trackRef.current!
       // scrollWidth minus viewport = how far we need to travel horizontally
@@ -49,10 +51,13 @@ export default function HorizontalScrollProjects() {
       // ── Headline word reveal
       const headline = ref.current!.querySelector<HTMLElement>('.hsp-headline')
       if (headline) {
-        const split = new SplitType(headline, { types: 'words' })
-        gsap.from(split.words!, {
-          y:       '110%',
-          opacity: 0,
+        split = new SplitType(headline, { types: 'words' })
+        // set + to, never from(): a from() tween is reverted by every
+        // ScrollTrigger.refresh() and stays reverted once `once: true` kills the trigger.
+        gsap.set(split.words!, { y: '110%', opacity: 0 })
+        gsap.to(split.words!, {
+          y:       '0%',
+          opacity: 1,
           duration: 0.7,
           ease:    'power3.out',
           stagger: 0.06,
@@ -71,7 +76,7 @@ export default function HorizontalScrollProjects() {
           ease: 'none',
           scrollTrigger: {
             trigger:        img.closest('.hsp-card')!,
-            containerAnimation: tl,   // links to the horizontal scroll tl
+            containerAnimation: tl,
             start:  'left right',
             end:    'right left',
             scrub:  true,
@@ -80,7 +85,16 @@ export default function HorizontalScrollProjects() {
       })
     }, ref)
 
-    return () => ctx.revert()
+    // Refresh ScrollTrigger on resize so the pin + scroll distance stay accurate
+    function onResize() { ScrollTrigger.refresh() }
+    window.addEventListener('resize', onResize, { passive: true })
+
+    return () => {
+      window.removeEventListener('resize', onResize)
+      // Revert SplitType before GSAP context so original text nodes are restored first
+      split?.revert()
+      ctx.revert()
+    }
   }, [prefersReducedMotion, lang])
 
   return (

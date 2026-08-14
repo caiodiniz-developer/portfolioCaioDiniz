@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { RouterProvider } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 import { router } from "./router";
-import CustomCursor from "./components/animations/CustomCursor";
 import SmoothScroll from "./components/animations/SmoothScroll";
 import ScrollProgress from "./components/animations/ScrollProgress";
 import GravityCursor from "./components/animations/GravityCursor";
@@ -53,12 +52,14 @@ export default function App() {
 
   return (
     <>
+      {/* SmoothScroll must mount BEFORE the Preloader: React fires effects in tree
+          order, and the Preloader's stopLenis() is a no-op unless Lenis already exists. */}
+      <SmoothScroll />
+
       <AnimatePresence mode="wait">
         {loading && <Preloader key="preloader" onDone={() => setLoading(false)} />}
       </AnimatePresence>
 
-      <CustomCursor />
-      <SmoothScroll />
       <ScrollProgress />
       <GravityCursor />
       <CurrentlyWidget />

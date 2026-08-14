@@ -1,22 +1,25 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import gsap from 'gsap'
 import { X, ExternalLink, Github, ArrowUpRight } from 'lucide-react'
 import { projects } from '@/data/projects'
 import { useLanguageStore } from '@/store/useLanguageStore'
 import { useCursorStore } from '@/store/useCursorStore'
 import { SITE } from '@/lib/constants'
+import RouteCards from '@/components/ui/RouteCards'
 
 type Filter = 'All' | 'Full Stack' | 'Front-end' | 'Back-end'
 
 const E: [number, number, number, number] = [0.16, 1, 0.3, 1]
-const COLLAPSED = 74   // px — row height when closed
-const EXPANDED  = 400  // px — row height when open
 
 const CAT_COLOR: Record<string, string> = {
   'Full Stack': '#60a5fa',
   'Front-end':  '#a78bfa',
   'Back-end':   '#fb923c',
 }
+
+const IMG_W = 420
+const IMG_H = 275
 
 export default function ProjectsPage() {
   const lang      = useLanguageStore(s => s.lang)
@@ -30,11 +33,15 @@ export default function ProjectsPage() {
 
   const filtered        = active === 'All' ? projects : projects.filter(p => p.category === active)
   const selectedProject = projects.find(p => p.id === selected) ?? null
+  const hoveredProject  = projects.find(p => p.id === hovered) ?? null
   const isBackend       = active === 'Back-end'
 
+  // Floating image ref — follows cursor via GSAP
+  const floatRef = useRef<HTMLDivElement>(null)
+
   useEffect(() => {
-    document.title = `Projetos — ${SITE.name}`
-    const check = () => setIsMobile(window.innerWidth < 768)
+    document.title = `Projetos — Caio Diniz`
+    const check = () => setIsMobile(window.innerWidth < 700)
     check()
     window.addEventListener('resize', check)
     return () => window.removeEventListener('resize', check)
@@ -51,15 +58,61 @@ export default function ProjectsPage() {
     return () => window.removeEventListener('keydown', h)
   }, [])
 
-  const isHov = (id: number) => !isMobile && hovered === id
+  // GSAP mouse-following image — uses GSAP ticker which is Lenis-synced
+  const handleMouseMove = useCallback((e: MouseEvent) => {
+    if (!floatRef.current) return
+    gsap.to(floatRef.current, {
+      x: e.clientX - IMG_W / 2,
+      y: e.clientY - IMG_H / 2,
+      duration: 0.55,
+      ease: 'power3.out',
+      overwrite: 'auto',
+    })
+  }, [])
+
+  useEffect(() => {
+    window.addEventListener('mousemove', handleMouseMove)
+    return () => window.removeEventListener('mousemove', handleMouseMove)
+  }, [handleMouseMove])
 
   return (
     <main style={{ paddingTop: '7rem', background: '#0d0d0d', minHeight: '100vh' }}>
 
+      {/* ── Floating cursor image (global, position: fixed) ── */}
+      <div
+        ref={floatRef}
+        style={{
+          position: 'fixed',
+          top: 0, left: 0,
+          width: IMG_W, height: IMG_H,
+          zIndex: 400,
+          pointerEvents: 'none',
+          borderRadius: 14,
+          overflow: 'hidden',
+          opacity: (!isMobile && hovered !== null) ? 1 : 0,
+          transition: 'opacity 0.25s',
+          willChange: 'transform',
+          boxShadow: '0 32px 80px rgba(0,0,0,0.75)',
+        }}
+      >
+        {hoveredProject && (
+          <>
+            <img
+              src={hoveredProject.image}
+              alt=""
+              style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+            />
+            {/* Category stripe */}
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: CAT_COLOR[hoveredProject.category] ?? '#fff', opacity: 0.8 }} />
+          </>
+        )}
+      </div>
+
       {/* ── Hero ── */}
       <section style={{
         padding: 'clamp(2rem,5vw,4rem) clamp(1.5rem,5vw,5rem) 0',
-        display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '1rem',
+        display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end',
+        flexWrap: 'wrap', gap: '1rem',
       }}>
         <div>
           <motion.span
@@ -102,12 +155,12 @@ export default function ProjectsPage() {
       {/* ── Filters ── */}
       <motion.div
         initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45, delay: 0.12 }}
-        style={{ padding: '1.5rem clamp(1.5rem,5vw,5rem)', display: 'flex', gap: 6, flexWrap: 'wrap', borderBottom: '1px solid rgba(255,255,255,0.05)' }}
+        style={{ padding: '1.5rem clamp(1.5rem,5vw,5rem)', display: 'flex', gap: 6, flexWrap: 'wrap' }}
       >
         {(['All', 'Full Stack', 'Front-end', 'Back-end'] as Filter[]).map(f => (
           <button
             key={f}
-            onClick={() => { setActive(f); setHovered(null); setSelected(null) }}
+            onClick={() => { setActive(f); setSelected(null); setHovered(null) }}
             onMouseEnter={() => setCursor('pointer')}
             onMouseLeave={() => setCursor('default')}
             style={{
@@ -124,7 +177,7 @@ export default function ProjectsPage() {
         ))}
       </motion.div>
 
-      {/* ══ Back-end redirect ══ */}
+      {/* ══ Back-end GitHub redirect ══ */}
       <AnimatePresence>
         {isBackend && (
           <motion.div
@@ -142,10 +195,12 @@ export default function ProjectsPage() {
                 </text>
               </svg>
               <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', border: '1px solid rgba(255,255,255,0.06)' }} />
-              <a href={SITE.github} target="_blank" rel="noopener noreferrer"
+              <a
+                href={SITE.github} target="_blank" rel="noopener noreferrer"
                 style={{ position: 'absolute', inset: 22, borderRadius: '50%', border: '1px solid rgba(255,255,255,0.1)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', textDecoration: 'none', transition: 'all 0.3s' }}
                 onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.background = 'rgba(255,255,255,0.05)'; el.style.borderColor = 'rgba(255,255,255,0.28)'; setCursor('pointer') }}
-                onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.background = 'transparent'; el.style.borderColor = 'rgba(255,255,255,0.1)'; setCursor('default') }}>
+                onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.background = 'transparent'; el.style.borderColor = 'rgba(255,255,255,0.1)'; setCursor('default') }}
+              >
                 <Github size={28} color="#ffffff" />
                 <span style={{ fontSize: '0.44rem', fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)' }}>GITHUB</span>
               </a>
@@ -158,10 +213,12 @@ export default function ProjectsPage() {
                 ? 'My back-end projects are pinned on GitHub. Check the featured repositories there.'
                 : 'Meus projetos back-end estão fixados no GitHub. Confira os repositórios em destaque.'}
             </p>
-            <a href={SITE.github} target="_blank" rel="noopener noreferrer"
+            <a
+              href={SITE.github} target="_blank" rel="noopener noreferrer"
               style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', background: '#fff', color: '#0d0d0d', borderRadius: 999, padding: '0.9rem 2rem', fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', textDecoration: 'none', transition: 'opacity 0.25s' }}
               onMouseEnter={e => { (e.currentTarget as HTMLElement).style.opacity = '0.85'; setCursor('pointer') }}
-              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.opacity = '1'; setCursor('default') }}>
+              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.opacity = '1'; setCursor('default') }}
+            >
               <Github size={13} />
               {lang === 'en' ? 'See on GitHub' : 'Ver no GitHub'} <ArrowUpRight size={12} />
             </a>
@@ -169,215 +226,119 @@ export default function ProjectsPage() {
         )}
       </AnimatePresence>
 
-      {/* ══ DESKTOP: Accordion Index List ══ */}
-      {!isBackend && !isMobile && (
-        <div style={{ paddingBottom: '6rem' }}>
-          <AnimatePresence mode="popLayout">
+      {/* ══ PROJECT LIST (Cuberto style) ══ */}
+      {!isBackend && (
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={active}
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            style={{ borderTop: '1px solid rgba(255,255,255,0.07)', paddingBottom: '6rem' }}
+            onMouseLeave={() => setHovered(null)}
+          >
             {filtered.map((project, i) => {
-              const open   = isHov(project.id)
-              const dimmed = hovered !== null && !open
+              const isHov    = !isMobile && hovered === project.id
+              const isDimmed = !isMobile && hovered !== null && !isHov
+              const accent   = CAT_COLOR[project.category] ?? '#fff'
 
               return (
-                <motion.article
+                <motion.div
                   key={project.id}
-                  layout
-                  initial={{ opacity: 0, y: 16 }}
-                  animate={{
-                    height: open ? EXPANDED : COLLAPSED,
-                    opacity: dimmed ? 0.15 : 1,
-                  }}
-                  exit={{ opacity: 0, x: -16 }}
-                  transition={{
-                    height:   { duration: 0.44, ease: [0.25, 0, 0.28, 1] },
-                    opacity:  { duration: 0.22 },
-                    layout:   { duration: 0.35 },
-                    default:  { duration: 0.4, ease: E, delay: i * 0.04 },
-                  }}
-                  style={{
-                    overflow: 'hidden', cursor: 'pointer',
-                    borderBottom: '1px solid rgba(255,255,255,0.055)',
-                    position: 'relative',
-                  }}
+                  initial={{ opacity: 0, y: 22 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.48, ease: E, delay: i * 0.06 }}
                   onMouseEnter={() => { setHovered(project.id); setCursor('view'); setLabel('Abrir') }}
                   onMouseLeave={() => { setHovered(null); setCursor('default'); setLabel('') }}
                   onClick={() => setSelected(project.id)}
-                >
-                  {/* ─ Row header (always visible) ─ */}
-                  <div style={{
-                    height: COLLAPSED,
+                  style={{
                     display: 'flex', alignItems: 'center',
-                    gap: '1.5rem',
                     padding: '0 clamp(1.5rem,5vw,5rem)',
-                    flexShrink: 0,
+                    height: isMobile ? 80 : 110,
+                    borderBottom: '1px solid rgba(255,255,255,0.07)',
+                    cursor: 'pointer',
+                    background: isHov ? 'rgba(255,255,255,0.022)' : 'transparent',
+                    opacity: isDimmed ? 0.22 : 1,
+                    transition: 'background 0.22s, opacity 0.18s',
+                    gap: '1.5rem',
+                    position: 'relative',
+                    overflow: 'hidden',
+                  }}
+                >
+                  {/* Hover accent bar */}
+                  <motion.div
+                    style={{
+                      position: 'absolute', left: 0, top: 0, bottom: 0, width: 3,
+                      background: accent, transformOrigin: 'top',
+                    }}
+                    initial={{ scaleY: 0 }}
+                    animate={{ scaleY: isHov ? 1 : 0 }}
+                    transition={{ duration: 0.28, ease: E }}
+                  />
+
+                  {/* Index */}
+                  <span style={{
+                    fontFamily: 'monospace', fontSize: '0.52rem', fontWeight: 700,
+                    letterSpacing: '0.12em', color: 'rgba(255,255,255,0.2)',
+                    flexShrink: 0, minWidth: '2ch',
+                    transition: 'color 0.2s',
+                    ...(isHov ? { color: accent } : {}),
                   }}>
-                    {/* Index */}
-                    <span style={{ fontFamily: 'monospace', fontSize: '0.5rem', fontWeight: 700, letterSpacing: '0.1em', color: 'rgba(255,255,255,0.22)', minWidth: '2ch', flexShrink: 0 }}>
-                      {String(i + 1).padStart(2, '0')}
-                    </span>
+                    {String(i + 1).padStart(2, '0')}
+                  </span>
 
-                    {/* Thumbnail (fades out when open) */}
-                    <div
-                      style={{
-                        width: 64, height: 46, borderRadius: 5, overflow: 'hidden', flexShrink: 0,
-                        opacity: open ? 0 : 1, transition: 'opacity 0.2s',
-                      }}
-                    >
-                      <img src={project.image} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-                    </div>
+                  {/* Title */}
+                  <motion.h2
+                    animate={{ x: isHov ? 6 : 0 }}
+                    transition={{ duration: 0.28, ease: E }}
+                    style={{
+                      fontFamily: 'Syne, sans-serif', fontWeight: 900,
+                      fontSize: isMobile ? 'clamp(1.1rem,5vw,1.5rem)' : 'clamp(1.4rem,3vw,2.6rem)',
+                      letterSpacing: '-0.04em', color: '#fff', margin: 0,
+                      flex: 1, lineHeight: 1,
+                    }}
+                  >
+                    {project.title}
+                  </motion.h2>
 
-                    {/* Title (fades out when open — big title shown in expanded area) */}
-                    <span
-                      style={{
-                        fontFamily: 'Syne, sans-serif', fontWeight: 800,
-                        fontSize: 'clamp(0.88rem,1.5vw,1.35rem)', letterSpacing: '-0.03em',
-                        color: '#fff', flexShrink: 0,
-                        opacity: open ? 0 : 1, transition: 'opacity 0.18s',
-                      }}
-                    >
-                      {project.title}
-                    </span>
+                  {/* Spacer */}
+                  <div style={{ flex: 1, display: isMobile ? 'none' : 'block' }} />
 
-                    {/* Divider line */}
-                    <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.05)' }} />
-
-                    {/* Meta */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', flexShrink: 0 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
-                        <span style={{ width: 5, height: 5, borderRadius: '50%', background: CAT_COLOR[project.category] ?? '#fff', flexShrink: 0 }} />
-                        <span style={{ fontSize: '0.54rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.28)' }}>
+                  {/* Meta: category + year */}
+                  {!isMobile && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '2rem', flexShrink: 0 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <span style={{ width: 5, height: 5, borderRadius: '50%', background: accent, transition: 'opacity 0.2s', opacity: isHov ? 1 : 0.5 }} />
+                        <span style={{ fontSize: '0.54rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)' }}>
                           {project.category}
                         </span>
                       </div>
                       <span style={{ fontFamily: 'monospace', fontSize: '0.5rem', color: 'rgba(255,255,255,0.22)' }}>
                         {project.year}
                       </span>
-                      <motion.span
-                        animate={{ rotate: open ? -45 : 0, color: open ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.2)' }}
-                        transition={{ duration: 0.3, ease: E }}
-                        style={{ fontSize: '1.1rem', lineHeight: 1, display: 'block' }}
-                      >
-                        →
-                      </motion.span>
                     </div>
-                  </div>
+                  )}
 
-                  {/* ─ Expanded content ─ */}
-                  <div
-                    style={{
-                      display: 'flex',
-                      height: EXPANDED - COLLAPSED,
-                      opacity: open ? 1 : 0,
-                      transform: open ? 'translateY(0)' : 'translateY(14px)',
-                      transition: open
-                        ? 'opacity 0.3s 0.12s, transform 0.3s 0.12s'
-                        : 'opacity 0.18s, transform 0.18s',
-                      pointerEvents: open ? 'auto' : 'none',
-                    }}
+                  {/* Arrow */}
+                  <motion.span
+                    animate={{ rotate: isHov ? -45 : 0, x: isHov ? 4 : 0 }}
+                    transition={{ duration: 0.28, ease: E }}
+                    style={{ fontSize: '1.2rem', color: 'rgba(255,255,255,0.25)', flexShrink: 0, lineHeight: 1 }}
                   >
-                    {/* Image */}
-                    <div style={{ flex: '0 0 55%', position: 'relative', overflow: 'hidden' }}>
-                      <motion.img
-                        layoutId={`pimg-${project.id}`}
-                        src={project.image}
-                        alt={project.title}
-                        style={{
-                          width: '100%', height: '100%', objectFit: 'cover', display: 'block',
-                          transform: open ? 'scale(1)' : 'scale(1.04)',
-                          transition: 'transform 0.55s ease',
-                        }}
-                      />
-                      {/* Category accent */}
-                      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2.5, background: CAT_COLOR[project.category] ?? '#fff', opacity: 0.65 }} />
-                    </div>
-
-                    {/* Right info */}
-                    <div
-                      style={{
-                        flex: 1,
-                        padding: '2rem clamp(2rem,4vw,4rem)',
-                        display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '0.85rem',
-                      }}
-                    >
-                      {/* Project number */}
-                      <span style={{ fontFamily: 'monospace', fontSize: '0.5rem', fontWeight: 700, letterSpacing: '0.18em', color: 'rgba(255,255,255,0.18)' }}>
-                        {String(i + 1).padStart(2, '0')} / {String(filtered.length).padStart(2, '0')}
-                      </span>
-
-                      <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 900, fontSize: 'clamp(1.6rem,3.2vw,2.8rem)', letterSpacing: '-0.045em', color: '#fff', margin: 0, lineHeight: 0.95 }}>
-                        {project.title}
-                      </h2>
-
-                      <p style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.38)', lineHeight: 1.68, margin: 0, maxWidth: '42ch' }}>
-                        {project.description}
-                      </p>
-
-                      <div style={{ display: 'flex', gap: '0.3rem', flexWrap: 'wrap' }}>
-                        {project.stack.slice(0, 4).map(t => (
-                          <span key={t} style={{ fontSize: '0.52rem', fontWeight: 600, padding: '0.22rem 0.55rem', borderRadius: 999, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.42)' }}>
-                            {t}
-                          </span>
-                        ))}
-                      </div>
-
-                      <button
-                        onClick={e => { e.stopPropagation(); setSelected(project.id) }}
-                        onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = 'rgba(255,255,255,0.38)'; el.style.color = '#fff'; setCursor('pointer') }}
-                        onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = 'rgba(255,255,255,0.14)'; el.style.color = 'rgba(255,255,255,0.48)'; setCursor('default') }}
-                        style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', background: 'transparent', border: '1px solid rgba(255,255,255,0.14)', borderRadius: 999, padding: '0.7rem 1.5rem', fontSize: '0.64rem', fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.48)', cursor: 'pointer', transition: 'all 0.2s', width: 'fit-content' }}
-                      >
-                        {lang === 'en' ? 'View project' : 'Ver projeto'} <ArrowUpRight size={11} />
-                      </button>
-                    </div>
-                  </div>
-                </motion.article>
+                    →
+                  </motion.span>
+                </motion.div>
               )
             })}
-          </AnimatePresence>
-        </div>
+          </motion.div>
+        </AnimatePresence>
       )}
 
-      {/* ══ MOBILE: Stacked cards ══ */}
-      {!isBackend && isMobile && (
-        <div style={{ padding: '0.3rem 1rem 5rem', display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
-          <AnimatePresence mode="popLayout">
-            {filtered.map((project, i) => (
-              <motion.div
-                key={project.id}
-                layout
-                initial={{ opacity: 0, y: 18 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                transition={{ duration: 0.38, ease: E, delay: i * 0.05 }}
-                style={{ aspectRatio: '4/3', position: 'relative', overflow: 'hidden', borderRadius: 10, cursor: 'pointer' }}
-                onClick={() => setSelected(project.id)}
-              >
-                <motion.img
-                  layoutId={`pimg-${project.id}`}
-                  src={project.image}
-                  alt={project.title}
-                  style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-                />
-                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.88) 0%, transparent 55%)' }} />
-                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2.5, background: CAT_COLOR[project.category] ?? '#fff', opacity: 0.65 }} />
-                <span style={{ position: 'absolute', top: 10, right: 10, fontFamily: 'monospace', fontSize: '0.46rem', fontWeight: 700, color: 'rgba(255,255,255,0.38)', background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(6px)', padding: '0.14rem 0.45rem', borderRadius: 999 }}>
-                  {String(i + 1).padStart(2, '0')}
-                </span>
-                <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '1.2rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.25rem' }}>
-                    <span style={{ width: 4, height: 4, borderRadius: '50%', background: CAT_COLOR[project.category] ?? '#fff' }} />
-                    <span style={{ fontSize: '0.48rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.38)' }}>
-                      {project.category} · {project.year}
-                    </span>
-                  </div>
-                  <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 900, fontSize: '1.45rem', letterSpacing: '-0.04em', color: '#fff', margin: 0, lineHeight: 1 }}>
-                    {project.title}
-                  </h3>
-                </div>
-              </motion.div>
-            ))}
-          </AnimatePresence>
-        </div>
-      )}
+      {/* Someone who just browsed the work is primed for how it was engineered. */}
+      <RouteCards
+        show={['teardown', 'cv', 'debug']}
+        headingPt="Nos bastidores"
+        headingEn="Behind the scenes"
+      />
 
       {/* ══ MODAL ══ */}
       <AnimatePresence>

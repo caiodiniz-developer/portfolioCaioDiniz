@@ -15,7 +15,10 @@ import ContactPage from "@/pages/ContactPage";
 import NotFound from "@/pages/NotFound";
 import BugCatcher from "@/pages/BugCatcher";
 import GuestbookPage from "@/pages/GuestbookPage";
+import TeardownPage from "@/pages/TeardownPage";
+import CVPage from "@/pages/CVPage";
 import { getLenis } from "@/hooks/useLenis";
+import { initAnalytics, pageview } from "@/lib/analytics";
 
 function ScrollReset() {
   const { pathname } = useLocation();
@@ -26,6 +29,19 @@ function ScrollReset() {
     } else {
       window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
     }
+  }, [pathname]);
+  return null;
+}
+
+/** Client-side routing means the browser never re-requests a document, so the
+ *  tracker only ever sees the landing page unless we report navigation itself. */
+function AnalyticsTracker() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    initAnalytics();
+  }, []);
+  useEffect(() => {
+    pageview(pathname);
   }, [pathname]);
   return null;
 }
@@ -45,6 +61,7 @@ function RootLayout() {
   return (
     <>
       <ScrollReset />
+      <AnalyticsTracker />
       <Header />
       {/* Wrapper adds bottom padding on mobile to clear the bottom nav bar */}
       <div style={{ paddingBottom: isMobile ? 68 : 0 }}>
@@ -75,6 +92,8 @@ export const router = createBrowserRouter([
       { path: "contact", element: <ContactPage /> },
       { path: "debug",      element: <BugCatcher /> },
       { path: "guestbook",  element: <GuestbookPage /> },
+      { path: "teardown",   element: <TeardownPage /> },
+      { path: "cv",         element: <CVPage /> },
       { path: "*", element: <NotFound /> },
     ],
   },

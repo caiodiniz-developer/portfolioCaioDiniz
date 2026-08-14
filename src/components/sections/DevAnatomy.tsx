@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useInView } from 'framer-motion'
 import { Brain, Heart, Code2, Layers } from 'lucide-react'
 import { useLanguageStore } from '@/store/useLanguageStore'
+import { getLenis } from '@/hooks/useLenis'
 
 const E: [number, number, number, number] = [0.22, 1, 0.36, 1]
 const TARGET_H = 2.0
@@ -98,8 +99,8 @@ function DotProjector({ dotRefs, modelOffset }: {
       const x = ((vec.x + 1) / 2) * size.width
       const y = ((-vec.y + 1) / 2) * size.height
 
-      el.style.left = `${x}px`
-      el.style.top  = `${y}px`
+      // Use transform instead of left/top — compositor-only, no layout reflow per frame
+      el.style.transform = `translate(${x}px, ${y}px) translate(-50%, -50%)`
 
       const behind = vec.z > 1
       el.style.opacity       = behind ? '0' : '1'
@@ -279,12 +280,20 @@ export default function DevAnatomy() {
     modelOffset.current = [x, 0, z]
   })
 
-  // On mobile: scroll card into view when a zone is activated
+  // On mobile: scroll card into view when a zone is activated.
+  // Use Lenis.scrollTo so it doesn't conflict with the smooth scroll engine.
   useEffect(() => {
     if (!activeId) return
     if (!window.matchMedia('(hover: none)').matches) return
     const id = setTimeout(() => {
-      cardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+      const el = cardRef.current
+      if (!el) return
+      const lenis = getLenis()
+      if (lenis) {
+        lenis.scrollTo(el, { offset: -40, duration: 0.9 })
+      } else {
+        el.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+      }
     }, 120)
     return () => clearTimeout(id)
   }, [activeId])
@@ -370,7 +379,8 @@ export default function DevAnatomy() {
                     ref={el => { dotRefs.current.set(dot.dotId, el) }}
                     style={{
                       position: 'absolute',
-                      transform: 'translate(-50%, -50%)',
+                      left: 0,
+                      top: 0,
                       opacity: 0,
                       pointerEvents: 'none',
                       transition: 'opacity 0.2s',

@@ -4,6 +4,7 @@ import { ArrowRight, RotateCcw, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useLanguageStore } from '@/store/useLanguageStore'
 import { useCursorStore } from '@/store/useCursorStore'
 import { SITE } from '@/lib/constants'
+import RouteCards from '@/components/ui/RouteCards'
 
 const E: [number, number, number, number] = [0.16, 1, 0.3, 1]
 
@@ -700,6 +701,13 @@ export default function ContactPage() {
         <ChatForm slot={slot} lang={lang} />
       </div>
       <TerminalSection lang={lang} />
+      {/* A visitor on the contact page is evaluating whether to hire — the CV
+          is the single most likely thing they still need. */}
+      <RouteCards
+        show={['cv', 'guestbook', 'teardown']}
+        headingPt="Antes de decidir"
+        headingEn="Before you decide"
+      />
       <style>{`
         @keyframes tblink  { 0%,100%{opacity:1} 50%{opacity:0} }
         @keyframes cpulse  { 0%,100%{box-shadow:0 0 0 0 rgba(34,197,94,.5)} 50%{box-shadow:0 0 0 7px rgba(34,197,94,0)} }

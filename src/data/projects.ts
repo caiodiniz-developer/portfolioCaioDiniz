@@ -1,3 +1,15 @@
+/** A technical decision, the alternative that lost, and the reason.
+ *  This is the part of a case study that separates "I built it" from
+ *  "I understood the tradeoff" — recruiters read `why` first. */
+export interface Tradeoff {
+  /** What was chosen. e.g. "PostgreSQL + Prisma" */
+  chose: string;
+  /** The credible alternative that was rejected. e.g. "MongoDB" */
+  over: string;
+  /** Why. One or two sentences, concrete, no marketing. */
+  why: string;
+}
+
 export interface Project {
   id: number;
   slug: string;
@@ -12,11 +24,16 @@ export interface Project {
   gallery: string[];
   liveUrl: string;
   githubUrl: string;
+  /** When set, the case study embeds the live product in an iframe instead of
+   *  showing a static screenshot. Leave undefined for sites that block framing
+   *  (X-Frame-Options / frame-ancestors) — the gallery is used as fallback. */
+  embedUrl?: string;
   role: string;
   problem: string;
   solution: string;
   features: string[];
   results: string[];
+  tradeoffs: Tradeoff[];
   featured: boolean;
 }
 
@@ -37,6 +54,7 @@ export const projects: Project[] = [
     gallery: ["/assets/finixApp-projeto1.png"],
     liveUrl: "https://finixapp.com.br",
     githubUrl: "",
+    embedUrl: "https://finixapp.com.br",
     role: "Full Stack Developer",
     problem:
       "Os usuários precisavam de uma plataforma centralizada para gerenciar finanças com dados em tempo real e pagamentos seguros. As soluções existentes eram complexas demais ou careciam de segurança adequada.",
@@ -57,6 +75,23 @@ export const projects: Project[] = [
       "99,9% de uptime",
       "< 200ms de resposta da API",
       "Rating de segurança A+",
+    ],
+    tradeoffs: [
+      {
+        chose: "PostgreSQL + Prisma",
+        over: "MongoDB",
+        why: "Dado financeiro é relacional por natureza: uma transação toca conta, categoria e usuário ao mesmo tempo. Precisava de constraints de integridade e transações ACID reais — em MongoDB eu teria que garantir isso na aplicação, que é onde bugs de saldo nascem.",
+      },
+      {
+        chose: "JWT com refresh token curto",
+        over: "Sessão em servidor",
+        why: "A API precisa escalar horizontal sem estado compartilhado. O custo é não conseguir revogar um token na hora — mitiguei com access token de 15min e uma blacklist de refresh tokens no Redis.",
+      },
+      {
+        chose: "Stripe",
+        over: "Integração direta com adquirente",
+        why: "Processar cartão direto exigiria conformidade PCI-DSS completa. Para o volume do projeto, a taxa do Stripe custa muito menos que auditoria e responsabilidade sobre dados de cartão.",
+      },
     ],
     featured: true,
   },
@@ -97,6 +132,23 @@ export const projects: Project[] = [
       "Zero incidentes de segurança",
       "1000+ requests diários",
     ],
+    tradeoffs: [
+      {
+        chose: "Zod validando na borda da API",
+        over: "Confiar nos tipos do TypeScript",
+        why: "TypeScript some em runtime. Todo dado que entra por HTTP é desconhecido até ser validado — o Zod gera o tipo e a validação da mesma definição, então não existe divergência entre o que o compilador acha e o que chega de verdade.",
+      },
+      {
+        chose: "Monólito modular",
+        over: "Microserviços",
+        why: "São módulos de um mesmo negócio, com um time de uma pessoa. Microserviço aqui só adicionaria latência de rede e complexidade de deploy sem resolver nenhum problema real de escala que o projeto tenha.",
+      },
+      {
+        chose: "Prisma",
+        over: "SQL puro",
+        why: "As queries do sistema são majoritariamente CRUD com joins previsíveis. Abri exceção nos relatórios, onde o SQL gerado ficava ineficiente — ali usei query raw e medi o plano de execução.",
+      },
+    ],
     featured: true,
   },
   {
@@ -115,6 +167,7 @@ export const projects: Project[] = [
     gallery: ["/assets/shopsphere-projeto3.png"],
     liveUrl: "https://loja-virtual-jade.vercel.app",
     githubUrl: "",
+    embedUrl: "https://loja-virtual-jade.vercel.app",
     role: "Full Stack Developer",
     problem:
       "O cliente precisava de uma loja virtual própria com controle total sobre produtos, pedidos e clientes, sem depender de plataformas genéricas com altas taxas.",
@@ -136,6 +189,23 @@ export const projects: Project[] = [
       "Score 100 de performance",
       "LCP < 1,2s",
     ],
+    tradeoffs: [
+      {
+        chose: "Loja própria",
+        over: "Shopify / Nuvemshop",
+        why: "A taxa por venda de uma plataforma pronta vira o maior custo fixo do negócio conforme ele cresce. Construir custou mais na largada, mas o cliente para de pagar percentual sobre cada pedido — o ponto de equilíbrio chegou em menos de um ano.",
+      },
+      {
+        chose: "Renderização no servidor do catálogo",
+        over: "SPA pura",
+        why: "Página de produto que não indexa não vende. O catálogo precisa vir pronto no HTML para o Google — o carrinho e o checkout, que ninguém pesquisa, ficaram client-side.",
+      },
+      {
+        chose: "Imagens em WebP com srcset",
+        over: "PNG único",
+        why: "Catálogo é imagem em cima de imagem, e a maior parte do tráfego é 4G no celular. Foi o que segurou o LCP abaixo de 1,2s sem perda visível de qualidade.",
+      },
+    ],
     featured: true,
   },
   {
@@ -154,6 +224,7 @@ export const projects: Project[] = [
     gallery: ["/assets/forja-projeto4.png"],
     liveUrl: "https://forja-sable.vercel.app",
     githubUrl: "",
+    embedUrl: "https://forja-sable.vercel.app",
     role: "Front-end Developer & UI Designer",
     problem:
       "O cliente não tinha presença digital compatível com o nível dos seus serviços, perdendo clientes para concorrentes com sites mais modernos.",
@@ -174,6 +245,23 @@ export const projects: Project[] = [
       "Redução do bounce rate em 35%",
       "Presença digital consolidada",
     ],
+    tradeoffs: [
+      {
+        chose: "GSAP",
+        over: "Animação só com CSS",
+        why: "As animações dependem de posição de scroll e de sequência entre elementos. Daria para forjar isso com CSS e IntersectionObserver, mas o ScrollTrigger resolve pin e scrub sem eu manter uma máquina de estados frágil na mão.",
+      },
+      {
+        chose: "Animações que respeitam prefers-reduced-motion",
+        over: "Animar sempre",
+        why: "Movimento intenso causa desconforto real em quem tem sensibilidade vestibular. É uma linha de media query que não custa nada e evita que o site passe mal para uma parcela dos visitantes.",
+      },
+      {
+        chose: "Formulário com backend próprio",
+        over: "Formspree / Typeform",
+        why: "Lead é o ativo do cliente. Serviço de terceiro significa dado de contato saindo do controle dele e um ponto de falha que eu não consigo depurar.",
+      },
+    ],
     featured: true,
   },
   {
@@ -192,6 +280,7 @@ export const projects: Project[] = [
     gallery: ["/assets/cubo3D-projeto5.png"],
     liveUrl: "https://cubomagico3d.vercel.app/",
     githubUrl: "",
+    embedUrl: "https://cubomagico3d.vercel.app/",
     role: "Front-end Developer",
     problem:
       "Projeto pessoal para explorar Three.js, lógica de rotação 3D e manipulação de estado complexo no browser sem depender de game engines.",
@@ -211,6 +300,23 @@ export const projects: Project[] = [
       "UX intuitivo e imersivo",
       "100% vanilla Three.js",
     ],
+    tradeoffs: [
+      {
+        chose: "Three.js puro",
+        over: "React Three Fiber",
+        why: "O cubo é uma máquina de estados que muda 27 peças por rotação. Reconciliar isso pelo React seria trabalho a mais para um resultado igual — aqui o loop imperativo é mais simples que o declarativo.",
+      },
+      {
+        chose: "Rotação matricial em grupo temporário",
+        over: "Recalcular a posição de cada peça",
+        why: "Rotacionar uma face significa mover 9 cubos juntos. Agrupá-los num objeto temporário, girar o grupo e depois reatribuir evita acumular erro de ponto flutuante a cada movimento — sem isso o cubo desalinha depois de umas 50 rotações.",
+      },
+      {
+        chose: "Raycasting para detectar a face",
+        over: "Mapear coordenadas de tela na mão",
+        why: "O cubo gira livremente, então não existe mapa fixo de pixel para face. Raycast resolve isso na perspectiva atual, seja qual for a orientação.",
+      },
+    ],
     featured: true,
   },
   {
@@ -229,6 +335,7 @@ export const projects: Project[] = [
     gallery: ["/assets/spylt-projeto6.png"],
     liveUrl: "https://spylt-blue.vercel.app/",
     githubUrl: "",
+    embedUrl: "https://spylt-blue.vercel.app/",
     role: "Front-end Developer & UI Designer",
     problem:
       "O cliente precisava de uma aplicação com identidade visual única e experiência premium para se destacar no mercado.",
@@ -247,6 +354,18 @@ export const projects: Project[] = [
       "Score 98 de performance",
       "Design diferenciado no mercado",
       "Taxa de engajamento elevada",
+    ],
+    tradeoffs: [
+      {
+        chose: "Framer Motion",
+        over: "GSAP",
+        why: "As animações aqui seguem o ciclo de vida de componentes React — entrar, sair, mudar de estado. O AnimatePresence resolve saída de elemento desmontado, que em GSAP exigiria segurar o nó no DOM na mão.",
+      },
+      {
+        chose: "Design system com tokens",
+        over: "Classes utilitárias soltas",
+        why: "Cor e espaçamento definidos como variáveis significam que trocar a identidade visual é editar um arquivo, não caçar hex code em 40 componentes.",
+      },
     ],
     featured: false,
   },
@@ -289,6 +408,18 @@ export const projects: Project[] = [
       "Score 98 de performance",
       "Feedback positivo de UX",
     ],
+    tradeoffs: [
+      {
+        chose: "Reescrever só o front-end",
+        over: "Refazer o sistema inteiro",
+        why: "O back-end funcionava e não era o motivo da evasão — a interface era. Trocar as duas pontas de uma vez dobraria o risco e o prazo para resolver um problema que estava só na camada visual.",
+      },
+      {
+        chose: "Filtro no cliente",
+        over: "Filtro no servidor",
+        why: "O conjunto de dados cabe em memória e a resposta vira instantânea, sem ida e volta de rede a cada tecla. Se a base crescer uma ordem de grandeza, essa decisão precisa ser revisitada.",
+      },
+    ],
     featured: false,
   },
   {
@@ -307,6 +438,7 @@ export const projects: Project[] = [
     gallery: ["/assets/fruity-projeto6.png"],
     liveUrl: "https://fruity-xi.vercel.app/",
     githubUrl: "",
+    embedUrl: "https://fruity-xi.vercel.app/",
     role: "Front-end Developer & Creative Developer",
     problem:
       "Criar uma experiência web que vai além do convencional, explorando cores, formas e animações de forma criativa e memorável.",
@@ -325,6 +457,18 @@ export const projects: Project[] = [
       "Experiência visual marcante",
       "Código limpo e performático",
       "Design award-worthy",
+    ],
+    tradeoffs: [
+      {
+        chose: "GSAP e Framer Motion juntos",
+        over: "Só uma das duas",
+        why: "Cada uma ganha em um terreno: GSAP para timeline atrelada ao scroll, Framer Motion para entrada e saída de componente. O custo é carregar duas libs — assumi porque o projeto é vitrine de animação, onde isso é o produto.",
+      },
+      {
+        chose: "Layout não-convencional",
+        over: "Grid previsível",
+        why: "O objetivo era ser memorável, não familiar. Em um site de e-commerce essa escolha seria errada — aqui a métrica é impressão, não taxa de conversão.",
+      },
     ],
     featured: false,
   },

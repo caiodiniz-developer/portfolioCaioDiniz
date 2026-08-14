@@ -85,15 +85,24 @@ function Track() {
     let paused = false
     let rafId: number
 
+    /* Measure once — reading scrollWidth per frame forced a sync layout flush
+       that stalled the scroll pipeline. */
+    let half = el.scrollWidth / 2
+
     function tick() {
       if (!paused) {
         pos -= 0.45
-        const half = el!.scrollWidth / 2
         if (pos <= -half) pos = 0
         el!.style.transform = `translate3d(${pos}px, 0, 0)`
       }
       rafId = requestAnimationFrame(tick)
     }
+
+    const ro = new ResizeObserver(() => {
+      half = el.scrollWidth / 2
+      if (pos < -half) pos = 0
+    })
+    ro.observe(el)
 
     rafId = requestAnimationFrame(tick)
 
@@ -107,6 +116,7 @@ function Track() {
 
     return () => {
       cancelAnimationFrame(rafId)
+      ro.disconnect()
       el.removeEventListener('mouseenter', pause)
       el.removeEventListener('mouseleave', resume)
       el.removeEventListener('touchstart', pause)
@@ -142,6 +152,8 @@ export default function StackCarousel() {
   const ref  = useRef<HTMLElement>(null)
 
   useEffect(() => {
+    let split: SplitType | null = null
+
     const ctx = gsap.context(() => {
       const badge = ref.current!.querySelector<HTMLElement>('.sc-badge')
       if (badge) {
@@ -155,10 +167,13 @@ export default function StackCarousel() {
       const h2El = ref.current!.querySelector<HTMLElement>('.sc-heading')
       if (h2El) {
         gsap.set(h2El, { overflow: 'hidden' })
-        const split = new SplitType(h2El, { types: 'words' })
-        gsap.from(split.words!, {
-          y: '115%',
-          opacity: 0,
+        split = new SplitType(h2El, { types: 'words' })
+        // set + to, never from(): a from() tween is reverted by every
+        // ScrollTrigger.refresh() and stays reverted once `once: true` kills the trigger.
+        gsap.set(split.words!, { y: '115%', opacity: 0 })
+        gsap.to(split.words!, {
+          y: '0%',
+          opacity: 1,
           duration: 0.8,
           ease: 'power3.out',
           stagger: 0.06,
@@ -168,7 +183,12 @@ export default function StackCarousel() {
       }
     }, ref)
 
-    return () => ctx.revert()
+    return () => {
+      // Revert SplitType BEFORE GSAP context so the original text node is restored
+      // before GSAP tries to clean up tweens that reference split DOM nodes.
+      split?.revert()
+      ctx.revert()
+    }
   }, [lang])
 
   return (

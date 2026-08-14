@@ -1,5 +1,8 @@
-import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
+// Lenis ships a REQUIRED stylesheet. Without it html/body keep their default
+// height rules and `scroll-behavior` is never forced to `auto`, so the browser
+// fights Lenis on every wheel event and scroll feels native/choppy.
+import 'lenis/dist/lenis.css'
 import './styles/globals.css'
 import './styles/animations.css'
 import App from './App'
@@ -30,8 +33,7 @@ if ('serviceWorker' in navigator) {
   })
 }
 
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <App />
-  </StrictMode>
-)
+// NOTE: StrictMode is intentionally omitted. In dev it mounts every effect twice,
+// which tears down and rebuilds Lenis + all ScrollTrigger instances mid-frame —
+// that produced stale pin/scroll measurements and visible jank while developing.
+createRoot(document.getElementById('root')!).render(<App />)
