@@ -33,8 +33,27 @@ export default function Decompose({
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
 
     const ctx = gsap.context(() => {
-      /* Direct children are the "boxes" that survive as outlines. */
-      const blocks = Array.from(el.children) as HTMLElement[]
+      /* Find the actual content blocks.
+         `el.children` is just the wrapped <section>, so animating that gave a
+         single flat fade rather than something that reads as coming apart.
+         Descend to the real cards/rows so they can stagger and outline
+         individually. */
+      function pickBlocks(): HTMLElement[] {
+        const candidates = [
+          '.svc-card',
+          '.container-custom > *',
+          'section > *',
+        ]
+        for (const sel of candidates) {
+          const found = Array.from(el!.querySelectorAll<HTMLElement>(sel))
+            // Skip wrappers that hold everything — they'd just fade the section.
+            .filter(n => n.offsetHeight > 40 && n.offsetHeight < window.innerHeight * 1.5)
+          if (found.length >= 2) return found
+        }
+        return Array.from(el!.children) as HTMLElement[]
+      }
+
+      const blocks = pickBlocks()
       if (!blocks.length) return
 
       const tl = gsap.timeline({

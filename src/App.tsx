@@ -15,6 +15,7 @@ import BatterySaver from "./components/animations/BatterySaver";
 import ContextCursor from "./components/animations/ContextCursor";
 import SpeedReader from "./components/animations/SpeedReader";
 import Preloader from "./components/Preloader";
+import { markAppReady } from "./lib/appReady";
 
 export default function App() {
   const [loading, setLoading] = useState(true);
@@ -61,7 +62,17 @@ export default function App() {
       <SmoothScroll />
 
       <AnimatePresence mode="wait">
-        {loading && <Preloader key="preloader" onDone={() => setLoading(false)} />}
+        {loading && (
+          <Preloader
+            key="preloader"
+            onDone={() => {
+              setLoading(false)
+              // Entrance animations wait for this — until now the hero was
+              // playing its whole timeline behind the overlay.
+              markAppReady()
+            }}
+          />
+        )}
       </AnimatePresence>
 
       <ScrollProgress />

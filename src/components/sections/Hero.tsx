@@ -12,6 +12,7 @@ import Magnetic from "@/components/animations/Magnetic";
 import PaintReveal from "@/components/animations/PaintReveal";
 import { projects } from "@/data/projects";
 import HeroWireframe from "@/components/sections/HeroWireframe";
+import { onAppReady } from "@/lib/appReady";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -224,6 +225,8 @@ export default function Hero() {
      is desaturated for the first three so the final beat reads as the interface
      "coming alive" rather than a filter change. */
   useEffect(() => {
+    let unsub = () => {};
+
     const ctx = gsap.context(() => {
       const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -233,7 +236,11 @@ export default function Hero() {
       gsap.set(".hero-btns", { y: 20, opacity: 0 });
       gsap.set(".hero-photo", { clipPath: "inset(100% 0 0 0)" });
 
-      const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+      /* Built paused and released by onAppReady. The router mounts alongside
+         the preloader, so an auto-playing timeline would finish behind the
+         overlay and the visitor would only ever see the finished hero. */
+      const tl = gsap.timeline({ defaults: { ease: "power3.out" }, paused: true });
+      unsub = onAppReady(() => tl.play());
 
       if (!reduced) {
         /* ── Beat 1: the wireframe assembles ── */
@@ -313,7 +320,7 @@ export default function Hero() {
         });
       }
     }, ref);
-    return () => ctx.revert();
+    return () => { unsub(); ctx.revert(); };
   }, []);
 
   return (

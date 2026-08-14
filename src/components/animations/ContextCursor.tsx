@@ -39,12 +39,34 @@ function Icon({ kind }: { kind: CursorKind }) {
 
   switch (kind) {
     case 'view':
+      // Lens rather than a plain outline: the gradient fill and highlight arc
+      // read as glass, and the handle is capped so it doesn't look like a
+      // stray line at small sizes.
       return (
-        <svg viewBox="0 0 24 24" width="17" height="17" {...common}>
-          <circle cx="10.5" cy="10.5" r="6.5" />
-          <line x1="15.5" y1="15.5" x2="21" y2="21" />
-          <line x1="7.6" y1="10.5" x2="13.4" y2="10.5" />
-          <line x1="10.5" y1="7.6" x2="10.5" y2="13.4" />
+        <svg viewBox="0 0 24 24" width="19" height="19" fill="none">
+          <defs>
+            <linearGradient id="cc-lens" x1="4" y1="3" x2="17" y2="17" gradientUnits="userSpaceOnUse">
+              <stop offset="0" stopColor="#fff" stopOpacity="0.28" />
+              <stop offset="1" stopColor="#fff" stopOpacity="0.04" />
+            </linearGradient>
+          </defs>
+          {/* glass */}
+          <circle cx="10.2" cy="10.2" r="6.9" fill="url(#cc-lens)" />
+          {/* rim */}
+          <circle
+            cx="10.2" cy="10.2" r="6.9"
+            stroke="currentColor" strokeWidth="1.7"
+          />
+          {/* specular highlight */}
+          <path
+            d="M5.6 8.4a5.2 5.2 0 013.4-3.2"
+            stroke="#fff" strokeOpacity="0.75" strokeWidth="1.4" strokeLinecap="round"
+          />
+          {/* handle */}
+          <path
+            d="M15.4 15.4L20 20"
+            stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"
+          />
         </svg>
       )
     case 'open':
