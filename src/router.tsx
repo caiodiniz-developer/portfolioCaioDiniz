@@ -15,7 +15,6 @@ import ContactPage from "@/pages/ContactPage";
 import NotFound from "@/pages/NotFound";
 import GuestbookPage from "@/pages/GuestbookPage";
 import CVPage from "@/pages/CVPage";
-import UsesPage from "@/pages/UsesPage";
 import { getLenis } from "@/hooks/useLenis";
 import { initAnalytics, pageview } from "@/lib/analytics";
 
@@ -91,7 +90,6 @@ export const router = createBrowserRouter([
       { path: "contact", element: <ContactPage /> },
       { path: "guestbook",  element: <GuestbookPage /> },
       { path: "cv",         element: <CVPage /> },
-      { path: "uses",       element: <UsesPage /> },
       { path: "*", element: <NotFound /> },
     ],
   },

@@ -8,6 +8,7 @@ import Process       from '@/components/sections/Process'
 import Testimonials  from '@/components/sections/Testimonials'
 import GitHubActivity from '@/components/sections/GitHubActivity'
 import CTASection    from '@/components/sections/CTASection'
+import Decompose     from '@/components/animations/Decompose'
 
 export default function Home() {
   useEffect(() => {
@@ -18,7 +19,13 @@ export default function Home() {
     <>
       <Hero />
       <FeaturedProjects />
-      <Services />
+      {/* Services decomposes back into wireframe as it leaves — the mirror of
+          the hero assembling itself on arrival. Applied to one section on
+          purpose: the effect reads as intentional once, and as a gimmick if
+          every section did it. */}
+      <Decompose>
+        <Services />
+      </Decompose>
       <StackCarousel />
       <Process />
       <Testimonials />

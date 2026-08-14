@@ -641,6 +641,7 @@ export default function GuestbookPage() {
 
           {/* ── FORM ── */}
           <motion.div
+            data-cursor="write"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1,  y: 0  }}
             transition={{ duration: 0.55, delay: 0.25, ease: E }}
@@ -683,7 +684,7 @@ export default function GuestbookPage() {
                 <p style={{ margin: 0, fontSize: '0.78rem', color: 'rgba(255,255,255,0.35)', lineHeight: 1.7 }}>
                   Configure <code style={{ color: '#4ade80', background: 'rgba(74,222,128,0.1)', padding: '0.1rem 0.4rem', borderRadius: 4 }}>.env.local</code>
                 </p>
-                <pre style={{ marginTop: '0.5rem', padding: '0.85rem 1rem', borderRadius: 8, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', fontSize: '0.68rem', color: '#4ade80', fontFamily: 'monospace', lineHeight: 1.8, overflowX: 'auto' }}>
+                <pre data-cursor="code" style={{ marginTop: '0.5rem', padding: '0.85rem 1rem', borderRadius: 8, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', fontSize: '0.68rem', color: '#4ade80', fontFamily: 'monospace', lineHeight: 1.8, overflowX: 'auto' }}>
 {`CREATE TABLE guestbook (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   name TEXT NOT NULL, message TEXT NOT NULL,

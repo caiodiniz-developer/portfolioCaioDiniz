@@ -240,6 +240,7 @@ export default function ProjectsPage() {
                   onMouseEnter={() => { setHovered(project.id); setCursor('view'); setLabel('Abrir') }}
                   onMouseLeave={() => { setHovered(null); setCursor('default'); setLabel('') }}
                   onClick={() => navigate(`/projects/${project.slug}`)}
+                  data-cursor="open"
                   style={{
                     display: 'flex', alignItems: 'center',
                     padding: '0 clamp(1.5rem,5vw,5rem)',

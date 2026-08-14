@@ -11,6 +11,7 @@ import { useCursorStore } from "@/store/useCursorStore";
 import Magnetic from "@/components/animations/Magnetic";
 import PaintReveal from "@/components/animations/PaintReveal";
 import { projects } from "@/data/projects";
+import HeroWireframe from "@/components/sections/HeroWireframe";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -55,7 +56,13 @@ function CharReveal({
   text: string;
   style?: React.CSSProperties;
 }) {
-  // overflow:hidden on the LINE block — descenders (g, p, q) show freely
+  // overflow:hidden on the LINE block — descenders (g, p, q) show freely.
+  //
+  // Characters are grouped into per-word spans. Without that grouping every
+  // letter is its own inline-block and the browser may break the line between
+  // ANY two of them — which is how "produtos" was rendering as "produto" / "s".
+  const words = text.split(" ");
+
   return (
     <span
       style={{
@@ -66,14 +73,29 @@ function CharReveal({
         ...style,
       }}
     >
-      {text.split("").map((char, i) => (
+      {words.map((word, wi) => (
         <span
-          key={i}
-          style={{ display: "inline-block", verticalAlign: "top" }}
+          key={wi}
+          style={{ display: "inline-block", whiteSpace: "nowrap", verticalAlign: "top" }}
         >
-          <span className="h-char" style={{ display: "inline-block" }}>
-            {char === " " ? " " : char}
-          </span>
+          {word.split("").map((char, ci) => (
+            <span
+              key={ci}
+              style={{ display: "inline-block", verticalAlign: "top" }}
+            >
+              <span className="h-char" style={{ display: "inline-block" }}>
+                {char}
+              </span>
+            </span>
+          ))}
+          {/* Real space between words — the only legal break point. */}
+          {wi < words.length - 1 && (
+            <span style={{ display: "inline-block", verticalAlign: "top" }}>
+              <span className="h-char" style={{ display: "inline-block" }}>
+                &nbsp;
+              </span>
+            </span>
+          )}
         </span>
       ))}
     </span>
@@ -196,9 +218,15 @@ export default function Hero() {
   const w2 = lang === "en" ? "digital" : "produtos";
   const w3 = lang === "en" ? "products." : "digitais.";
 
-  /* ── GSAP entrance ── */
+  /* ── GSAP entrance ──
+     Four beats, in this order: the wireframe draws itself, the real content
+     rises inside it, the skeleton dissolves, and colour arrives last. The hero
+     is desaturated for the first three so the final beat reads as the interface
+     "coming alive" rather than a filter change. */
   useEffect(() => {
     const ctx = gsap.context(() => {
+      const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
       gsap.set(".h-char", { y: "140%" }); // must exceed outer-block clip (lineHeight + paddingBottom)
       gsap.set(".hero-badge", { y: 14, opacity: 0 });
       gsap.set(".hero-sub", { y: 24, opacity: 0 });
@@ -206,19 +234,59 @@ export default function Hero() {
       gsap.set(".hero-photo", { clipPath: "inset(100% 0 0 0)" });
 
       const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
-      tl.to(".hero-badge", { y: 0, opacity: 1, duration: 0.6 }, 0.1);
+
+      if (!reduced) {
+        /* ── Beat 1: the wireframe assembles ── */
+        gsap.set(".hero-grid", { filter: "grayscale(1) saturate(0)" });
+        gsap.set(".hw-root", { opacity: 1 });
+        gsap.set(".hw-box", { scaleX: 0, opacity: 0 });
+        gsap.set(".hw-photo", { scaleX: 1, scaleY: 0, opacity: 0 });
+
+        tl.to(".hw-box:not(.hw-photo)", {
+          scaleX: 1, opacity: 1,
+          duration: 0.42, ease: "power2.out",
+          stagger: 0.055,
+        }, 0);
+        tl.to(".hw-photo", {
+          scaleY: 1, opacity: 1,
+          duration: 0.6, ease: "power3.out",
+        }, 0.18);
+      }
+
+      /* ── Beat 2: real content rises into the boxes ── */
+      const t0 = reduced ? 0 : 0.62;
+      tl.to(".hero-badge", { y: 0, opacity: 1, duration: 0.6 }, t0 + 0.1);
       tl.to(
         ".h-char",
         { y: "0%", duration: 0.9, stagger: { each: 0.018 } },
-        0.22,
+        t0 + 0.22,
       );
-      tl.to(".hero-sub", { y: 0, opacity: 1, duration: 0.65 }, 0.65);
-      tl.to(".hero-btns", { y: 0, opacity: 1, duration: 0.6 }, 0.78);
+      tl.to(".hero-sub", { y: 0, opacity: 1, duration: 0.65 }, t0 + 0.65);
+      tl.to(".hero-btns", { y: 0, opacity: 1, duration: 0.6 }, t0 + 0.78);
       tl.to(
         ".hero-photo",
         { clipPath: "inset(0% 0 0 0)", duration: 1.2, ease: "power4.inOut" },
-        0.3,
+        t0 + 0.3,
       );
+
+      if (!reduced) {
+        /* ── Beat 3: the skeleton dissolves ── */
+        tl.to(".hw-box", {
+          opacity: 0,
+          duration: 0.45, ease: "power2.inOut",
+          stagger: 0.03,
+        }, t0 + 0.5);
+
+        /* ── Beat 4: colour ── */
+        tl.to(".hero-grid", {
+          filter: "grayscale(0) saturate(1)",
+          duration: 1.1,
+          ease: "power2.inOut",
+          // Clear the property so it stops compositing the hero for the rest
+          // of the visit — a permanent filter forces its own layer.
+          onComplete: () => gsap.set(".hero-grid", { clearProps: "filter" }),
+        }, t0 + 1.05);
+      }
 
       gsap.to(".hero-photo-inner", {
         yPercent: -12,
@@ -287,6 +355,10 @@ export default function Hero() {
             "radial-gradient(ellipse 90% 90% at 50% 50%, transparent 30%, rgba(13,13,13,0.6) 100%)",
         }}
       />
+
+      {/* Skeleton the hero assembles from — sits above the background, below
+          the real content, and fades out once the content has arrived. */}
+      <HeroWireframe />
 
       {/* Two-column layout */}
       <div

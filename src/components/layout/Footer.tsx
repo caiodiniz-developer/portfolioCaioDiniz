@@ -19,7 +19,6 @@ const NAV = [
   { path: '/services',  pt: 'Serviços', en: 'Services' },
   { path: '/contact',   pt: 'Contato',  en: 'Contact'  },
   { path: '/cv',        pt: 'Currículo',en: 'Résumé'   },
-  { path: '/uses',      pt: '/uses',    en: '/uses'    },
 ]
 
 export default function Footer() {

@@ -69,6 +69,7 @@ function ProjectCard({ project, index, aspectRatio, disableTilt }: {
     <article
       ref={cardRef as React.RefObject<HTMLElement>}
       className="fp-card group"
+      data-cursor="view"
       style={{ transformStyle: 'preserve-3d', position: 'relative' }}
       onMouseEnter={handleMouseEnter}
       onMouseMove={handleMouseMove}

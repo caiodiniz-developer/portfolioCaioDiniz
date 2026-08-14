@@ -132,23 +132,6 @@ export default function Header() {
             >
               {lang === 'en' ? 'Guestbook' : 'Livro de Visitas'}
             </NavLink>
-            {/* /uses — the uses.tech convention; devs look for this by name, so
-                it keeps its literal path as the label. */}
-            <NavLink
-              to="/uses"
-              onMouseEnter={() => setCursor('pointer')}
-              onMouseLeave={() => setCursor('default')}
-              className={({ isActive }) =>
-                cn(
-                  'px-3.5 py-2 text-[0.65rem] font-semibold uppercase tracking-[0.08em] rounded-full transition-colors duration-200 whitespace-nowrap',
-                  isActive
-                    ? 'text-white bg-white/[0.07]'
-                    : 'text-white/40 hover:text-white/75'
-                )
-              }
-            >
-              /uses
-            </NavLink>
           </nav>
 
           {/* Right side */}
@@ -317,25 +300,6 @@ export default function Header() {
                     }
                   >
                     {lang === 'en' ? 'Guestbook' : 'Livro de Visitas'}
-                  </NavLink>
-                </motion.li>
-                <motion.li
-                  initial={{ opacity: 0, y: 28 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.07 + (NAV_LINKS.length + 1) * 0.07, duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
-                  className="border-b border-white/[0.07] overflow-hidden"
-                >
-                  <NavLink
-                    to="/uses"
-                    onClick={() => setMobileOpen(false)}
-                    className={({ isActive }) =>
-                      cn(
-                        'block py-5 text-5xl font-black tracking-[-0.03em] transition-colors duration-200',
-                        isActive ? 'text-white' : 'text-white/25 hover:text-white'
-                      )
-                    }
-                  >
-                    /uses
                   </NavLink>
                 </motion.li>
               </ul>

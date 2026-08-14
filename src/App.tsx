@@ -12,6 +12,8 @@ import ClickSound from "./components/animations/ClickSound";
 import SectionCounter from "./components/animations/SectionCounter";
 import LiveTab from "./components/animations/LiveTab";
 import BatterySaver from "./components/animations/BatterySaver";
+import ContextCursor from "./components/animations/ContextCursor";
+import SpeedReader from "./components/animations/SpeedReader";
 import Preloader from "./components/Preloader";
 
 export default function App() {
@@ -71,6 +73,8 @@ export default function App() {
       <SectionCounter />
       <LiveTab />
       <BatterySaver />
+      <ContextCursor />
+      <SpeedReader />
       <RouterProvider router={router} />
     </>
   );
