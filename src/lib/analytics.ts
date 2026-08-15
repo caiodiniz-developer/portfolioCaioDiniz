@@ -62,9 +62,16 @@ export function initAnalytics(): void {
     document.head.appendChild(gtagScript)
 
     window.dataLayer = window.dataLayer || []
-    // gtag must use `arguments`, not a rest param — GA reads the raw arguments
-    // object off dataLayer and a spread array is not equivalent.
-    function gtag(...args: unknown[]) { window.dataLayer!.push(args) }
+
+    /* gtag.js walks dataLayer looking for the raw `arguments` object. A plain
+       Array pushed in its place is NOT equivalent — the tag skips the entry and
+       the event is dropped without any error. Hence the non-arrow function and
+       `arguments` rather than a rest parameter. */
+    function rawGtag() {
+      // eslint-disable-next-line prefer-rest-params
+      window.dataLayer!.push(arguments)
+    }
+    const gtag = rawGtag as unknown as (...args: unknown[]) => void
     window.gtag = gtag
 
     gtag('js', new Date())

@@ -47,6 +47,7 @@ export const TECH: Record<string, TechIcon> = {
   stripe:         { name: 'Stripe',       color: '#635BFF' },
   zod:            { name: 'Zod',          color: '#3E67B1' },
   gsap:           { name: 'GSAP',         color: '#88CE02' },
+  lenis:          { name: 'Lenis',        color: '#F5C518' },
 }
 
 /** Resolve a stack string from projects.ts to an icon definition. */

@@ -472,6 +472,61 @@ export const projects: Project[] = [
     ],
     featured: false,
   },
+  {
+    id: 9,
+    slug: "aerivo",
+    title: "AERIVO",
+    category: "Front-end",
+    type: "Experiência Imersiva",
+    year: "2026",
+    description:
+      "Experiência cinematográfica de viagem conduzida pelo scroll — do horizonte distante até a cabine, com narrativa contínua e tipografia editorial.",
+    longDescription:
+      "A AERIVO é uma experiência web sobre voar. Em vez de apresentar destinos numa grade, o site conduz o visitante por uma narrativa contínua controlada pelo scroll: começa no horizonte distante e vai se aproximando até a cabine. Cada seção é um momento da jornada, com tipografia editorial em Playfair Display e movimento sincronizado ao scroll via GSAP e Lenis.",
+    stack: ["React", "TypeScript", "GSAP", "Lenis", "Vite", "Tailwind CSS"],
+    image: "/assets/aerivo-projeto8.png",
+    gallery: ["/assets/aerivo-projeto8.png"],
+    liveUrl: "https://aerivo.vercel.app/",
+    githubUrl: "",
+    embedUrl: "https://aerivo.vercel.app/",
+    role: "Front-end Developer & Creative Developer",
+    problem:
+      "Sites de viagem se parecem: uma grade de cards com foto e preço. O desafio era vender a sensação de viajar, não o catálogo — provocar desejo antes de informar.",
+    solution:
+      "Construí uma narrativa linear em que o scroll é o único controle. A página inteira é uma timeline: cada rolagem aproxima o visitante do destino, com o texto e a imagem se revelando no ritmo do movimento em vez de aparecerem de uma vez.",
+    features: [
+      "Narrativa contínua guiada pelo scroll",
+      "Timeline GSAP sincronizada com Lenis",
+      "Tipografia editorial com Playfair Display",
+      "Revelação progressiva por seção",
+      "Transições encadeadas entre destinos",
+      "Layout responsivo mobile-first",
+    ],
+    results: [
+      "Projeto publicado e funcional",
+      "Narrativa que sustenta a rolagem inteira",
+      "Bundle de ~255KB",
+      "Identidade visual própria",
+    ],
+    tradeoffs: [
+      {
+        chose: "Narrativa linear conduzida pelo scroll",
+        over: "Grade de destinos navegável",
+        why: "Uma grade deixa o visitante escolher, mas não constrói expectativa. Aqui a métrica é desejo, não eficiência — e desejo precisa de ordem e ritmo. O custo é que quem já sabe o que quer não consegue pular direto pra lá.",
+      },
+      {
+        chose: "GSAP + Lenis compartilhando um único loop",
+        over: "Animação por IntersectionObserver",
+        why: "IntersectionObserver dispara em limiares — ou entrou, ou não entrou. Uma narrativa que se desenrola com a rolagem precisa de progresso contínuo, e é isso que o scrub do ScrollTrigger dá. Lenis entra para o scroll interpolar em vez de saltar.",
+      },
+      {
+        chose: "Playfair Display no título",
+        over: "Uma sans-serif geométrica",
+        why: "O produto vende sofisticação, e serifa carrega essa leitura de imediato. Escolhi um peso alto de propósito: nos pesos leves a Playfair fica delicada demais e some contra imagem de fundo.",
+      },
+    ],
+    featured: true,
+  },
 ];
 
 export function getProjectBySlug(slug: string): Project | undefined {
