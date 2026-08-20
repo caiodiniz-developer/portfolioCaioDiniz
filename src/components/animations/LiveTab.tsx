@@ -98,10 +98,25 @@ export default function LiveTab() {
       linkEl.href = canvas.toDataURL('image/png')
     }
 
+    /* Scrollable distance, cached.
+       Reading `scrollHeight` inside the scroll handler forces the browser to
+       flush layout on every single scroll event — the same mistake that was
+       stalling the marquees. The value only changes when the document does, so
+       a ResizeObserver is the right trigger, not the scroll itself. */
+    let maxScroll = 0
+    function measure() {
+      maxScroll = document.documentElement.scrollHeight - window.innerHeight
+    }
+    measure()
+
+    const ro = new ResizeObserver(measure)
+    ro.observe(document.documentElement)
+
     function onScroll() {
-      const doc = document.documentElement
-      const max = doc.scrollHeight - window.innerHeight
-      const pct = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0
+      // Hot path: arithmetic only, no layout reads.
+      const pct = maxScroll > 0
+        ? Math.min(1, Math.max(0, window.scrollY / maxScroll))
+        : 0
       const whole = Math.round(pct * 100)
       // Redrawing + toDataURL is not free; only do it when the ring would
       // visibly change.
@@ -112,11 +127,12 @@ export default function LiveTab() {
 
     onScroll()
     window.addEventListener('scroll', onScroll, { passive: true })
-    window.addEventListener('resize', onScroll, { passive: true })
+    window.addEventListener('resize', measure, { passive: true })
 
     return () => {
+      ro.disconnect()
       window.removeEventListener('scroll', onScroll)
-      window.removeEventListener('resize', onScroll)
+      window.removeEventListener('resize', measure)
       linkEl.remove()
     }
   }, [])

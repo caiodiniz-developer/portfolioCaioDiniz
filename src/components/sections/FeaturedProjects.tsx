@@ -121,7 +121,12 @@ function ProjectCard({ project, index, aspectRatio, disableTilt }: {
           <div className="absolute top-4 left-4 right-4 flex items-center justify-between z-30 pointer-events-none">
             <span
               className="inline-flex items-center px-2.5 py-1 text-[0.55rem] font-semibold uppercase tracking-[0.1em] text-white/65 rounded-full"
-              style={{ border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(8px)' }}
+              /* Solid instead of backdrop-filter: this badge repeats once per
+                 project card, and each blur forces the browser to snapshot and
+                 re-composite what is behind it on every frame. Over an image
+                 the blur is invisible anyway — a slightly more opaque fill is
+                 indistinguishable and free. */
+              style={{ border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(0,0,0,0.62)' }}
             >
               {project.category}
             </span>
@@ -354,8 +359,7 @@ export default function FeaturedProjects() {
           gap: 0.4rem;
           border-radius: 999px;
           border: 1px solid rgba(255,255,255,0.18);
-          background: rgba(0,0,0,0.62);
-          backdrop-filter: blur(10px);
+          background: rgba(0,0,0,0.82);
           color: #fff;
           font-family: inherit;
           cursor: pointer;

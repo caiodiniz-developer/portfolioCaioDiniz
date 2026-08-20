@@ -382,13 +382,10 @@ export const projects: Project[] = [
       "O Prime App é uma aplicação web com foco em experiência do usuário e design visual premium. Conta com filtros avançados, animações suaves e uma interface limpa que prioriza a usabilidade.",
     stack: ["React", "TypeScript", "Framer Motion", "Tailwind CSS"],
     image: "/assets/projeto-prime.png",
-    gallery: [
-      "/assets/foto-prime-1.jpeg",
-      "/assets/foto-prime-2.jpeg",
-      "/assets/foto-prime-3.jpeg",
-    ],
-    liveUrl: "https://caiodiniz.dev", // mude o link aqui
+    gallery: ["/assets/projeto-prime.png"],
+    liveUrl: "https://www.agenciaprimefootball.com.br/",
     githubUrl: "",
+    embedUrl: "https://www.agenciaprimefootball.com.br/",
     role: "Front-end Developer",
     problem:
       "O cliente precisava de uma aplicação web moderna com UX premium para substituir uma interface desatualizada que prejudicava a retenção de usuários.",

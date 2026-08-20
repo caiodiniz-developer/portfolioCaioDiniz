@@ -220,8 +220,7 @@ export default function HorizontalScrollProjects() {
                   className="inline-flex items-center px-2.5 py-1 text-[0.55rem] font-semibold uppercase tracking-[0.1em] text-white/65 rounded-full"
                   style={{
                     border:          '1px solid rgba(255,255,255,0.15)',
-                    background:      'rgba(0,0,0,0.45)',
-                    backdropFilter:  'blur(8px)',
+                    background:      'rgba(0,0,0,0.68)',
                   }}
                 >
                   {project.category}

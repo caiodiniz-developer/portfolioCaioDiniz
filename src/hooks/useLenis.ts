@@ -57,6 +57,24 @@ export function useLenis() {
     // Keep ScrollTrigger's cached scroll position in sync with Lenis' virtual one.
     lenis.on('scroll', ScrollTrigger.update)
 
+    /* Teach ScrollTrigger to READ from Lenis rather than from the DOM.
+       Without a proxy, every scrub'd trigger calls window.scrollY on its own —
+       which is the browser's real position, not the interpolated one Lenis is
+       rendering. The two disagree by a few pixels every frame, and scrubbed
+       animations chase a value that never settles. That mismatch is what makes
+       scrub feel "loose" even when the frame rate is fine. */
+    ScrollTrigger.scrollerProxy(document.documentElement, {
+      scrollTop(value) {
+        if (arguments.length && typeof value === 'number') {
+          lenis.scrollTo(value, { immediate: true })
+        }
+        return lenis.scroll
+      },
+      getBoundingClientRect() {
+        return { top: 0, left: 0, width: window.innerWidth, height: window.innerHeight }
+      },
+    })
+
     // ONE raf loop for the whole app: GSAP's ticker drives Lenis.
     // Never call requestAnimationFrame(lenis.raf) separately — two loops
     // double-advance the interpolation and produce stutter.

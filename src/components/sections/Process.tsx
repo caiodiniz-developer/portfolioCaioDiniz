@@ -336,7 +336,6 @@ export default function Process() {
           border-radius: 16px;
           border: 1px solid rgba(255,255,255,0.16);
           background: linear-gradient(160deg, rgba(255,255,255,0.1), rgba(255,255,255,0.03));
-          backdrop-filter: blur(6px);
           color: rgba(255,255,255,0.62);
           font-family: inherit;
           cursor: pointer;

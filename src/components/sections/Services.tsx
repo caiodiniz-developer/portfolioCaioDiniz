@@ -77,7 +77,7 @@ function ServiceCard({
           <div className="absolute top-4 left-4 right-4 flex items-center justify-between z-30 pointer-events-none">
             <span
               className="inline-flex items-center px-2.5 py-1 text-[0.55rem] font-semibold uppercase tracking-[0.1em] rounded-full"
-              style={{ border: '1px solid rgba(0,0,0,0.15)', background: 'rgba(255,255,255,0.82)', backdropFilter: 'blur(8px)', color: '#0d0d0d' }}
+              style={{ border: '1px solid rgba(0,0,0,0.15)', background: 'rgba(255,255,255,0.94)', color: '#0d0d0d' }}
             >
               {cat}
             </span>

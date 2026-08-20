@@ -1,58 +1,114 @@
 import { useEffect } from 'react'
 import gsap from 'gsap'
 
-/* Add data-gravity to any element you want attracted to the cursor */
+/**
+ * Pulls any `[data-gravity]` element toward the cursor when it comes close.
+ *
+ * PERF CONTRACT — mousemove fires up to 120Hz and, crucially, trackpad
+ * scrolling generates it too, so anything expensive here lands squarely on the
+ * scroll pipeline:
+ *  1. Geometry is measured into a cache in DOCUMENT space, never inside the
+ *     move handler. Reading getBoundingClientRect() per element per event was
+ *     forcing a synchronous layout flush dozens of times a second.
+ *  2. The cache is refreshed on resize and on DOM changes, debounced into a
+ *     single frame — the MutationObserver used to rebuild every quickTo on
+ *     every mutation, which also leaked tweens.
+ *  3. Scroll does not invalidate the cache: viewport position is derived by
+ *     subtracting the current scroll offset at read time.
+ */
+
+const THRESHOLD = 130   // px radius of influence
+const STRENGTH  = 0.28  // 0–1, how far it travels
+
+interface Target {
+  el: HTMLElement
+  qx: gsap.QuickToFunc
+  qy: gsap.QuickToFunc
+  /** Centre and size, in document space. */
+  cx: number
+  cy: number
+  w: number
+  h: number
+}
+
 export default function GravityCursor() {
   useEffect(() => {
     if (window.matchMedia('(hover: none)').matches) return
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
 
-    const THRESHOLD = 130  // px radius of influence
-    const STRENGTH  = 0.28 // 0–1 how much it moves
+    let targets: Target[] = []
 
-    const els: { el: HTMLElement; qx: gsap.QuickToFunc; qy: gsap.QuickToFunc }[] = []
+    function measure() {
+      const sx = window.scrollX
+      const sy = window.scrollY
+      const next: Target[] = []
 
-    function refresh() {
-      els.length = 0
       document.querySelectorAll<HTMLElement>('[data-gravity]').forEach(el => {
-        els.push({
+        const r = el.getBoundingClientRect()
+        if (r.width === 0 && r.height === 0) return
+        next.push({
           el,
+          // quickTo is created once per element per measure, not per event.
           qx: gsap.quickTo(el, 'x', { duration: 0.55, ease: 'power3.out' }),
           qy: gsap.quickTo(el, 'y', { duration: 0.55, ease: 'power3.out' }),
+          cx: r.left + r.width / 2 + sx,
+          cy: r.top + r.height / 2 + sy,
+          w: r.width,
+          h: r.height,
         })
       })
-    }
-    refresh()
 
-    /* Re-scan on route changes */
-    const observer = new MutationObserver(refresh)
-    observer.observe(document.body, { childList: true, subtree: true })
+      targets = next
+    }
+
+    /* Collapse a burst of DOM changes (a route transition) into one measure. */
+    let scheduled = false
+    function scheduleMeasure() {
+      if (scheduled) return
+      scheduled = true
+      requestAnimationFrame(() => {
+        scheduled = false
+        measure()
+      })
+    }
 
     function onMove(e: MouseEvent) {
-      const mx = e.clientX, my = e.clientY
-      els.forEach(({ el, qx, qy }) => {
-        const r   = el.getBoundingClientRect()
-        const cx  = r.left + r.width  / 2
-        const cy  = r.top  + r.height / 2
-        const dx  = mx - cx
-        const dy  = my - cy
-        const dist= Math.sqrt(dx * dx + dy * dy)
+      const mx = e.clientX
+      const my = e.clientY
+      const sx = window.scrollX
+      const sy = window.scrollY
+
+      for (let i = 0; i < targets.length; i++) {
+        const t = targets[i]
+        // Cached document-space centre → current viewport position.
+        const dx = mx - (t.cx - sx)
+        const dy = my - (t.cy - sy)
+        const dist = Math.hypot(dx, dy)
 
         if (dist < THRESHOLD) {
           const factor = (1 - dist / THRESHOLD) * STRENGTH
-          qx(dx * factor * (r.width  / 2))
-          qy(dy * factor * (r.height / 2))
+          t.qx(dx * factor * (t.w / 2))
+          t.qy(dy * factor * (t.h / 2))
         } else {
-          qx(0); qy(0)
+          t.qx(0)
+          t.qy(0)
         }
-      })
+      }
     }
 
+    measure()
+
     window.addEventListener('mousemove', onMove, { passive: true })
+    window.addEventListener('resize', scheduleMeasure, { passive: true })
+
+    const mo = new MutationObserver(scheduleMeasure)
+    mo.observe(document.body, { childList: true, subtree: true })
 
     return () => {
       window.removeEventListener('mousemove', onMove)
-      observer.disconnect()
-      els.forEach(({ el }) => gsap.set(el, { x: 0, y: 0 }))
+      window.removeEventListener('resize', scheduleMeasure)
+      mo.disconnect()
+      targets.forEach(t => gsap.set(t.el, { x: 0, y: 0 }))
     }
   }, [])
 
