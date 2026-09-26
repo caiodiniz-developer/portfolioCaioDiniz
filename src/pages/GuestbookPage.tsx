@@ -12,21 +12,37 @@ import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
 /* ── Supabase ── */
 const SB_URL     = import.meta.env.VITE_SUPABASE_URL  as string | undefined
 const SB_KEY     = import.meta.env.VITE_SUPABASE_ANON as string | undefined
-const ADMIN_PASS = import.meta.env.VITE_ADMIN_PASS    as string | undefined
 const TABLE      = 'guestbook'
+const TOKEN_KEY  = 'gb_admin_token'
 const E: [number, number, number, number] = [0.16, 1, 0.3, 1]
 
 interface Entry { id: string; name: string; message: string; created_at: string }
 
-function sbFetch(path: string, opts?: RequestInit) {
+/* Moderation is enforced by Postgres, not by this file. The DELETE policy in
+   supabase/guestbook.sql only accepts a JWT issued to the admin's email, so
+   the browser holds no secret — a visitor who flips `isAdmin` in devtools
+   just sees the delete fail. The token below is the one Supabase Auth hands
+   back after a real password check on the server. */
+function sbFetch(path: string, opts?: RequestInit, token?: string) {
   const headers: Record<string, string> = {
     apikey:         SB_KEY ?? '',
-    Authorization:  `Bearer ${SB_KEY ?? ''}`,
+    Authorization:  `Bearer ${token ?? SB_KEY ?? ''}`,
     'Content-Type': 'application/json',
     ...((opts?.headers as Record<string, string>) ?? {}),
   }
-  if (opts?.method === 'POST') headers.Prefer = 'return=representation'
+  if (opts?.method === 'POST' || opts?.method === 'DELETE') headers.Prefer = 'return=representation'
   return fetch(`${SB_URL}/rest/v1/${path}`, { ...opts, headers })
+}
+
+async function signIn(password: string): Promise<string | null> {
+  const res = await fetch(`${SB_URL}/auth/v1/token?grant_type=password`, {
+    method:  'POST',
+    headers: { apikey: SB_KEY ?? '', 'Content-Type': 'application/json' },
+    body:    JSON.stringify({ email: SITE.email, password }),
+  })
+  if (!res.ok) return null
+  const data = await res.json() as { access_token?: string }
+  return data.access_token ?? null
 }
 
 const CONFIGURED = !!(SB_URL && SB_KEY)
@@ -512,9 +528,10 @@ export default function GuestbookPage() {
   const [message,    setMessage]    = useState('')
   const [sticker,    setSticker]    = useState<StickerKey | null>(null)
   const [error,      setError]      = useState('')
-  const [isAdmin,    setIsAdmin]    = useState(() =>
-    typeof sessionStorage !== 'undefined' && sessionStorage.getItem('gb_admin') === '1'
-  )
+  const [token,      setToken]      = useState<string | null>(() => {
+    try { return sessionStorage.getItem(TOKEN_KEY) } catch { return null }
+  })
+  const isAdmin = !!token
   const [active, setActive] = useState<Entry | null>(null)
 
   useEffect(() => { document.title = `${lang === 'en' ? 'Guestbook' : 'Livro de Visitas'} — ${SITE.name}` }, [lang])
@@ -556,17 +573,31 @@ export default function GuestbookPage() {
     finally   { setSubmitting(false) }
   }
 
-  function activateAdmin() {
-    if (isAdmin) { sessionStorage.removeItem('gb_admin'); setIsAdmin(false); return }
+  function clearToken() {
+    try { sessionStorage.removeItem(TOKEN_KEY) } catch { /* storage blocked */ }
+    setToken(null)
+  }
+
+  async function activateAdmin() {
+    if (isAdmin) { clearToken(); return }
+    if (!CONFIGURED) return
     const pass = prompt(gb.adminPrompt)
-    if (!pass || !ADMIN_PASS || pass !== ADMIN_PASS) return
-    sessionStorage.setItem('gb_admin', '1'); setIsAdmin(true)
+    if (!pass) return
+    const t = await signIn(pass).catch(() => null)
+    if (!t) { alert(gb.adminDenied); return }
+    try { sessionStorage.setItem(TOKEN_KEY, t) } catch { /* storage blocked */ }
+    setToken(t)
   }
 
   async function deleteEntry(id: string) {
-    if (!confirm(gb.deleteConfirm)) return
+    if (!token || !confirm(gb.deleteConfirm)) return
     try {
-      await sbFetch(`${TABLE}?id=eq.${id}`, { method: 'DELETE' })
+      const res = await sbFetch(`${TABLE}?id=eq.${id}`, { method: 'DELETE' }, token)
+      // RLS doesn't error on a forbidden delete — it silently matches zero
+      // rows. An empty representation means nothing was removed.
+      if (res.status === 401) { clearToken(); throw new Error('expired') }
+      const removed: Entry[] = res.ok ? await res.json() : []
+      if (!removed.length) throw new Error('denied')
       setEntries(prev => prev.filter(e => e.id !== id))
       setActive(null)
     } catch { alert(gb.errorDelete) }
@@ -693,7 +724,7 @@ export default function GuestbookPage() {
 ALTER TABLE guestbook ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "read_all"   ON guestbook FOR SELECT USING (true);
 CREATE POLICY "insert_all" ON guestbook FOR INSERT WITH CHECK (true);
-CREATE POLICY "delete_all" ON guestbook FOR DELETE USING (true);`}
+-- delete: see supabase/guestbook.sql (admin only)`}
                 </pre>
               </div>
             ) : (

@@ -180,6 +180,7 @@ export const translations = {
       deleteConfirm: 'Delete this message?',
       adminLabel: 'Admin',
       adminPrompt: 'Admin password:',
+      adminDenied: 'Wrong password.',
     },
   },
   pt: {
@@ -361,6 +362,7 @@ export const translations = {
       deleteConfirm: 'Apagar este recado?',
       adminLabel: 'Admin',
       adminPrompt: 'Senha de admin:',
+      adminDenied: 'Senha incorreta.',
     },
   },
 } as const
