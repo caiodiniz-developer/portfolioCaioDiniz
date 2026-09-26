@@ -257,3 +257,24 @@
 ::-webkit-scrollbar-track { background: #0d0d0d; }
 ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.12); border-radius: 2px; }
 ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.25); }
+
+/* ── Card → case study morph (see src/lib/morph.ts) ──
+   The two snapshots have different aspect ratios (portrait card, 16:9 hero);
+   cover-fitting both keeps the image from stretching mid-flight. */
+::view-transition-group(project-media) {
+  animation-duration: 0.75s;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  border-radius: 16px;
+  overflow: hidden;
+}
+::view-transition-old(project-media),
+::view-transition-new(project-media) {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  animation-duration: 0.75s;
+}
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.4s;
+}

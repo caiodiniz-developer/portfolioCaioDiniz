@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { ExternalLink, Play, Maximize2, RotateCw } from 'lucide-react'
 import { useLanguageStore } from '@/store/useLanguageStore'
 import { track } from '@/lib/analytics'
+import { MORPH_NAME } from '@/lib/morph'
 
 /**
  * Embeds the real, running product in an iframe so a visitor can use it
@@ -111,9 +112,11 @@ export default function LiveDemo({
         </a>
       </div>
 
-      {/* ── Viewport ── */}
+      {/* ── Viewport ── (the landing spot of the card morph) */}
       <div
+        data-morph-target
         style={{
+          viewTransitionName: MORPH_NAME,
           position: 'relative',
           aspectRatio: '16/9',
           overflow: 'hidden',

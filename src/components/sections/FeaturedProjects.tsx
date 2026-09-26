@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { ArrowUpRight, Play, X } from 'lucide-react'
 import { motion } from 'framer-motion'
 import gsap from 'gsap'
@@ -11,6 +11,7 @@ import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
 import { track } from '@/lib/analytics'
 import { CubertoBtn } from './Hero'
 import HoverVideo from '@/components/projects/HoverVideo'
+import { morphNavigate, isPlainClick, prefetchProjectDetail } from '@/lib/morph'
 
 const E: [number, number, number, number] = [0.16, 1, 0.3, 1]
 
@@ -32,9 +33,12 @@ function ProjectCard({ project, index, aspectRatio, disableTilt }: {
   // Cached on mouseenter — reading getBoundingClientRect every mousemove forces a layout reflow
   const rectRef   = useRef<DOMRect | null>(null)
   const [hovered, setHovered] = useState(false)
+  const mediaRef  = useRef<HTMLDivElement>(null)
+  const navigate  = useNavigate()
 
   function handleMouseEnter() {
     setHovered(true)
+    prefetchProjectDetail()
     if (disableTilt || !cardRef.current) return
     rectRef.current = cardRef.current.getBoundingClientRect()
   }
@@ -89,9 +93,15 @@ function ProjectCard({ project, index, aspectRatio, disableTilt }: {
         onMouseLeave={() => { setCursor('default'); setLabel('') }}
         className="block"
         style={{ pointerEvents: demoOn ? 'none' : undefined }}
+        onClick={e => {
+          if (!isPlainClick(e)) return
+          e.preventDefault()
+          morphNavigate(mediaRef.current, () => navigate(`/projects/${project.slug}`))
+        }}
       >
         {/* Image container */}
         <div
+          ref={mediaRef}
           className="relative overflow-hidden rounded-2xl"
           style={{ aspectRatio, background: '#111' }}
         >

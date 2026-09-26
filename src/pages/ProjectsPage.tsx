@@ -8,6 +8,7 @@ import { useLanguageStore } from '@/store/useLanguageStore'
 import { useCursorStore } from '@/store/useCursorStore'
 import { SITE } from '@/lib/constants'
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
+import { morphNavigate, prefetchProjectDetail } from '@/lib/morph'
 
 type Filter = 'All' | 'Full Stack' | 'Front-end' | 'Back-end'
 
@@ -249,9 +250,11 @@ export default function ProjectsPage() {
                   initial={{ opacity: 0, y: 22 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.48, ease: E, delay: i * 0.06 }}
-                  onMouseEnter={() => { setHovered(project.id); setCursor('view'); setLabel('Abrir') }}
+                  onMouseEnter={() => { setHovered(project.id); setCursor('view'); setLabel('Abrir'); prefetchProjectDetail() }}
                   onMouseLeave={() => { setHovered(null); setCursor('default'); setLabel('') }}
-                  onClick={() => navigate(`/projects/${project.slug}`)}
+                  // The cursor-following preview flies into the case study (desktop only —
+                  // on touch there is no preview, so it's a normal navigation).
+                  onClick={() => morphNavigate(isHov ? floatRef.current : null, () => navigate(`/projects/${project.slug}`))}
                   data-cursor="open"
                   style={{
                     display: 'flex', alignItems: 'center',

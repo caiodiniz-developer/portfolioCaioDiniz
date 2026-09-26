@@ -1,6 +1,6 @@
 import { createBrowserRouter, Outlet, useLocation } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
-import { lazy, Suspense, useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import MobileNav from "@/components/layout/MobileNav";
@@ -21,6 +21,7 @@ const GuestbookPage = lazy(() => import("@/pages/GuestbookPage"));
 const CVPage        = lazy(() => import("@/pages/CVPage"));
 import { getLenis } from "@/hooks/useLenis";
 import { initAnalytics, pageview } from "@/lib/analytics";
+import { isMorphing } from "@/lib/morph";
 
 function ScrollReset() {
   const { pathname } = useLocation();
@@ -50,6 +51,18 @@ function AnalyticsTracker() {
 
 function RootLayout() {
   const location = useLocation();
+
+  /* A card morph (src/lib/morph.ts) keeps the transition key unchanged, so the
+     new route renders in place instead of waiting for AnimatePresence to play
+     the old page out — the browser pauses animation frames while a View
+     Transition captures the new state, and that exit would never finish. The
+     key only follows the pathname when the pathname actually changes. */
+  const lastPath = useRef(location.pathname);
+  const pageKey  = useRef(location.pathname);
+  if (location.pathname !== lastPath.current) {
+    lastPath.current = location.pathname;
+    if (!isMorphing()) pageKey.current = location.pathname;
+  }
   const [isMobile, setIsMobile] = useState(() =>
     typeof window !== "undefined" ? window.innerWidth < 1024 : false
   );
@@ -68,7 +81,7 @@ function RootLayout() {
       {/* Wrapper adds bottom padding on mobile to clear the bottom nav bar */}
       <div style={{ paddingBottom: isMobile ? 68 : 0 }}>
         <AnimatePresence mode="wait" initial={false}>
-          <PageTransition key={location.pathname}>
+          <PageTransition key={pageKey.current}>
             {/* Inside the transition, so the page-out animation still plays
                 while the next route's chunk downloads. */}
             <Suspense fallback={<div style={{ minHeight: "100svh" }} />}>

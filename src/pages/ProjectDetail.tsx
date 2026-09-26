@@ -7,6 +7,7 @@ import TechStack from '@/components/projects/TechStack'
 import { SITE } from '@/lib/constants'
 import { useLanguageStore } from '@/store/useLanguageStore'
 import { useCursorStore } from '@/store/useCursorStore'
+import { MORPH_NAME } from '@/lib/morph'
 
 /**
  * Deliberately minimal case study: the running product and the stack that built
@@ -98,7 +99,7 @@ export default function ProjectDetail() {
             liveUrl={project.liveUrl}
           />
         ) : (
-          <div className="pd-shot">
+          <div className="pd-shot" data-morph-target style={{ viewTransitionName: MORPH_NAME }}>
             <img src={project.image} alt={project.title} loading="eager" />
           </div>
         )}
