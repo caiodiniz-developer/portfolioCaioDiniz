@@ -43,7 +43,7 @@ function TechItem({ raw, index }: { raw: string; index: number }) {
           <span
             className="ts-badge"
             style={{
-              color:       hovered ? t.color : 'rgba(255,255,255,0.35)',
+              color:       hovered ? t.color : 'rgba(255,255,255,0.55)',
               borderColor: hovered ? t.color : 'rgba(255,255,255,0.14)',
               transform:   hovered ? 'scale(1.1)' : 'scale(1)',
             }}
@@ -55,7 +55,7 @@ function TechItem({ raw, index }: { raw: string; index: number }) {
 
       <span
         className="ts-name"
-        style={{ color: hovered ? t.color : 'rgba(255,255,255,0.25)' }}
+        style={{ color: hovered ? t.color : 'rgba(255,255,255,0.5)' }}
       >
         {t.name}
       </span>

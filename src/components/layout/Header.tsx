@@ -113,7 +113,7 @@ export default function Header() {
                     'px-3.5 py-2 text-[0.65rem] font-semibold uppercase tracking-[0.08em] rounded-full transition-colors duration-200 whitespace-nowrap',
                     isActive
                       ? 'text-white bg-white/[0.07]'
-                      : 'text-white/40 hover:text-white/75'
+                      : 'text-white/55 hover:text-white/80'
                   )
                 }
               >
@@ -129,7 +129,7 @@ export default function Header() {
                   'px-3.5 py-2 text-[0.65rem] font-semibold uppercase tracking-[0.08em] rounded-full transition-colors duration-200 whitespace-nowrap',
                   isActive
                     ? 'text-white bg-white/[0.07]'
-                    : 'text-white/40 hover:text-white/75'
+                    : 'text-white/55 hover:text-white/80'
                 )
               }
             >

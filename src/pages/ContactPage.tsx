@@ -108,7 +108,7 @@ function TerminalSection({ lang }: { lang: string }) {
         <motion.div initial={{ opacity: 0, y: 32 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-80px' }} transition={{ duration: 0.85, ease: E }}
           style={{ background: 'rgba(255,255,255,0.026)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 14, overflow: 'hidden', boxShadow: '0 48px 96px rgba(0,0,0,0.55)' }}>
           <div style={{ padding: '0.75rem 1.1rem', background: 'rgba(255,255,255,0.04)', borderBottom: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', gap: 7 }}>
-            <button onClick={skipAll} style={{ width: 12, height: 12, borderRadius: '50%', background: '#ff5f56', border: 'none', cursor: 'pointer', padding: 0, flexShrink: 0 }} />
+            <button onClick={skipAll} aria-label="Skip" title="Skip" style={{ width: 12, height: 12, borderRadius: '50%', background: '#ff5f56', border: 'none', cursor: 'pointer', padding: 0, flexShrink: 0 }} />
             <span style={{ width: 12, height: 12, borderRadius: '50%', background: '#ffbd2e', display: 'block' }} />
             <span style={{ width: 12, height: 12, borderRadius: '50%', background: '#27c93f', display: 'block' }} />
             <span style={{ marginLeft: 'auto', fontFamily: '"SF Mono","Fira Code",monospace', fontSize: '0.56rem', color: 'rgba(255,255,255,0.2)', letterSpacing: '0.05em' }}>
@@ -281,7 +281,7 @@ function AvailabilitySection({ onSelect, lang }: { onSelect: (slot: string) => v
         >
           {/* Month navigation bar */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1.1rem 1.4rem', borderBottom: '1px solid rgba(255,255,255,0.07)', background: 'rgba(255,255,255,0.02)' }}>
-            <button onClick={prevMonth} onMouseEnter={() => setCursor('pointer')} onMouseLeave={() => setCursor('default')}
+            <button onClick={prevMonth} aria-label={pt ? 'Mês anterior' : 'Previous month'} onMouseEnter={() => setCursor('pointer')} onMouseLeave={() => setCursor('default')}
               style={{ width: 34, height: 34, borderRadius: 8, border: '1px solid rgba(255,255,255,0.1)', background: 'transparent', color: 'rgba(255,255,255,0.45)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.18s' }}
               onMouseOver={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.08)'; (e.currentTarget as HTMLElement).style.color = '#fff' }}
               onMouseOut={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.45)' }}>
@@ -302,7 +302,7 @@ function AvailabilitySection({ onSelect, lang }: { onSelect: (slot: string) => v
               </motion.div>
             </AnimatePresence>
 
-            <button onClick={nextMonth} onMouseEnter={() => setCursor('pointer')} onMouseLeave={() => setCursor('default')}
+            <button onClick={nextMonth} aria-label={pt ? 'Próximo mês' : 'Next month'} onMouseEnter={() => setCursor('pointer')} onMouseLeave={() => setCursor('default')}
               style={{ width: 34, height: 34, borderRadius: 8, border: '1px solid rgba(255,255,255,0.1)', background: 'transparent', color: 'rgba(255,255,255,0.45)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.18s' }}
               onMouseOver={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.08)'; (e.currentTarget as HTMLElement).style.color = '#fff' }}
               onMouseOut={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.45)' }}>
@@ -652,7 +652,7 @@ function ChatForm({ slot, lang }: { slot: string; lang: string }) {
                       placeholder={pt ? 'Digite aqui...' : 'Type here...'}
                       style={lineStyle} autoComplete="off" />
                   )}
-                  <button onClick={advance} disabled={!input.trim()}
+                  <button onClick={advance} disabled={!input.trim()} aria-label={pt ? 'Enviar' : 'Send'}
                     onMouseEnter={() => setCursor('pointer')} onMouseLeave={() => setCursor('default')}
                     style={{ width: 34, height: 34, borderRadius: 8, background: input.trim() ? '#fff' : 'rgba(255,255,255,0.06)', border: 'none', cursor: input.trim() ? 'pointer' : 'not-allowed', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, transition: 'all 0.18s' }}>
                     <ArrowRight size={14} style={{ color: input.trim() ? '#0d0d0d' : 'rgba(255,255,255,0.2)' }} />

@@ -81,7 +81,7 @@ function ServiceCard({
             >
               {cat}
             </span>
-            <span className="font-black tabular-nums" style={{ fontSize: '0.55rem', letterSpacing: '0.12em', color: 'rgba(0,0,0,0.3)' }}>
+            <span className="font-black tabular-nums" style={{ fontSize: '0.55rem', letterSpacing: '0.12em', color: 'rgba(0,0,0,0.55)' }}>
               {String(index + 1).padStart(2, '0')}
             </span>
           </div>
@@ -111,7 +111,7 @@ function ServiceCard({
           >
             {title}
           </h3>
-          <p className="text-[0.78rem] leading-relaxed line-clamp-2" style={{ color: 'rgba(0,0,0,0.4)' }}>
+          <p className="text-[0.78rem] leading-relaxed line-clamp-2" style={{ color: 'rgba(0,0,0,0.6)' }}>
             {desc}
           </p>
         </motion.div>
@@ -142,9 +142,9 @@ export default function Services() {
         >
           {/* Section marker */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.75rem' }}>
-            <span style={{ fontFamily: 'monospace', fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.12em', color: 'rgba(0,0,0,0.3)' }}>02</span>
+            <span style={{ fontFamily: 'monospace', fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.12em', color: 'rgba(0,0,0,0.55)' }}>02</span>
             <div style={{ flex: 1, height: 1, background: 'rgba(0,0,0,0.1)' }} />
-            <span style={{ fontFamily: 'monospace', fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(0,0,0,0.25)' }}>{t.services.badge}</span>
+            <span style={{ fontFamily: 'monospace', fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(0,0,0,0.55)' }}>{t.services.badge}</span>
           </div>
 
           <div className="flex items-end justify-between gap-8 mb-7">
@@ -168,7 +168,7 @@ export default function Services() {
 
           <p
             className="leading-relaxed"
-            style={{ fontSize: 'clamp(0.95rem, 1.4vw, 1.1rem)', color: 'rgba(0,0,0,0.5)', maxWidth: '44ch', fontWeight: 400 }}
+            style={{ fontSize: 'clamp(0.95rem, 1.4vw, 1.1rem)', color: 'rgba(0,0,0,0.62)', maxWidth: '44ch', fontWeight: 400 }}
           >
             {lang === 'en'
               ? 'From design to deployment — I build digital products that combine code, motion and strategy.'

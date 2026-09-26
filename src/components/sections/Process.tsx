@@ -134,9 +134,9 @@ export default function Process() {
           transition={{ duration: 0.65, ease: E }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.75rem' }}>
-            <span style={{ fontFamily: 'monospace', fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.12em', color: 'rgba(255,255,255,0.22)' }}>04</span>
+            <span style={{ fontFamily: 'monospace', fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.12em', color: 'rgba(255,255,255,0.5)' }}>04</span>
             <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.08)' }} />
-            <span style={{ fontFamily: 'monospace', fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.18)' }}>
+            <span style={{ fontFamily: 'monospace', fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.5)' }}>
               {en ? 'process' : 'processo'}
             </span>
           </div>
@@ -147,7 +147,7 @@ export default function Process() {
           >
             {en ? 'From idea to product' : 'Da ideia ao produto'}
           </h2>
-          <p style={{ marginTop: '1rem', fontSize: '0.85rem', color: 'rgba(255,255,255,0.28)', maxWidth: '44ch', lineHeight: 1.7 }}>
+          <p style={{ marginTop: '1rem', fontSize: '0.85rem', color: 'rgba(255,255,255,0.52)', maxWidth: '44ch', lineHeight: 1.7 }}>
             {en
               ? 'Six stages, in order. Scroll to move through them — or pick one.'
               : 'Seis etapas, em ordem. Role para avançar — ou escolha uma.'}
@@ -178,7 +178,7 @@ export default function Process() {
                   {en ? step.descriptionEn : step.descriptionPt}
                 </p>
 
-                <span className="pr-duration">{step.duration}</span>
+                <span className="pr-duration">{en ? step.duration : step.duration.replace('days', 'dias')}</span>
               </motion.div>
             </AnimatePresence>
 
@@ -203,8 +203,13 @@ export default function Process() {
               {processSteps.map((s, i) => {
                 const isOn = i === active
                 return (
+                  /* Pointer shortcut only: the rail above is the labelled,
+                     keyboard-reachable control for the same action, and the
+                     ring's side cards are half-hidden behind the front one. */
                   <button
                     key={s.id}
+                    tabIndex={-1}
+                    aria-hidden
                     className={`pr-card ${isOn ? 'is-on' : ''}`}
                     style={{ transform: `rotateY(${i * STEP}deg) translateZ(var(--pr-radius))` }}
                     onClick={() => rotateTo(i)}
@@ -250,7 +255,7 @@ export default function Process() {
         }
         .pr-total {
           font-size: 0.28em;
-          color: rgba(255,255,255,0.2);
+          color: rgba(255,255,255,0.5);
           margin-left: 0.35em;
           letter-spacing: 0;
         }
@@ -266,7 +271,7 @@ export default function Process() {
         .pr-desc {
           font-size: 0.88rem;
           line-height: 1.75;
-          color: rgba(255,255,255,0.36);
+          color: rgba(255,255,255,0.58);
           margin: 0;
           max-width: 42ch;
           min-height: 5.2em;   /* stops the rail jumping between stages */
@@ -281,7 +286,7 @@ export default function Process() {
           font-weight: 700;
           letter-spacing: 0.14em;
           text-transform: uppercase;
-          color: rgba(255,255,255,0.3);
+          color: rgba(255,255,255,0.55);
         }
 
         .pr-rail {

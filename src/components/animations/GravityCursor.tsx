@@ -61,15 +61,14 @@ export default function GravityCursor() {
       targets = next
     }
 
-    /* Collapse a burst of DOM changes (a route transition) into one measure. */
-    let scheduled = false
+    /* Collapse a burst of DOM changes into one measure, once things settle.
+       Per-frame was too eager: the preloader and the staggered home sections
+       mutate the DOM continuously at startup, and each measure is a forced
+       layout of every [data-gravity] element. */
+    let timer: ReturnType<typeof setTimeout> | undefined
     function scheduleMeasure() {
-      if (scheduled) return
-      scheduled = true
-      requestAnimationFrame(() => {
-        scheduled = false
-        measure()
-      })
+      clearTimeout(timer)
+      timer = setTimeout(measure, 250)
     }
 
     function onMove(e: MouseEvent) {
@@ -108,6 +107,7 @@ export default function GravityCursor() {
       window.removeEventListener('mousemove', onMove)
       window.removeEventListener('resize', scheduleMeasure)
       mo.disconnect()
+      clearTimeout(timer)
       targets.forEach(t => gsap.set(t.el, { x: 0, y: 0 }))
     }
   }, [])

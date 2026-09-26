@@ -12,8 +12,21 @@ import ContextCursor from "./components/animations/ContextCursor";
 import Preloader from "./components/Preloader";
 import { markAppReady } from "./lib/appReady";
 
+const INTRO_KEY = "intro-seen";
+
+/* The intro plays once per session: it's a first impression, not something
+   to sit through again on every reload or return from a case study link. */
+function shouldPlayIntro() {
+  try { return !sessionStorage.getItem(INTRO_KEY); } catch { return true; }
+}
+
 export default function App() {
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(shouldPlayIntro);
+
+  useEffect(() => {
+    if (!loading) markAppReady();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     console.log(
@@ -62,6 +75,7 @@ export default function App() {
             key="preloader"
             onDone={() => {
               setLoading(false)
+              try { sessionStorage.setItem(INTRO_KEY, "1") } catch { /* storage blocked */ }
               // Entrance animations wait for this — until now the hero was
               // playing its whole timeline behind the overlay.
               markAppReady()

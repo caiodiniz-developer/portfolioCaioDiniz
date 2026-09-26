@@ -64,7 +64,7 @@ function StackItem({ name, icon, color, invert = false }: {
       <span
         className="text-[0.5rem] font-semibold uppercase tracking-[0.1em] text-center leading-tight"
         style={{
-          color:      hovered ? color : 'rgba(255,255,255,0.22)',
+          color:      hovered ? color : 'rgba(255,255,255,0.5)',
           transition: 'color 0.35s ease',
         }}
       >
@@ -206,9 +206,9 @@ export default function StackCarousel() {
         <div className="flex flex-col gap-4">
           {/* Section marker */}
           <div className="sc-badge" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <span style={{ fontFamily: 'monospace', fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.12em', color: 'rgba(255,255,255,0.22)' }}>03</span>
+            <span style={{ fontFamily: 'monospace', fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.12em', color: 'rgba(255,255,255,0.5)' }}>03</span>
             <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.08)' }} />
-            <span style={{ fontFamily: 'monospace', fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.18)' }}>{lang === 'en' ? 'tech stack' : 'tecnologias'}</span>
+            <span style={{ fontFamily: 'monospace', fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.5)' }}>{lang === 'en' ? 'tech stack' : 'tecnologias'}</span>
           </div>
           <h2
             className="sc-heading font-black text-white"

@@ -20,7 +20,7 @@ const TOKEN = new RegExp(
 )
 
 const COLOR: Record<string, string> = {
-  comment: 'rgba(255,255,255,0.3)',
+  comment: 'rgba(255,255,255,0.45)',
   string:  '#96d0ff',
   keyword: '#f47067',
   number:  '#6cb6ff',
@@ -71,7 +71,6 @@ export default function CodeSnippet({ snippet }: { snippet: Snippet }) {
             <code>
               {lines.map((line, i) => (
                 <span key={i} className="cs-line">
-                  <span className="cs-ln" aria-hidden>{i + 1}</span>
                   <span>{highlight(line)}{'\n'}</span>
                 </span>
               ))}
@@ -111,13 +110,13 @@ export default function CodeSnippet({ snippet }: { snippet: Snippet }) {
         }
         .cs-file {
           font-family: "JetBrains Mono","Fira Code",ui-monospace,monospace;
-          font-size: 0.66rem; color: rgba(255,255,255,0.4);
+          font-size: 0.66rem; color: rgba(255,255,255,0.5);
           overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
         }
         .cs-link {
           display: inline-flex; align-items: center; gap: 0.3rem; flex-shrink: 0;
           font-size: 0.58rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
-          color: rgba(255,255,255,0.45); text-decoration: none; transition: color 0.2s;
+          color: rgba(255,255,255,0.6); text-decoration: none; transition: color 0.2s;
         }
         .cs-link:hover { color: #fff; }
         .cs-pre {
@@ -128,10 +127,14 @@ export default function CodeSnippet({ snippet }: { snippet: Snippet }) {
           color: rgba(255,255,255,0.82);
           tab-size: 2;
         }
-        .cs-line { display: flex; padding-right: 1.25rem; white-space: pre; }
-        .cs-ln {
+        /* Line numbers come from a CSS counter: decorative, so they stay out
+           of copied text and out of the accessibility tree. */
+        .cs-pre code { counter-reset: ln; }
+        .cs-line { display: flex; padding-right: 1.25rem; white-space: pre; counter-increment: ln; }
+        .cs-line::before {
+          content: counter(ln);
           width: 3rem; flex-shrink: 0; padding-right: 1rem; text-align: right;
-          color: rgba(255,255,255,0.16); user-select: none;
+          color: rgba(255,255,255,0.18); user-select: none;
         }
       `}</style>
     </section>

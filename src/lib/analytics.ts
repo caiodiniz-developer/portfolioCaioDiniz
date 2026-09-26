@@ -59,7 +59,13 @@ export function initAnalytics(): void {
     const gtagScript = document.createElement('script')
     gtagScript.async = true
     gtagScript.src = `https://www.googletagmanager.com/gtag/js?id=${GA_ID}`
-    document.head.appendChild(gtagScript)
+    /* gtag.js runs a long task on arrival. The stub below queues every call
+       in dataLayer until it loads, so injecting it once the page is idle loses
+       nothing — the first page view is simply sent a moment later. */
+    const w = window as Window & { requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number }
+    const inject = () => document.head.appendChild(gtagScript)
+    if (w.requestIdleCallback) w.requestIdleCallback(inject, { timeout: 4000 })
+    else setTimeout(inject, 2000)
 
     window.dataLayer = window.dataLayer || []
 

@@ -267,9 +267,9 @@ export default function FeaturedProjects() {
           <div className="flex flex-col gap-4">
             {/* Section marker */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-              <span style={{ fontFamily: 'monospace', fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.12em', color: 'rgba(255,255,255,0.22)' }}>01</span>
+              <span style={{ fontFamily: 'monospace', fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.12em', color: 'rgba(255,255,255,0.5)' }}>01</span>
               <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.1)' }} />
-              <span style={{ fontFamily: 'monospace', fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.18)' }}>
+              <span style={{ fontFamily: 'monospace', fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.5)' }}>
                 {lang === 'en' ? 'selected work' : 'trabalhos selecionados'}
               </span>
             </div>
@@ -332,7 +332,7 @@ export default function FeaturedProjects() {
 
         {/* Mobile CTA */}
         <div className="flex sm:hidden justify-center mt-12">
-          <Link to="/projects" className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.1em] text-white/30 hover:text-white transition-colors duration-300">
+          <Link to="/projects" className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.1em] text-white/55 hover:text-white transition-colors duration-300">
             {t.projects.viewAll} <ArrowUpRight size={13} />
           </Link>
         </div>

@@ -136,7 +136,7 @@ export default function ProjectDetail() {
           display: inline-flex; align-items: center; gap: 0.45rem;
           font-size: 0.6rem; font-weight: 700;
           letter-spacing: 0.14em; text-transform: uppercase;
-          color: rgba(255,255,255,0.3); text-decoration: none;
+          color: rgba(255,255,255,0.55); text-decoration: none;
           transition: color 0.22s;
         }
         .pd-back:hover { color: #fff; }
@@ -155,7 +155,7 @@ export default function ProjectDetail() {
           display: block;
           font-size: 0.58rem; font-weight: 700;
           letter-spacing: 0.16em; text-transform: uppercase;
-          color: rgba(255,255,255,0.28);
+          color: rgba(255,255,255,0.5);
           margin-bottom: 0.7rem;
         }
         .pd-title {
@@ -180,7 +180,7 @@ export default function ProjectDetail() {
         .pd-btn-primary { background: #fff; color: #0d0d0d; }
         .pd-btn-primary:hover { background: #e2e2e2; }
         .pd-btn-ghost {
-          background: transparent; color: rgba(255,255,255,0.45);
+          background: transparent; color: rgba(255,255,255,0.6);
           border: 1px solid rgba(255,255,255,0.12);
         }
         .pd-btn-ghost:hover { color: #fff; border-color: rgba(255,255,255,0.32); }
@@ -201,7 +201,7 @@ export default function ProjectDetail() {
         .pd-label {
           font-size: 0.58rem; font-weight: 700;
           letter-spacing: 0.16em; text-transform: uppercase;
-          color: rgba(255,255,255,0.24);
+          color: rgba(255,255,255,0.5);
           margin: 0 0 1rem;
         }
         .pd-stack { display: flex; flex-wrap: wrap; gap: 0.5rem; }
@@ -223,7 +223,7 @@ export default function ProjectDetail() {
         .pd-next-label {
           font-size: 0.56rem; font-weight: 700;
           letter-spacing: 0.16em; text-transform: uppercase;
-          color: rgba(255,255,255,0.24);
+          color: rgba(255,255,255,0.5);
         }
         .pd-next-title {
           display: inline-flex; align-items: center; gap: 0.7rem;

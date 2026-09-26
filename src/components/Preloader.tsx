@@ -88,7 +88,7 @@ function VscIcon({ children, active, style }: {
     <div style={{
       width: 48, height: 48,
       display: 'flex', alignItems: 'center', justifyContent: 'center',
-      color: active ? '#d4d4d4' : 'rgba(255,255,255,0.28)',
+      color: active ? '#d4d4d4' : 'rgba(255,255,255,0.5)',
       borderLeft: `2px solid ${active ? '#d4d4d4' : 'transparent'}`,
       cursor: 'default',
       ...style,
@@ -115,16 +115,38 @@ export default function Preloader({ onDone }: { onDone: () => void }) {
     return () => { startLenis() }
   }, [])
 
-  /* Typing: advance one char every 10ms */
+  /* Typing: 10ms per char, derived from elapsed time and redrawn at ~30fps.
+     The old version re-rendered once per character through a setTimeout
+     chain, so on a slow phone every char waited for the previous render —
+     the intro stretched and blocked the main thread the whole time. */
   useEffect(() => {
     if (phase !== 'typing') return
-    if (revealed >= TOTAL_CHARS) {
-      const t = setTimeout(() => setPhase('terminal'), 260)
-      return () => clearTimeout(t)
-    }
-    const t = setTimeout(() => setRevealed(r => r + 1), 10)
+    const start = performance.now()
+    const id = setInterval(() => {
+      const n = Math.min(TOTAL_CHARS, Math.floor((performance.now() - start) / 10))
+      setRevealed(n)
+      if (n >= TOTAL_CHARS) clearInterval(id)
+    }, 33)
+    return () => clearInterval(id)
+  }, [phase])
+
+  useEffect(() => {
+    if (phase !== 'typing' || revealed < TOTAL_CHARS) return
+    const t = setTimeout(() => setPhase('terminal'), 260)
     return () => clearTimeout(t)
   }, [revealed, phase])
+
+  /* Any click or key skips straight to the site. */
+  useEffect(() => {
+    if (phase === 'out') return
+    const skip = () => setPhase('out')
+    window.addEventListener('pointerdown', skip)
+    window.addEventListener('keydown', skip)
+    return () => {
+      window.removeEventListener('pointerdown', skip)
+      window.removeEventListener('keydown', skip)
+    }
+  }, [phase])
 
   /* Terminal: reveal one line every 130ms */
   useEffect(() => {
@@ -170,7 +192,10 @@ export default function Preloader({ onDone }: { onDone: () => void }) {
   }
 
   return (
+    /* Decorative: a picture of an editor, not content. Screen readers skip it
+       rather than read out fake source code character by character. */
     <motion.div
+      aria-hidden
       style={{
         position: 'fixed', inset: 0, zIndex: 9999,
         background: '#1e1e1e',
@@ -200,7 +225,7 @@ export default function Preloader({ onDone }: { onDone: () => void }) {
             <div key={i} style={{ width: 12, height: 12, borderRadius: '50%', background: bg, opacity: 0.85 }} />
           ))}
         </div>
-        <div style={{ flex: 1, textAlign: 'center', fontSize: 12, color: 'rgba(255,255,255,0.32)', letterSpacing: '0.02em' }}>
+        <div style={{ flex: 1, textAlign: 'center', fontSize: 12, color: 'rgba(255,255,255,0.6)', letterSpacing: '0.02em' }}>
           portfolio.ts — Caio Diniz — Visual Studio Code
         </div>
       </div>
@@ -249,7 +274,7 @@ export default function Preloader({ onDone }: { onDone: () => void }) {
             overflow: 'hidden',
           }}
         >
-          <div style={{ padding: '10px 12px 6px', fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)' }}>
+          <div style={{ padding: '10px 12px 6px', fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.55)' }}>
             Explorador
           </div>
           {SIDEBAR.map((f, i) => (
@@ -263,8 +288,8 @@ export default function Preloader({ onDone }: { onDone: () => void }) {
                 : f.active
                   ? '#d4d4d4'
                   : (f as { dir?: boolean }).dir
-                    ? 'rgba(255,255,255,0.4)'
-                    : ((f as { color?: string }).color || 'rgba(255,255,255,0.38)'),
+                    ? 'rgba(255,255,255,0.62)'
+                    : ((f as { color?: string }).color || 'rgba(255,255,255,0.62)'),
               fontWeight: f.head ? 700 : 400,
             }}>
               {f.label}
@@ -323,7 +348,7 @@ export default function Preloader({ onDone }: { onDone: () => void }) {
                   width: 52, flexShrink: 0,
                   textAlign: 'right', paddingRight: 20,
                   fontSize: 12,
-                  color: line.isCurrent ? 'rgba(255,255,255,0.48)' : '#3c3c3c',
+                  color: line.isCurrent ? 'rgba(255,255,255,0.48)' : '#858585',
                   userSelect: 'none',
                 }}>
                   {li + 1}
@@ -368,7 +393,7 @@ export default function Preloader({ onDone }: { onDone: () => void }) {
                     display: 'flex', alignItems: 'center',
                     padding: '0 16px',
                     fontSize: 11,
-                    color: i === 0 ? '#d4d4d4' : 'rgba(255,255,255,0.28)',
+                    color: i === 0 ? '#d4d4d4' : 'rgba(255,255,255,0.55)',
                     background: i === 0 ? '#1e1e1e' : 'transparent',
                     borderTop: i === 0 ? '1px solid #007acc' : '1px solid transparent',
                     borderRight: i === 0 ? '1px solid #191919' : 'none',
@@ -404,11 +429,11 @@ export default function Preloader({ onDone }: { onDone: () => void }) {
       {/* ── Status bar ──────────────────────────────────────────── */}
       <div style={{
         height: 22, flexShrink: 0,
-        background: phase === 'out' ? '#16825d' : '#007acc',
+        background: phase === 'out' ? '#16825d' : '#0065a9',
         transition: 'background 0.45s ease',
         display: 'flex', alignItems: 'center',
         padding: '0 10px', gap: 14,
-        fontSize: 11, color: 'rgba(255,255,255,0.9)',
+        fontSize: 11, color: '#fff',
       }}>
         {/* Git branch icon + name */}
         <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>

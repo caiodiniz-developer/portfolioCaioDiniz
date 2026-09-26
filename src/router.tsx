@@ -5,7 +5,6 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import MobileNav from "@/components/layout/MobileNav";
 import PageTransition from "@/components/animations/PageTransition";
-import Terminal from "@/components/animations/Terminal";
 import CommandPalette from "@/components/CommandPalette";
 import Home from "@/pages/Home";
 import NotFound from "@/pages/NotFound";
@@ -20,6 +19,19 @@ const ServicesPage  = lazy(() => import("@/pages/ServicesPage"));
 const ContactPage   = lazy(() => import("@/pages/ContactPage"));
 const GuestbookPage = lazy(() => import("@/pages/GuestbookPage"));
 const CVPage        = lazy(() => import("@/pages/CVPage"));
+const Terminal      = lazy(() => import("@/components/animations/Terminal"));
+
+/* The secret terminal is an easter egg — it shouldn't compete with the first
+   paint. Mount (and so download) it once the browser is idle. */
+function IdleTerminal() {
+  const [ready, setReady] = useState(false);
+  useEffect(() => {
+    const w = window as Window & { requestIdleCallback?: (cb: () => void) => number };
+    if (w.requestIdleCallback) w.requestIdleCallback(() => setReady(true));
+    else { const t = setTimeout(() => setReady(true), 2500); return () => clearTimeout(t); }
+  }, []);
+  return ready ? <Suspense fallback={null}><Terminal /></Suspense> : null;
+}
 import { getLenis } from "@/hooks/useLenis";
 import { initAnalytics, pageview } from "@/lib/analytics";
 import { isMorphing } from "@/lib/morph";
@@ -93,7 +105,7 @@ function RootLayout() {
         <Footer />
       </div>
       {/* Global overlays that need router context */}
-      <Terminal />
+      <IdleTerminal />
       <CommandPalette />
       <MobileNav />
     </>

@@ -66,7 +66,7 @@ export default function Footer() {
           />
           <span style={{
             fontSize: '0.6rem', fontWeight: 600, letterSpacing: '0.08em',
-            color: 'rgba(255,255,255,0.2)', textTransform: 'uppercase',
+            color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase',
           }}>
             © {year} Caio Diniz
           </span>
@@ -99,7 +99,7 @@ export default function Footer() {
             border:     '1px solid rgba(255,255,255,0.1)',
             borderRadius: 999,
             padding:    '0.38rem 0.9rem',
-            color:      'rgba(255,255,255,0.2)',
+            color:      'rgba(255,255,255,0.5)',
             fontSize:   '0.58rem',
             fontWeight: 700,
             letterSpacing: '0.12em',
@@ -117,7 +117,7 @@ export default function Footer() {
           }}
           onMouseLeave={e => {
             const el = e.currentTarget
-            el.style.color = 'rgba(255,255,255,0.2)'
+            el.style.color = 'rgba(255,255,255,0.5)'
             el.style.borderColor = 'rgba(255,255,255,0.1)'
             el.style.background = 'transparent'
             setCursor('default')
@@ -151,7 +151,7 @@ export default function Footer() {
           font-weight: 600;
           letter-spacing: 0.1em;
           text-transform: uppercase;
-          color: rgba(255,255,255,0.22);
+          color: rgba(255,255,255,0.5);
           text-decoration: none;
           transition: color 0.22s;
           white-space: nowrap;

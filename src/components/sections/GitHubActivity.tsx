@@ -106,7 +106,7 @@ export default function GitHubActivity() {
               display: 'inline-flex', alignItems: 'center', gap: 10,
               fontSize: '0.6rem', fontWeight: 700,
               letterSpacing: '0.16em', textTransform: 'uppercase',
-              color: 'rgba(255,255,255,0.26)',
+              color: 'rgba(255,255,255,0.5)',
             }}>
               <span style={{ width: 18, height: 1, background: 'rgba(255,255,255,0.15)' }} />
               {en ? 'Live from GitHub' : 'Ao vivo do GitHub'}
@@ -124,7 +124,7 @@ export default function GitHubActivity() {
             <p style={{
               marginTop: '0.9rem', maxWidth: '46ch',
               fontSize: 'clamp(0.85rem,1.4vw,1rem)', lineHeight: 1.7,
-              color: 'rgba(255,255,255,0.32)',
+              color: 'rgba(255,255,255,0.5)',
             }}>
               {en
                 ? 'Not a claim — the numbers below are read from the public GitHub API every time this page loads.'
@@ -170,7 +170,7 @@ export default function GitHubActivity() {
                 marginTop: '0.5rem',
                 fontSize: '0.58rem', fontWeight: 600,
                 letterSpacing: '0.12em', textTransform: 'uppercase',
-                color: 'rgba(255,255,255,0.22)',
+                color: 'rgba(255,255,255,0.5)',
               }}>
                 {l}
               </div>
@@ -209,7 +209,7 @@ export default function GitHubActivity() {
               display: 'flex', alignItems: 'center', gap: 6,
               marginTop: '0.9rem',
               fontSize: '0.55rem', letterSpacing: '0.1em',
-              textTransform: 'uppercase', color: 'rgba(255,255,255,0.18)',
+              textTransform: 'uppercase', color: 'rgba(255,255,255,0.5)',
             }}>
               <span>{en ? 'less' : 'menos'}</span>
               {LEVEL_BG.map(bg => (
@@ -226,7 +226,7 @@ export default function GitHubActivity() {
             <h3 style={{
               fontSize: '0.58rem', fontWeight: 700,
               letterSpacing: '0.16em', textTransform: 'uppercase',
-              color: 'rgba(255,255,255,0.22)', marginBottom: '1rem',
+              color: 'rgba(255,255,255,0.5)', marginBottom: '1rem',
             }}>
               {en ? 'What I actually write' : 'O que eu realmente escrevo'}
             </h3>
@@ -260,7 +260,7 @@ export default function GitHubActivity() {
                     flexShrink: 0,
                   }} />
                   {l.name}
-                  <span style={{ color: 'rgba(255,255,255,0.18)' }}>{l.count}</span>
+                  <span style={{ color: 'rgba(255,255,255,0.5)' }}>{l.count}</span>
                 </span>
               ))}
             </div>
