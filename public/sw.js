@@ -28,6 +28,10 @@ self.addEventListener('fetch', (e) => {
 
   if (request.method !== 'GET' || url.origin !== location.origin) return
 
+  /* Video seeks arrive as Range requests and come back 206 Partial Content,
+     which the Cache API refuses to store. Let the browser handle media. */
+  if (request.headers.has('range') || request.destination === 'video') return
+
   /* Navigation: network first, then the cached app shell, and only if BOTH are
      unavailable the dedicated offline page. The previous version fell back to
      `caches.match('/')` alone — when the shell was not cached yet the visitor
