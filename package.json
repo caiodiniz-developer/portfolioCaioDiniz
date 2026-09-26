@@ -11,26 +11,20 @@
     "og": "node scripts/og.mjs"
   },
   "dependencies": {
-    "@gsap/react": "^2.1.1",
-    "@hookform/resolvers": "^3.9.0",
     "@paper-design/shaders": "^0.0.77",
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.6.1",
-    "@react-three/postprocessing": "^2.16.2",
     "clsx": "^2.1.1",
     "framer-motion": "^11.11.0",
     "gsap": "^3.12.5",
     "lenis": "^1.1.16",
     "lucide-react": "^0.446.0",
-    "postprocessing": "^6.36.3",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-hook-form": "^7.53.0",
     "react-router-dom": "^6.26.2",
     "split-type": "^0.3.4",
     "tailwind-merge": "^2.5.2",
     "three": "^0.185.0",
-    "zod": "^3.23.8",
     "zustand": "^4.5.5"
   },
   "devDependencies": {
@@ -54,9 +48,6 @@
     "@react-three/drei": {
       "react": "$react",
       "react-dom": "$react-dom"
-    },
-    "@react-three/postprocessing": {
-      "react": "$react"
     }
   }
 }
