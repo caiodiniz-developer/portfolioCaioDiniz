@@ -1,20 +1,24 @@
 import { createBrowserRouter, Outlet, useLocation } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import MobileNav from "@/components/layout/MobileNav";
 import PageTransition from "@/components/animations/PageTransition";
 import Terminal from "@/components/animations/Terminal";
 import Home from "@/pages/Home";
-import AboutPage from "@/pages/AboutPage";
-import ProjectsPage from "@/pages/ProjectsPage";
-import ProjectDetail from "@/pages/ProjectDetail";
-import ServicesPage from "@/pages/ServicesPage";
-import ContactPage from "@/pages/ContactPage";
 import NotFound from "@/pages/NotFound";
-import GuestbookPage from "@/pages/GuestbookPage";
-import CVPage from "@/pages/CVPage";
+
+/* Home is the landing page, so it ships in the entry chunk. Every other route
+   is split off: Three.js and the 3D model only exist on /about, and nobody
+   landing on / should pay for them. */
+const AboutPage     = lazy(() => import("@/pages/AboutPage"));
+const ProjectsPage  = lazy(() => import("@/pages/ProjectsPage"));
+const ProjectDetail = lazy(() => import("@/pages/ProjectDetail"));
+const ServicesPage  = lazy(() => import("@/pages/ServicesPage"));
+const ContactPage   = lazy(() => import("@/pages/ContactPage"));
+const GuestbookPage = lazy(() => import("@/pages/GuestbookPage"));
+const CVPage        = lazy(() => import("@/pages/CVPage"));
 import { getLenis } from "@/hooks/useLenis";
 import { initAnalytics, pageview } from "@/lib/analytics";
 
@@ -65,7 +69,11 @@ function RootLayout() {
       <div style={{ paddingBottom: isMobile ? 68 : 0 }}>
         <AnimatePresence mode="wait" initial={false}>
           <PageTransition key={location.pathname}>
-            <Outlet />
+            {/* Inside the transition, so the page-out animation still plays
+                while the next route's chunk downloads. */}
+            <Suspense fallback={<div style={{ minHeight: "100svh" }} />}>
+              <Outlet />
+            </Suspense>
           </PageTransition>
         </AnimatePresence>
         <Footer />
