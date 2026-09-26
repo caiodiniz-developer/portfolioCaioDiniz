@@ -5,15 +5,10 @@ import { router } from "./router";
 import SmoothScroll from "./components/animations/SmoothScroll";
 import ScrollProgress from "./components/animations/ScrollProgress";
 import GravityCursor from "./components/animations/GravityCursor";
-import CurrentlyWidget from "./components/ui/CurrentlyWidget";
-import ReturnVisitor from "./components/animations/ReturnVisitor";
 import PresentationMode from "./components/animations/PresentationMode";
-import ClickSound from "./components/animations/ClickSound";
-import SectionCounter from "./components/animations/SectionCounter";
 import LiveTab from "./components/animations/LiveTab";
 import BatterySaver from "./components/animations/BatterySaver";
 import ContextCursor from "./components/animations/ContextCursor";
-import SpeedReader from "./components/animations/SpeedReader";
 import Preloader from "./components/Preloader";
 import { markAppReady } from "./lib/appReady";
 
@@ -77,15 +72,10 @@ export default function App() {
 
       <ScrollProgress />
       <GravityCursor />
-      <CurrentlyWidget />
-      <ReturnVisitor />
       <PresentationMode />
-      <ClickSound />
-      <SectionCounter />
       <LiveTab />
       <BatterySaver />
       <ContextCursor />
-      <SpeedReader />
       <RouterProvider router={router} />
     </>
   );
