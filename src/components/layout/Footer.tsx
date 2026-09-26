@@ -3,6 +3,12 @@ import { useLanguageStore } from '@/store/useLanguageStore'
 import { useCursorStore } from '@/store/useCursorStore'
 import { usePresentationStore } from '@/store/usePresentationStore'
 import { getLenis } from '@/hooks/useLenis'
+import { SITE } from '@/lib/constants'
+
+/** Lighthouse desktop scores — performance, accessibility, best practices,
+ *  SEO. Median of 3 runs on the production build (2026-09-26). Re-measure
+ *  after large changes; the footer link lets anyone re-run it live. */
+const LIGHTHOUSE = [83, 100, 100, 100]
 
 /**
  * Minimal closing bar.
@@ -70,6 +76,17 @@ export default function Footer() {
           }}>
             © {year} Caio Diniz
           </span>
+          {/* Measured, not claimed — the link re-runs it live on PageSpeed. */}
+          <a
+            href={`https://pagespeed.web.dev/analysis?url=${encodeURIComponent(SITE.url)}&form_factor=desktop`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="ft-lh"
+            title={pt ? 'Lighthouse no desktop: performance, acessibilidade, boas práticas, SEO' : 'Lighthouse on desktop: performance, accessibility, best practices, SEO'}
+          >
+            <span className="ft-lh-label">Lighthouse</span>
+            {LIGHTHOUSE.map((n, i) => <span key={i} className="ft-lh-score">{n}</span>)}
+          </a>
         </div>
 
         {/* Navigation — the CTA above carries the contact channels, so this row
@@ -157,6 +174,22 @@ export default function Footer() {
           white-space: nowrap;
         }
         .ft-link:hover { color: #fff; }
+
+        .ft-lh {
+          display: inline-flex; align-items: center; gap: 0.35rem;
+          margin-left: 0.6rem; padding: 0.22rem 0.55rem;
+          border-radius: 999px; border: 1px solid rgba(255,255,255,0.1);
+          text-decoration: none; transition: border-color 0.22s;
+        }
+        .ft-lh:hover { border-color: rgba(74,222,128,0.45); }
+        .ft-lh-label {
+          font-size: 0.55rem; font-weight: 600; letter-spacing: 0.08em;
+          text-transform: uppercase; color: rgba(255,255,255,0.5);
+        }
+        .ft-lh-score {
+          font-size: 0.58rem; font-weight: 700; font-variant-numeric: tabular-nums;
+          color: #4ade80;
+        }
 
         @media (max-width: 720px) {
           .ft-bar   { justify-content: center; text-align: center; }
