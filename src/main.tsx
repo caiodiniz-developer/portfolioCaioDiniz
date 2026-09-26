@@ -7,6 +7,10 @@ import './styles/fonts.css'
 import './styles/globals.css'
 import './styles/animations.css'
 import App from './App'
+import { initTheme } from './lib/theme'
+
+// Before the first render, so a saved light theme never flashes dark.
+initTheme()
 
 // R3F v8 + React 19 shim: restore ReactCurrentOwner that R3F's reconciler expects.
 // Wrapped in try-catch because namespace objects may be sealed in production bundles.

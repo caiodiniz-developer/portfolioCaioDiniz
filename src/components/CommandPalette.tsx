@@ -4,9 +4,10 @@ import { useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
   ArrowUpRight, Copy, Check, FileText, Github, Languages, Linkedin,
-  MessageCircle, Search, CornerDownLeft, Sparkles,
+  MessageCircle, Search, CornerDownLeft, Sparkles, SunMoon,
 } from 'lucide-react'
 import AskPanel from '@/components/AskPanel'
+import { getTheme, toggleTheme } from '@/lib/theme'
 import { projects } from '@/data/projects'
 import { SITE } from '@/lib/constants'
 import { track } from '@/lib/analytics'
@@ -94,9 +95,11 @@ export default function CommandPalette() {
       { id: 'a:cv',       group: A, icon: <FileText size={14} />,      label: en ? 'Résumé' : 'Currículo', keywords: 'cv resume', run: go('/cv') },
       { id: 'a:github',   group: A, icon: <Github size={14} />,        label: 'GitHub',   run: ext(SITE.github) },
       { id: 'a:linkedin', group: A, icon: <Linkedin size={14} />,      label: 'LinkedIn', run: ext(SITE.linkedin) },
+      { id: 'a:theme', group: A, icon: <SunMoon size={14} />, label: getTheme() === 'light' ? (en ? 'Dark mode' : 'Modo escuro') : (en ? 'Light mode' : 'Modo claro'), keywords: 'tema theme claro escuro light dark', run: () => { setTimeout(() => toggleTheme(), 200) } },
       { id: 'a:lang',     group: A, icon: <Languages size={14} />,     label: en ? 'Mudar para português' : 'Switch to English', keywords: 'idioma language', run: () => { toggleLang() } },
     ]
-  }, [en, navigate, setOpen, toggleLang])
+    // `open` so the light/dark label is re-read each time the palette opens.
+  }, [en, navigate, setOpen, toggleLang, open])
 
   const filtered = useMemo(() => {
     const AI = en ? 'Ask about Caio' : 'Pergunte sobre o Caio'

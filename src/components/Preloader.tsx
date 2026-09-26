@@ -196,6 +196,7 @@ export default function Preloader({ onDone }: { onDone: () => void }) {
        rather than read out fake source code character by character. */
     <motion.div
       aria-hidden
+      data-no-invert
       style={{
         position: 'fixed', inset: 0, zIndex: 9999,
         background: '#1e1e1e',

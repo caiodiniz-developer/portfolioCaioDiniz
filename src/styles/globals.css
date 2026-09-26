@@ -278,3 +278,27 @@
 ::view-transition-new(root) {
   animation-duration: 0.4s;
 }
+
+/* ── Light theme (see src/lib/theme.ts) ──
+   The whole page is inverted; hue-rotate(180deg) turns the inverted accents
+   back to their own hue. Real imagery is inverted a second time so it reads
+   as untouched. The preloader is a picture of a dark editor and stays dark. */
+:root[data-theme="light"] {
+  filter: invert(1) hue-rotate(180deg);
+  background: #0d0d0d; /* inverts to the light canvas */
+}
+:root[data-theme="light"] :is(img, video, canvas, iframe, picture, [data-no-invert]) {
+  filter: invert(1) hue-rotate(180deg);
+}
+/* Already inverted by an ancestor — don't flip them back twice. */
+:root[data-theme="light"] [data-no-invert] :is(img, video, canvas, iframe, picture) {
+  filter: none;
+}
+
+/* The theme switch reveals the new theme as a growing circle (theme.ts
+   drives the clip-path); only the incoming layer animates. */
+.theme-transition::view-transition-old(root),
+.theme-transition::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}

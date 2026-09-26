@@ -9,6 +9,7 @@ import { useCursorStore } from '@/store/useCursorStore'
 import { usePresentationStore } from '@/store/usePresentationStore'
 import { usePaletteStore } from '@/store/usePaletteStore'
 import { isMac } from '@/components/CommandPalette'
+import ThemeToggle from '@/components/ThemeToggle'
 import { NAV_LINKS, SITE } from '@/lib/constants'
 import { CubertoBtn } from '@/components/sections/Hero'
 
@@ -164,6 +165,8 @@ export default function Header() {
               {isMac ? '⌘K' : 'Ctrl K'}
             </button>
 
+            <ThemeToggle className="hidden lg:flex" />
+
             {/* Language toggle with shimmer glow */}
             <button
               onClick={handleToggle}
@@ -226,6 +229,8 @@ export default function Header() {
                 {lang === 'en' ? "Let's talk" : 'Vamos conversar'}
               </CubertoBtn>
             </Link>
+
+            <ThemeToggle className="flex lg:hidden" />
 
             {/* Language toggle on mobile (hamburger replaced by bottom nav) */}
             <button
