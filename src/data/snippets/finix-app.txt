@@ -1,0 +1,24 @@
+const createTokenFingerprint = (token: string) => {
+  return crypto.createHash("sha256").update(token).digest("hex");
+};
+
+export const verifyRefreshToken = async (
+  token: string,
+): Promise<(RefreshToken & { user: User }) | null> => {
+  const tokenFingerprint = createTokenFingerprint(token);
+  const refreshToken = await prisma.refreshToken.findUnique({
+    where: { tokenFingerprint },
+    include: { user: true },
+  });
+
+  if (!refreshToken || refreshToken.expiresAt < new Date()) {
+    return null;
+  }
+
+  const isValid = await bcrypt.compare(token, refreshToken.tokenHash);
+  if (!isValid) {
+    return null;
+  }
+
+  return refreshToken as RefreshToken & { user: User };
+};

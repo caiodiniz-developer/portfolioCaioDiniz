@@ -1,0 +1,18 @@
+const lastFrameIndex = Math.max(Math.floor(duration * scrubFps) - 1, 0)
+const head = { t: 0 }
+let lastFrame = -1
+tl.to(
+  head,
+  {
+    t: duration,
+    duration: ACT1_END,
+    onUpdate: () => {
+      const frame = Math.min(Math.round(head.t * scrubFps), lastFrameIndex)
+      const wanted = frame / scrubFps
+      if (frame === lastFrame && Math.abs(video.currentTime - wanted) < 0.5 / scrubFps) return
+      lastFrame = frame
+      video.currentTime = wanted
+    },
+  },
+  0
+)

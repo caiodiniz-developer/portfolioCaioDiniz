@@ -1,0 +1,21 @@
+export function rateLimit(max, windowMs) {
+  const hits = new Map();
+  return (req, res, next) => {
+    const key = `${req.ip}:${(req.body?.email ?? "").toLowerCase()}`;
+    const now = Date.now();
+    const entry = hits.get(key);
+
+    if (!entry || entry.resetAt < now) {
+      hits.set(key, { count: 1, resetAt: now + windowMs });
+      return next();
+    }
+    if (entry.count >= max) {
+      const waitSec = Math.ceil((entry.resetAt - now) / 1000);
+      return res
+        .status(429)
+        .json({ error: `Muitas tentativas. Tente novamente em ${waitSec}s.` });
+    }
+    entry.count += 1;
+    next();
+  };
+}

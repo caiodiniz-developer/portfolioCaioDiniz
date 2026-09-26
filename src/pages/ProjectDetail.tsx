@@ -4,6 +4,8 @@ import { ArrowLeft, ArrowRight, ExternalLink, Github } from 'lucide-react'
 import { getProjectBySlug, projects } from '@/data/projects'
 import LiveDemo from '@/components/projects/LiveDemo'
 import TechStack from '@/components/projects/TechStack'
+import CodeSnippet from '@/components/projects/CodeSnippet'
+import { snippets } from '@/data/snippets'
 import { SITE } from '@/lib/constants'
 import { useLanguageStore } from '@/store/useLanguageStore'
 import { useCursorStore } from '@/store/useCursorStore'
@@ -103,6 +105,9 @@ export default function ProjectDetail() {
             <img src={project.image} alt={project.title} loading="eager" />
           </div>
         )}
+
+        {/* ── One real excerpt from the repo, when it's public ── */}
+        {snippets[project.slug] && <CodeSnippet snippet={snippets[project.slug]} />}
 
         {/* ── Stack ── */}
         <section className="pd-stack-wrap">

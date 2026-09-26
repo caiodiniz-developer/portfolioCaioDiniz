@@ -1,0 +1,13 @@
+return prisma.$transaction(async (tx) => {
+  // Atomic stock decrement guards against race conditions between checkouts
+  for (const li of lineItems) {
+    const updated = await tx.product.updateMany({
+      where: { id: li.product.id, stock: { gte: li.quantity } },
+      data: { stock: { decrement: li.quantity }, sold: { increment: li.quantity } },
+    });
+    if (updated.count === 0) {
+      throw ApiError.badRequest(`Estoque insuficiente para "${li.product.title}"`);
+    }
+  }
+  // …
+})
