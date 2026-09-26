@@ -45,7 +45,7 @@ export const projects: Project[] = [
     slug: "finix-app",
     title: "FinixApp",
     category: "Full Stack",
-    type: "Finance Platform",
+    type: "Plataforma Financeira",
     year: "2026",
     description:
       "Plataforma financeira completa com autenticação, dashboard interativo, integração de pagamentos e visualização de dados em tempo real.",
