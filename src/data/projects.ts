@@ -524,6 +524,61 @@ export const projects: Project[] = [
     ],
     featured: true,
   },
+  {
+    id: 10,
+    slug: "veigh",
+    title: "LANDINGPAGE VEIGH",
+    category: "Front-end",
+    type: "Landing Page",
+    year: "2026",
+    description:
+      "Landing page imersiva do álbum Eu Venci o Mundo — vídeo controlado pelo scroll, narrativa em capítulos e um disco de vinil interativo em 3D.",
+    longDescription:
+      "Landing page para o rapper Veigh e o álbum Eu Venci o Mundo. A página conta a trajetória do artista em capítulos — de Itapevi ao Forbes Under 30 — com uma intro em que o vídeo avança conforme o scroll, tipografia gótica no verso de abertura e um disco de vinil em Three.js que o visitante arrasta para passar as faixas e toca num sulco para pousar a agulha.",
+    stack: ["React", "TypeScript", "GSAP", "Lenis", "Three.js", "Vite"],
+    image: "/assets/Veigh-projeto7.png",
+    gallery: ["/assets/Veigh-projeto7.png"],
+    liveUrl: "https://veigh-five.vercel.app",
+    githubUrl: "",
+    embedUrl: "https://veigh-five.vercel.app",
+    role: "Front-end Developer & Creative Developer",
+    problem:
+      "Lançamento de álbum costuma virar uma página com capa e um botão do Spotify. O desafio era fazer o site carregar a narrativa do disco — a virada de quem venceu o mundo — antes de mandar o visitante ouvir.",
+    solution:
+      "Estruturei a página como uma história em capítulos conduzida pelo scroll: a intro faz scrub do vídeo com GSAP, cada capítulo revela um momento da carreira e o fim leva a um disco 3D interativo que funciona como tracklist, fechando no link para o álbum completo.",
+    features: [
+      "Intro com vídeo controlado pelo scroll",
+      "Narrativa dividida em capítulos",
+      "Disco de vinil 3D interativo com Three.js",
+      "Scroll suave com Lenis + ScrollTrigger",
+      "Fontes self-hosted com preload seletivo",
+      "Layout responsivo mobile-first",
+    ],
+    results: [
+      "Projeto publicado e funcional",
+      "Tracklist transformada em interação",
+      "Fontes e vídeo priorizados no carregamento",
+      "Identidade visual fiel ao álbum",
+    ],
+    tradeoffs: [
+      {
+        chose: "Vídeo com scrub no scroll",
+        over: "Vídeo em autoplay",
+        why: "Autoplay acontece com o visitante, não por causa dele. Amarrar o tempo do vídeo ao scroll faz a abertura andar no ritmo de quem lê. O custo é o vídeo precisar ser encodado com keyframes frequentes, senão o seek engasga.",
+      },
+      {
+        chose: "Disco 3D como tracklist",
+        over: "Lista de faixas em HTML",
+        why: "Uma lista informa, mas não se parece com ouvir um disco. O vinil arrastável traduz o gesto físico de trocar de faixa. Em troca, carrega o Three.js — por isso ele só entra no fim da página, depois do que precisa aparecer primeiro.",
+      },
+      {
+        chose: "Fontes self-hosted com preload",
+        over: "Google Fonts via CDN",
+        why: "Elimina handshakes com domínios externos e deixa decidir o que chega primeiro: só os subsets do texto e dos rótulos entram no preload. A gótica do verso aparece depois do scrub da intro e tem tempo de chegar sozinha.",
+      },
+    ],
+    featured: false,
+  },
 ];
 
 export function getProjectBySlug(slug: string): Project | undefined {
