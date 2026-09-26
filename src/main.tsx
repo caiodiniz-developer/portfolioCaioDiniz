@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client'
 // height rules and `scroll-behavior` is never forced to `auto`, so the browser
 // fights Lenis on every wheel event and scroll feels native/choppy.
 import 'lenis/dist/lenis.css'
+import './styles/fonts.css'
 import './styles/globals.css'
 import './styles/animations.css'
 import App from './App'
