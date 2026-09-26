@@ -232,7 +232,7 @@ export default function About() {
       >
         <div className="ab-img absolute inset-0">
           <PaintReveal
-            src="/assets/minha-foto-1.png"
+            src="/assets/minha-foto-1.webp"
             alt="Caio Diniz"
             style={{ width: "100%", height: "100%" }}
             brushSize={105}

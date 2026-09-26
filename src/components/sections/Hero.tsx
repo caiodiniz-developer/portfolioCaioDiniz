@@ -509,7 +509,7 @@ export default function Hero() {
               style={{ top: 0, bottom: "-24%", left: 0, right: 0 }}
             >
               <PaintReveal
-                src="/assets/minha-foto-1.png"
+                src="/assets/minha-foto-1.webp"
                 alt="Caio Diniz"
                 brushSize={110}
                 style={{ width: "100%", height: "100%" }}

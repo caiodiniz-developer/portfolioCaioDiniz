@@ -20,7 +20,7 @@ export const testimonials: Testimonial[] = [
     name: "Allan Priveregues",
     role: "CEO ",
     company: "ONG MPBIA",
-    avatar: "/assets/testemunha-1.png",
+    avatar: "/assets/testemunha-1.webp",
   },
   {
     id: 2,
@@ -31,7 +31,7 @@ export const testimonials: Testimonial[] = [
     name: "Vitor Diego",
     role: "Senior",
     company: "Engenheiro de dados",
-    avatar: "/assets/testemunha-2.jpeg",
+    avatar: "/assets/testemunha-2.webp",
   },
   {
     id: 3,
@@ -42,6 +42,6 @@ export const testimonials: Testimonial[] = [
     name: "Grupo manutenções",
     role: " Director",
     company: "Broup Agency",
-    avatar: "/assets/testemunha-3.png",
+    avatar: "/assets/testemunha-3.webp",
   },
 ];
