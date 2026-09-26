@@ -6,6 +6,7 @@ import Footer from "@/components/layout/Footer";
 import MobileNav from "@/components/layout/MobileNav";
 import PageTransition from "@/components/animations/PageTransition";
 import Terminal from "@/components/animations/Terminal";
+import CommandPalette from "@/components/CommandPalette";
 import Home from "@/pages/Home";
 import NotFound from "@/pages/NotFound";
 
@@ -93,6 +94,7 @@ function RootLayout() {
       </div>
       {/* Global overlays that need router context */}
       <Terminal />
+      <CommandPalette />
       <MobileNav />
     </>
   );

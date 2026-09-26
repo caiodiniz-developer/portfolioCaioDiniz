@@ -7,6 +7,8 @@ import { useT } from '@/hooks/useTranslation'
 import { useLanguageStore } from '@/store/useLanguageStore'
 import { useCursorStore } from '@/store/useCursorStore'
 import { usePresentationStore } from '@/store/usePresentationStore'
+import { usePaletteStore } from '@/store/usePaletteStore'
+import { isMac } from '@/components/CommandPalette'
 import { NAV_LINKS, SITE } from '@/lib/constants'
 import { CubertoBtn } from '@/components/sections/Hero'
 
@@ -17,6 +19,7 @@ export default function Header() {
   const t = useT()
   const setCursor = useCursorStore((s) => s.setState)
   const { active: presenting, toggle: togglePresentation } = usePresentationStore()
+  const openPalette = usePaletteStore((s) => s.setOpen)
 
   useEffect(() => {
     document.body.style.overflow = mobileOpen ? 'hidden' : ''
@@ -136,6 +139,30 @@ export default function Header() {
 
           {/* Right side */}
           <div className="flex items-center gap-2 ml-auto">
+
+            {/* Command palette — the shortcut is the label, so it teaches itself */}
+            <button
+              onClick={() => openPalette(true)}
+              onMouseEnter={() => setCursor('pointer')}
+              onMouseLeave={() => setCursor('default')}
+              aria-label={lang === 'en' ? 'Open command menu' : 'Abrir menu de comandos'}
+              className="hidden lg:flex items-center justify-center"
+              style={{
+                height:        '2.25rem',
+                padding:       '0 0.8rem',
+                borderRadius:  '999px',
+                border:        '1px solid rgba(255,255,255,0.12)',
+                background:    'rgba(255,255,255,0.04)',
+                color:         'rgba(255,255,255,0.5)',
+                fontSize:      '0.6rem',
+                fontWeight:    700,
+                letterSpacing: '0.08em',
+                cursor:        'pointer',
+                flexShrink:    0,
+              }}
+            >
+              {isMac ? '⌘K' : 'Ctrl K'}
+            </button>
 
             {/* Language toggle with shimmer glow */}
             <button
