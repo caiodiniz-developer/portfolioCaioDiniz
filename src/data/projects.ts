@@ -71,10 +71,10 @@ export const projects: Project[] = [
       "Histórico de transações",
     ],
     results: [
-      "50+ usuários ativos",
-      "99,9% de uptime",
-      "< 200ms de resposta da API",
-      "Rating de segurança A+",
+      "Em produção em finixapp.com.br",
+      "Pagamentos reais processados via Stripe",
+      "Refresh token rotativo no lugar de sessão longa",
+      "Permissões checadas no servidor, não só na UI",
     ],
     tradeoffs: [
       {
@@ -127,10 +127,10 @@ export const projects: Project[] = [
       "Testes automatizados",
     ],
     results: [
-      "100% de cobertura de testes",
-      "Latência p95 < 100ms",
-      "Zero incidentes de segurança",
-      "1000+ requests diários",
+      "Código aberto no GitHub",
+      "API documentada com Swagger",
+      "Toda entrada validada com Zod",
+      "Rate limiting e trilha de auditoria",
     ],
     tradeoffs: [
       {
@@ -181,13 +181,12 @@ export const projects: Project[] = [
       "SEO otimizado",
       "Design responsivo mobile-first",
       "Integração de pagamentos",
-      "LCP < 1,2s",
     ],
     results: [
-      "+180% no tráfego orgânico",
-      "+240% na taxa de conversão",
-      "Score 100 de performance",
-      "LCP < 1,2s",
+      "Loja publicada e navegável",
+      "Fluxo completo: catálogo → carrinho → checkout",
+      "Painel admin para produtos e pedidos",
+      "Layout pensado primeiro para o celular",
     ],
     tradeoffs: [
       {
@@ -240,10 +239,10 @@ export const projects: Project[] = [
       "Totalmente responsivo",
     ],
     results: [
-      "+150% nas consultas online",
-      "Score 98 de performance",
-      "Redução do bounce rate em 35%",
-      "Presença digital consolidada",
+      "Site publicado e funcional",
+      "Animações GSAP sem travar o scroll",
+      "CTAs de contato em todas as seções",
+      "Identidade visual própria",
     ],
     tradeoffs: [
       {
@@ -350,10 +349,10 @@ export const projects: Project[] = [
       "UX focado em conversão",
     ],
     results: [
-      "Feedback positivo dos usuários",
-      "Score 98 de performance",
-      "Design diferenciado no mercado",
-      "Taxa de engajamento elevada",
+      "Projeto publicado e funcional",
+      "Design system aplicado em todas as telas",
+      "Transições consistentes entre seções",
+      "Identidade visual própria",
     ],
     tradeoffs: [
       {
@@ -372,7 +371,7 @@ export const projects: Project[] = [
   {
     id: 7,
     slug: "prime-app",
-    title: "Prime Footeboll",
+    title: "Prime Football",
     category: "Front-end",
     type: "Aplicação Web",
     year: "2026",
@@ -400,10 +399,10 @@ export const projects: Project[] = [
       "Performance otimizada",
     ],
     results: [
-      "+60% de retenção de usuários",
-      "-40% na taxa de rejeição",
-      "Score 98 de performance",
-      "Feedback positivo de UX",
+      "Em produção para a agência",
+      "Interface antiga substituída por completo",
+      "Filtros respondendo sem ida ao servidor",
+      "Layout responsivo do celular ao desktop",
     ],
     tradeoffs: [
       {
@@ -452,8 +451,8 @@ export const projects: Project[] = [
     results: [
       "Projeto publicado e funcional",
       "Experiência visual marcante",
-      "Código limpo e performático",
-      "Design award-worthy",
+      "GSAP e Framer Motion convivendo sem conflito",
+      "Layout fora do padrão de grid",
     ],
     tradeoffs: [
       {
@@ -527,7 +526,7 @@ export const projects: Project[] = [
   {
     id: 10,
     slug: "veigh",
-    title: "LANDINGPAGE VEIGH",
+    title: "VEIGH",
     category: "Front-end",
     type: "Landing Page",
     year: "2026",
