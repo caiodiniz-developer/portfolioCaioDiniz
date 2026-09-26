@@ -5,7 +5,6 @@ import FeaturedProjects from '@/components/sections/FeaturedProjects'
 import Services      from '@/components/sections/Services'
 import StackCarousel from '@/components/sections/StackCarousel'
 import Process       from '@/components/sections/Process'
-import Testimonials  from '@/components/sections/Testimonials'
 import GitHubActivity from '@/components/sections/GitHubActivity'
 import CTASection    from '@/components/sections/CTASection'
 import Decompose     from '@/components/animations/Decompose'
@@ -28,7 +27,8 @@ export default function Home() {
       </Decompose>
       <StackCarousel />
       <Process />
-      <Testimonials />
+      {/* Testimonials hidden until there are real, attributable quotes —
+          src/data/testimonials.ts still holds placeholders. */}
       <GitHubActivity />
       <CTASection />
     </>

@@ -202,7 +202,7 @@ export const projects: Project[] = [
       {
         chose: "Imagens em WebP com srcset",
         over: "PNG único",
-        why: "Catálogo é imagem em cima de imagem, e a maior parte do tráfego é 4G no celular. Foi o que segurou o LCP abaixo de 1,2s sem perda visível de qualidade.",
+        why: "Catálogo é imagem em cima de imagem, e a maior parte do tráfego é 4G no celular — é onde a economia de bytes mais pesa no LCP, sem perda visível de qualidade.",
       },
     ],
     featured: true,
