@@ -34,6 +34,7 @@ export const TECH: Record<string, TechIcon> = {
   mysql:          { name: 'MySQL',        icon: `${DEV}/mysql/mysql-original.svg`,            color: '#4479A1' },
   sql:            { name: 'SQL',          icon: `${DEV}/azuresqldatabase/azuresqldatabase-original.svg`, color: '#4479A1' },
   prisma:         { name: 'Prisma',       icon: `${DEV}/prisma/prisma-original.svg`,          color: '#5A67D8', invert: true },
+  express:        { name: 'Express',      icon: `${DEV}/express/express-original.svg`,          color: '#ffffff', invert: true },
   git:            { name: 'Git',          icon: `${DEV}/git/git-original.svg`,                color: '#F05032' },
   figma:          { name: 'Figma',        icon: `${DEV}/figma/figma-original.svg`,            color: '#F24E1E' },
   vite:           { name: 'Vite',         icon: `${DEV}/vitejs/vitejs-original.svg`,          color: '#646CFF' },

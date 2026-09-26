@@ -49,11 +49,11 @@ export const projects: Project[] = [
       "Plataforma financeira completa com autenticação, dashboard interativo, integração de pagamentos e visualização de dados em tempo real.",
     longDescription:
       "O FinixApp é uma plataforma de gestão financeira projetada para dar ao usuário controle total sobre seus dados financeiros. Construída com foco em segurança, performance e experiência do usuário — com autenticação JWT, pagamentos via Stripe, gráficos interativos e painel administrativo com atualizações em tempo real.",
-    stack: ["React", "TypeScript", "Node.js", "PostgreSQL", "JWT", "Stripe"],
+    stack: ["React", "TypeScript", "Node.js", "Express", "Prisma", "PostgreSQL", "JWT", "Stripe"],
     image: "/assets/finixApp-projeto1.webp",
     gallery: ["/assets/finixApp-projeto1.webp"],
     liveUrl: "https://finixapp.com.br",
-    githubUrl: "",
+    githubUrl: "https://github.com/caiodiniz-developer/FinixApp",
     embedUrl: "https://finixapp.com.br",
     role: "Full Stack Developer",
     problem:
@@ -72,8 +72,9 @@ export const projects: Project[] = [
     ],
     results: [
       "Em produção em finixapp.com.br",
-      "Pagamentos reais processados via Stripe",
-      "Refresh token rotativo no lugar de sessão longa",
+      "Código aberto no GitHub",
+      "Planos pagos integrados ao Stripe",
+      "Refresh token salvo só como hash no banco",
       "Permissões checadas no servidor, não só na UI",
     ],
     tradeoffs: [
@@ -162,11 +163,11 @@ export const projects: Project[] = [
       "Loja virtual completa com catálogo de produtos, carrinho, checkout e painel administrativo.",
     longDescription:
       "O ShopSphere é uma plataforma de e-commerce construída do zero com experiência de compra fluida, gerenciamento de produtos e integração de pagamentos. Design focado em conversão com UX intuitiva e performance otimizada.",
-    stack: ["React", "TypeScript", "Node.js", "Tailwind CSS"],
+    stack: ["React", "TypeScript", "Node.js", "Express", "Prisma", "PostgreSQL", "Tailwind CSS"],
     image: "/assets/shopsphere-projeto3.webp",
     gallery: ["/assets/shopsphere-projeto3.webp"],
     liveUrl: "https://loja-virtual-jade.vercel.app",
-    githubUrl: "",
+    githubUrl: "https://github.com/caiodiniz-developer/LojaVirtual",
     embedUrl: "https://loja-virtual-jade.vercel.app",
     role: "Full Stack Developer",
     problem:
@@ -534,11 +535,11 @@ export const projects: Project[] = [
       "Landing page imersiva do álbum Eu Venci o Mundo — vídeo controlado pelo scroll, narrativa em capítulos e um disco de vinil interativo em 3D.",
     longDescription:
       "Landing page para o rapper Veigh e o álbum Eu Venci o Mundo. A página conta a trajetória do artista em capítulos — de Itapevi ao Forbes Under 30 — com uma intro em que o vídeo avança conforme o scroll, tipografia gótica no verso de abertura e um disco de vinil em Three.js que o visitante arrasta para passar as faixas e toca num sulco para pousar a agulha.",
-    stack: ["React", "TypeScript", "GSAP", "Lenis", "Three.js", "Vite"],
+    stack: ["React", "JavaScript", "GSAP", "Lenis", "Three.js", "Vite"],
     image: "/assets/Veigh-projeto7.webp",
     gallery: ["/assets/Veigh-projeto7.webp"],
     liveUrl: "https://veigh-five.vercel.app",
-    githubUrl: "",
+    githubUrl: "https://github.com/caiodiniz-developer/Veigh",
     embedUrl: "https://veigh-five.vercel.app",
     role: "Front-end Developer & Creative Developer",
     problem:
