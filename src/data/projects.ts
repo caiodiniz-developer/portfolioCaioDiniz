@@ -110,7 +110,7 @@ export const projects: Project[] = [
       "Sistema de gerenciamento empresarial completo com módulos de controle de estoque, financeiro e relatórios.",
     longDescription:
       "O Nexus é um sistema de gerenciamento empresarial desenvolvido para centralizar operações de negócio. Conta com módulos integrados de estoque, financeiro, cadastro de clientes e geração de relatórios — tudo em uma interface limpa e eficiente.",
-    stack: ["Node.js", "TypeScript", "PostgreSQL", "Prisma", "Zod"],
+    stack: ["React", "TypeScript", "Node.js", "Express", "PostgreSQL", "JWT"],
     image: "/assets/nexux-projeto2.webp",
     gallery: ["/assets/nexux-projeto2.webp"],
     liveUrl: "https://github.com/caiodiniz-developer/SistemaDeGerenciamentoEmpresarial",
@@ -119,7 +119,7 @@ export const projects: Project[] = [
     problem:
       "A empresa precisava de um sistema centralizado para gerenciar operações internas, eliminar planilhas manuais e ter visibilidade em tempo real do negócio.",
     solution:
-      "Projetei e implementei um sistema modular com Node.js, Prisma ORM, autenticação JWT e dashboards de KPIs — com validação robusta via Zod em todas as entradas.",
+      "Projetei e implementei um sistema modular com React no front e Express no back, SQL direto no PostgreSQL, autenticação JWT com 2FA e validação de entrada em todas as rotas.",
     features: [
       "Gestão de estoque em tempo real",
       "Módulo financeiro completo",
@@ -127,30 +127,30 @@ export const projects: Project[] = [
       "Relatórios exportáveis",
       "Auth JWT com permissões por perfil",
       "Rate limiting e logs de auditoria",
-      "Documentação Swagger",
+      "Autenticação em dois fatores (TOTP)",
       "Testes automatizados",
     ],
     results: [
       "Código aberto no GitHub",
-      "API documentada com Swagger",
-      "Toda entrada validada com Zod",
-      "Rate limiting e trilha de auditoria",
+      "Login com 2FA por aplicativo autenticador",
+      "Rate limiting por IP e por usuário",
+      "Testes de API contra um Postgres em memória",
     ],
     tradeoffs: [
       {
-        chose: "Zod validando na borda da API",
-        over: "Confiar nos tipos do TypeScript",
-        why: "TypeScript some em runtime. Todo dado que entra por HTTP é desconhecido até ser validado — o Zod gera o tipo e a validação da mesma definição, então não existe divergência entre o que o compilador acha e o que chega de verdade.",
+        chose: "SQL direto com pg",
+        over: "Um ORM",
+        why: "O SQL que roda é exatamente o que está escrito, sem camada gerando query por trás. Os testes sobem um Postgres em memória (pg-mem), então a API é testada contra SQL de verdade sem precisar de um banco rodando.",
+      },
+      {
+        chose: "Rate limit em memória",
+        over: "Redis",
+        why: "Com uma única instância, um Map com janela fixa resolve e não adiciona infraestrutura. Se o deploy escalar para várias instâncias, o contador precisa ir para um store compartilhado — e o código já deixa isso anotado.",
       },
       {
         chose: "Monólito modular",
         over: "Microserviços",
         why: "São módulos de um mesmo negócio, com um time de uma pessoa. Microserviço aqui só adicionaria latência de rede e complexidade de deploy sem resolver nenhum problema real de escala que o projeto tenha.",
-      },
-      {
-        chose: "Prisma",
-        over: "SQL puro",
-        why: "As queries do sistema são majoritariamente CRUD com joins previsíveis. Abri exceção nos relatórios, onde o SQL gerado ficava ineficiente — ali usei query raw e medi o plano de execução.",
       },
     ],
     featured: true,
