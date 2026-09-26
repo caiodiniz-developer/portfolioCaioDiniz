@@ -20,17 +20,34 @@ const ContactPage   = lazy(() => import("@/pages/ContactPage"));
 const GuestbookPage = lazy(() => import("@/pages/GuestbookPage"));
 const CVPage        = lazy(() => import("@/pages/CVPage"));
 const Terminal      = lazy(() => import("@/components/animations/Terminal"));
+const LiveCursors   = lazy(() => import("@/components/LiveCursors"));
 
-/* The secret terminal is an easter egg — it shouldn't compete with the first
-   paint. Mount (and so download) it once the browser is idle. */
-function IdleTerminal() {
+/* Extras that shouldn't compete with the first paint: mounted (and so
+   downloaded) once the browser is idle. */
+function useIdle() {
   const [ready, setReady] = useState(false);
   useEffect(() => {
     const w = window as Window & { requestIdleCallback?: (cb: () => void) => number };
     if (w.requestIdleCallback) w.requestIdleCallback(() => setReady(true));
     else { const t = setTimeout(() => setReady(true), 2500); return () => clearTimeout(t); }
   }, []);
-  return ready ? <Suspense fallback={null}><Terminal /></Suspense> : null;
+  return ready;
+}
+
+function IdleTerminal() {
+  return useIdle() ? <Suspense fallback={null}><Terminal /></Suspense> : null;
+}
+
+// Live cursors need a mouse and a Supabase project; skip the socket otherwise.
+const LIVE_CURSORS =
+  !!(import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON) &&
+  typeof window !== "undefined" &&
+  window.matchMedia("(hover: hover) and (pointer: fine)").matches &&
+  !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+function IdleLiveCursors() {
+  const ready = useIdle();
+  return LIVE_CURSORS && ready ? <Suspense fallback={null}><LiveCursors /></Suspense> : null;
 }
 import { getLenis } from "@/hooks/useLenis";
 import { initAnalytics, pageview } from "@/lib/analytics";
@@ -106,6 +123,7 @@ function RootLayout() {
       </div>
       {/* Global overlays that need router context */}
       <IdleTerminal />
+      <IdleLiveCursors />
       <CommandPalette />
       <MobileNav />
     </>
