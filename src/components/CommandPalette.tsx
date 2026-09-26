@@ -4,8 +4,9 @@ import { useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
   ArrowUpRight, Copy, Check, FileText, Github, Languages, Linkedin,
-  MessageCircle, Search, CornerDownLeft,
+  MessageCircle, Search, CornerDownLeft, Sparkles,
 } from 'lucide-react'
+import AskPanel from '@/components/AskPanel'
 import { projects } from '@/data/projects'
 import { SITE } from '@/lib/constants'
 import { track } from '@/lib/analytics'
@@ -41,6 +42,8 @@ export default function CommandPalette() {
   const [query,  setQuery]  = useState('')
   const [active, setActive] = useState(0)
   const [copied, setCopied] = useState(false)
+  // A question handed to the AI assistant: the palette swaps to AskPanel.
+  const [asking, setAsking] = useState<string | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const listRef  = useRef<HTMLDivElement>(null)
 
@@ -54,7 +57,7 @@ export default function CommandPalette() {
 
   useEffect(() => {
     if (!open) return
-    setQuery(''); setActive(0); setCopied(false)
+    setQuery(''); setActive(0); setCopied(false); setAsking(null)
     const t = setTimeout(() => inputRef.current?.focus(), 30)
     return () => clearTimeout(t)
   }, [open])
@@ -96,10 +99,24 @@ export default function CommandPalette() {
   }, [en, navigate, setOpen, toggleLang])
 
   const filtered = useMemo(() => {
-    const q = norm(query.trim())
-    if (!q) return items
-    return items.filter(i => norm(`${i.label} ${i.hint ?? ''} ${i.keywords ?? ''} ${i.group}`).includes(q))
-  }, [items, query])
+    const AI = en ? 'Ask about Caio' : 'Pergunte sobre o Caio'
+    const askItem = (question: string, id: string, label = question): Item => ({
+      id, group: AI, label, icon: <Sparkles size={14} style={{ color: '#4ade80' }} />,
+      run: () => { setAsking(question); return 'keep-open' },
+    })
+    const raw = query.trim()
+    const q = norm(raw)
+    // Empty: two example questions, so the assistant is discoverable.
+    if (!q) return [
+      askItem(en ? 'Which project best shows back-end work?' : 'Qual projeto mostra melhor o back-end?', 'ai:s1'),
+      askItem(en ? 'Has he worked with payments?' : 'Ele já trabalhou com pagamentos?', 'ai:s2'),
+      ...items,
+    ]
+    const matches = items.filter(i => norm(`${i.label} ${i.hint ?? ''} ${i.keywords ?? ''} ${i.group}`).includes(q))
+    // Anything longer than a word or two reads as a question: offer it first.
+    const asQuestion = raw.length >= 3 ? [askItem(raw, 'ai:q', `${en ? 'Ask' : 'Perguntar'}: “${raw}”`)] : []
+    return raw.includes(' ') || matches.length === 0 ? [...asQuestion, ...matches] : [...matches, ...asQuestion]
+  }, [items, query, en])
 
   useEffect(() => { setActive(0) }, [query])
 
@@ -114,6 +131,7 @@ export default function CommandPalette() {
   }
 
   function onKeyDown(e: ReactKeyboardEvent) {
+    if (asking) return // AskPanel owns the keyboard while answering
     if (e.key === 'ArrowDown') { e.preventDefault(); setActive(a => Math.min(a + 1, filtered.length - 1)) }
     else if (e.key === 'ArrowUp') { e.preventDefault(); setActive(a => Math.max(a - 1, 0)) }
     else if (e.key === 'Enter') { e.preventDefault(); runItem(filtered[active]) }
@@ -156,13 +174,21 @@ export default function CommandPalette() {
               overflow: 'hidden',
             }}
           >
+            {asking ? (
+              <AskPanel
+                first={asking}
+                en={en}
+                onBack={() => { setAsking(null); setTimeout(() => inputRef.current?.focus(), 30) }}
+                onClose={() => setOpen(false)}
+              />
+            ) : (<>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '0 18px', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
               <Search size={15} style={{ color: 'rgba(255,255,255,0.3)', flexShrink: 0 }} />
               <input
                 ref={inputRef}
                 value={query}
                 onChange={e => setQuery(e.target.value)}
-                placeholder={en ? 'Search projects, pages, actions…' : 'Buscar projetos, páginas, ações…'}
+                placeholder={en ? 'Search, or ask anything about Caio…' : 'Busque ou pergunte qualquer coisa sobre o Caio…'}
                 aria-label={en ? 'Search' : 'Buscar'}
                 style={{
                   flex: 1, height: 56, background: 'transparent', border: 'none', outline: 'none',
@@ -186,7 +212,7 @@ export default function CommandPalette() {
                 return (
                   <div key={item.id}>
                     {header && (
-                      <p style={{ margin: 0, padding: '12px 12px 6px', fontSize: '0.55rem', fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.25)' }}>
+                      <p style={{ margin: 0, padding: '12px 12px 6px', fontSize: '0.55rem', fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.45)' }}>
                         {header}
                       </p>
                     )}
@@ -218,6 +244,7 @@ export default function CommandPalette() {
                 )
               })}
             </div>
+            </>)}
           </motion.div>
         </motion.div>
       )}
