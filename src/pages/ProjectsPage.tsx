@@ -7,6 +7,7 @@ import { projects } from '@/data/projects'
 import { useLanguageStore } from '@/store/useLanguageStore'
 import { useCursorStore } from '@/store/useCursorStore'
 import { SITE } from '@/lib/constants'
+import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
 
 type Filter = 'All' | 'Full Stack' | 'Front-end' | 'Back-end'
 
@@ -31,6 +32,7 @@ export default function ProjectsPage() {
   const [active,   setActive]   = useState<Filter>('All')
   const [hovered,  setHovered]  = useState<number | null>(null)
   const [isMobile, setIsMobile] = useState(false)
+  const reducedMotion = usePrefersReducedMotion()
 
   const filtered       = active === 'All' ? projects : projects.filter(p => p.category === active)
   const hoveredProject = projects.find(p => p.id === hovered) ?? null
@@ -92,6 +94,16 @@ export default function ProjectsPage() {
               alt=""
               style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
             />
+            {/* Screenshot stays underneath, so there's no flash while the clip buffers. */}
+            {hoveredProject.video && !reducedMotion && (
+              <video
+                key={hoveredProject.slug}
+                src={hoveredProject.video}
+                autoPlay muted loop playsInline
+                aria-hidden
+                style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
+              />
+            )}
             {/* Category stripe */}
             <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: CAT_COLOR[hoveredProject.category] ?? '#fff', opacity: 0.8 }} />
           </>

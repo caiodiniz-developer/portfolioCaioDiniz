@@ -28,6 +28,8 @@ export interface Project {
    *  showing a static screenshot. Leave undefined for sites that block framing
    *  (X-Frame-Options / frame-ancestors) — the gallery is used as fallback. */
   embedUrl?: string;
+  /** ~5s muted scroll-through of the live site, played on card hover. */
+  video?: string;
   role: string;
   problem: string;
   solution: string;
@@ -52,6 +54,7 @@ export const projects: Project[] = [
     stack: ["React", "TypeScript", "Node.js", "Express", "Prisma", "PostgreSQL", "JWT", "Stripe"],
     image: "/assets/finixApp-projeto1.webp",
     gallery: ["/assets/finixApp-projeto1.webp"],
+    video: "/previews/finix-app.mp4",
     liveUrl: "https://finixapp.com.br",
     githubUrl: "https://github.com/caiodiniz-developer/FinixApp",
     embedUrl: "https://finixapp.com.br",
@@ -166,6 +169,7 @@ export const projects: Project[] = [
     stack: ["React", "TypeScript", "Node.js", "Express", "Prisma", "PostgreSQL", "Tailwind CSS"],
     image: "/assets/shopsphere-projeto3.webp",
     gallery: ["/assets/shopsphere-projeto3.webp"],
+    video: "/previews/shopsphere.mp4",
     liveUrl: "https://loja-virtual-jade.vercel.app",
     githubUrl: "https://github.com/caiodiniz-developer/LojaVirtual",
     embedUrl: "https://loja-virtual-jade.vercel.app",
@@ -222,6 +226,7 @@ export const projects: Project[] = [
     stack: ["React", "TypeScript", "GSAP", "Tailwind CSS"],
     image: "/assets/forja-projeto4.webp",
     gallery: ["/assets/forja-projeto4.webp"],
+    video: "/previews/forja.mp4",
     liveUrl: "https://forja-sable.vercel.app",
     githubUrl: "",
     embedUrl: "https://forja-sable.vercel.app",
@@ -278,6 +283,7 @@ export const projects: Project[] = [
     stack: ["Three.js", "JavaScript", "HTML", "CSS"],
     image: "/assets/cubo3D-projeto5.webp",
     gallery: ["/assets/cubo3D-projeto5.webp"],
+    video: "/previews/cubo3d.mp4",
     liveUrl: "https://cubomagico3d.vercel.app/",
     githubUrl: "",
     embedUrl: "https://cubomagico3d.vercel.app/",
@@ -333,6 +339,7 @@ export const projects: Project[] = [
     stack: ["React", "TypeScript", "Tailwind CSS", "Framer Motion"],
     image: "/assets/spylt-projeto6.webp",
     gallery: ["/assets/spylt-projeto6.webp"],
+    video: "/previews/spylt.mp4",
     liveUrl: "https://spylt-blue.vercel.app/",
     githubUrl: "",
     embedUrl: "https://spylt-blue.vercel.app/",
@@ -383,6 +390,7 @@ export const projects: Project[] = [
     stack: ["React", "TypeScript", "Framer Motion", "Tailwind CSS"],
     image: "/assets/projeto-prime.webp",
     gallery: ["/assets/projeto-prime.webp"],
+    video: "/previews/prime-app.mp4",
     liveUrl: "https://www.agenciaprimefootball.com.br/",
     githubUrl: "",
     embedUrl: "https://www.agenciaprimefootball.com.br/",
@@ -433,6 +441,7 @@ export const projects: Project[] = [
     stack: ["React", "TypeScript", "GSAP", "Framer Motion", "Tailwind CSS"],
     image: "/assets/fruity-projeto6.webp",
     gallery: ["/assets/fruity-projeto6.webp"],
+    video: "/previews/fruity.mp4",
     liveUrl: "https://fruity-xi.vercel.app/",
     githubUrl: "",
     embedUrl: "https://fruity-xi.vercel.app/",
@@ -483,6 +492,7 @@ export const projects: Project[] = [
     stack: ["React", "TypeScript", "GSAP", "Lenis", "Vite", "Tailwind CSS"],
     image: "/assets/aerivo-projeto8.webp",
     gallery: ["/assets/aerivo-projeto8.webp"],
+    video: "/previews/aerivo.mp4",
     liveUrl: "https://aerivo.vercel.app/",
     githubUrl: "",
     embedUrl: "https://aerivo.vercel.app/",
@@ -538,6 +548,7 @@ export const projects: Project[] = [
     stack: ["React", "JavaScript", "GSAP", "Lenis", "Three.js", "Vite"],
     image: "/assets/Veigh-projeto7.webp",
     gallery: ["/assets/Veigh-projeto7.webp"],
+    video: "/previews/veigh.mp4",
     liveUrl: "https://veigh-five.vercel.app",
     githubUrl: "https://github.com/caiodiniz-developer/Veigh",
     embedUrl: "https://veigh-five.vercel.app",

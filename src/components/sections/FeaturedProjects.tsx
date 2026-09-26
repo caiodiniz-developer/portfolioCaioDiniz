@@ -10,6 +10,7 @@ import { useCursorStore } from '@/store/useCursorStore'
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
 import { track } from '@/lib/analytics'
 import { CubertoBtn } from './Hero'
+import HoverVideo from '@/components/projects/HoverVideo'
 
 const E: [number, number, number, number] = [0.16, 1, 0.3, 1]
 
@@ -30,8 +31,10 @@ function ProjectCard({ project, index, aspectRatio, disableTilt }: {
   const [demoOn, setDemoOn] = useState(false)
   // Cached on mouseenter — reading getBoundingClientRect every mousemove forces a layout reflow
   const rectRef   = useRef<DOMRect | null>(null)
+  const [hovered, setHovered] = useState(false)
 
   function handleMouseEnter() {
+    setHovered(true)
     if (disableTilt || !cardRef.current) return
     rectRef.current = cardRef.current.getBoundingClientRect()
   }
@@ -50,6 +53,7 @@ function ProjectCard({ project, index, aspectRatio, disableTilt }: {
   }
 
   function handleMouseLeave() {
+    setHovered(false)
     if (disableTilt || !cardRef.current) return
     rectRef.current = null
     gsap.to(cardRef.current, { rotateX: 0, rotateY: 0, duration: 0.65, ease: 'power3.out' })
@@ -114,6 +118,8 @@ function ProjectCard({ project, index, aspectRatio, disableTilt }: {
             viewport={{ once: true, margin: '-60px' }}
             transition={{ duration: 1.2, ease: E }}
           />
+
+          {project.video && <HoverVideo src={project.video} active={hovered && !demoOn} />}
 
           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/18 transition-colors duration-500 z-20 pointer-events-none" />
 
