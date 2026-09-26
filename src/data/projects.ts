@@ -30,6 +30,9 @@ export interface Project {
   embedUrl?: string;
   /** ~5s muted scroll-through of the live site, played on card hover. */
   video?: string;
+  /** Screenshot of what the project replaced. When set, the case study shows
+   *  a drag-to-compare slider against `image`. */
+  before?: string;
   role: string;
   problem: string;
   solution: string;

@@ -5,6 +5,7 @@ import { getProjectBySlug, projects } from '@/data/projects'
 import LiveDemo from '@/components/projects/LiveDemo'
 import TechStack from '@/components/projects/TechStack'
 import CodeSnippet from '@/components/projects/CodeSnippet'
+import BeforeAfter from '@/components/projects/BeforeAfter'
 import { snippets } from '@/data/snippets'
 import { SITE } from '@/lib/constants'
 import { useLanguageStore } from '@/store/useLanguageStore'
@@ -105,6 +106,9 @@ export default function ProjectDetail() {
             <img src={project.image} alt={project.title} loading="eager" />
           </div>
         )}
+
+        {/* ── What it replaced, when there's a screenshot of the old one ── */}
+        {project.before && <BeforeAfter before={project.before} after={project.image} title={project.title} />}
 
         {/* ── One real excerpt from the repo, when it's public ── */}
         {snippets[project.slug] && <CodeSnippet snippet={snippets[project.slug]} />}
