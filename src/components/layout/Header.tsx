@@ -122,7 +122,7 @@ export default function Header() {
               </NavLink>
             ))}
             <NavLink
-              to="/guestbook"
+              to="/lab"
               onMouseEnter={() => setCursor('pointer')}
               onMouseLeave={() => setCursor('default')}
               className={({ isActive }) =>
@@ -134,7 +134,7 @@ export default function Header() {
                 )
               }
             >
-              {lang === 'en' ? 'Guestbook' : 'Livro de Visitas'}
+              Lab
             </NavLink>
           </nav>
 
@@ -322,7 +322,7 @@ export default function Header() {
                   className="border-b border-white/[0.07] overflow-hidden"
                 >
                   <NavLink
-                    to="/guestbook"
+                    to="/lab"
                     onClick={() => setMobileOpen(false)}
                     className={({ isActive }) =>
                       cn(
@@ -331,7 +331,7 @@ export default function Header() {
                       )
                     }
                   >
-                    {lang === 'en' ? 'Guestbook' : 'Livro de Visitas'}
+                    Lab
                   </NavLink>
                 </motion.li>
               </ul>
