@@ -120,7 +120,9 @@ export default function LabPage() {
              fit a phone, so the floor is lower than the other page titles. */
           font-size: clamp(1.7rem, 8.4vw, 6rem); letter-spacing: -0.055em; line-height: 0.9;
         }
-        .lab-h1 span { color: rgba(255,255,255,0.22); }
+        /* The dimmed second line: 0.4 is the faintest that still clears the
+           3:1 contrast floor for large text on this background. */
+        .lab-h1 span { color: rgba(255,255,255,0.4); }
         .lab-lead { margin: 0; max-width: 38rem; font-size: 0.95rem; line-height: 1.75; color: rgba(255,255,255,0.55); }
 
         .lab-index { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: clamp(2rem,4vw,3rem); }
