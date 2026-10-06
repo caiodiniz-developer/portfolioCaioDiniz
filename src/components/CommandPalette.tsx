@@ -80,7 +80,7 @@ export default function CommandPalette() {
       { id: 'n:projects',  group: N, label: en ? 'All projects' : 'Todos os projetos', run: go('/projects') },
       { id: 'n:services',  group: N, label: en ? 'Services' : 'Serviços',         run: go('/services') },
       { id: 'n:contact',   group: N, label: en ? 'Contact' : 'Contato',           run: go('/contact') },
-      { id: 'n:guestbook', group: N, label: en ? 'Guestbook' : 'Livro de visitas', run: go('/guestbook') },
+      { id: 'n:lab',       group: N, label: en ? 'Lab' : 'Laboratório', keywords: 'experimentos experiments playground', run: go('/lab') },
       {
         id: 'a:email', group: A, icon: <Copy size={14} />,
         label: en ? 'Copy email' : 'Copiar email', hint: SITE.email,
