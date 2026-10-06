@@ -65,7 +65,7 @@ export default function AboutPage() {
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
             className="flex flex-col gap-6 max-w-3xl"
           >
-            <span className="inline-flex items-center gap-3 text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-white/30">
+            <span className="inline-flex items-center gap-3 text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-white/55">
               <span className="w-5 h-px bg-white/15" />
               {t.about.badge}
             </span>
@@ -74,12 +74,12 @@ export default function AboutPage() {
               style={{ fontFamily: 'Syne, sans-serif', fontSize: 'clamp(2.5rem, 7vw, 6rem)', letterSpacing: '-0.055em', lineHeight: '0.88' }}
             >
               {lang === 'en' ? (
-                <>Developer,<br /><span style={{ color: 'rgba(255,255,255,0.22)' }}>creator &amp; builder.</span></>
+                <>Developer,<br /><span style={{ color: 'rgba(255,255,255,0.4)' }}>creator &amp; builder.</span></>
               ) : (
-                <>Desenvolvedor,<br /><span style={{ color: 'rgba(255,255,255,0.22)' }}>criador &amp; construtor.</span></>
+                <>Desenvolvedor,<br /><span style={{ color: 'rgba(255,255,255,0.4)' }}>criador &amp; construtor.</span></>
               )}
             </h1>
-            <p className="text-sm text-white/35 leading-relaxed max-w-xl">
+            <p className="text-sm text-white/60 leading-relaxed max-w-xl">
               {t.about.description}
             </p>
           </motion.div>
