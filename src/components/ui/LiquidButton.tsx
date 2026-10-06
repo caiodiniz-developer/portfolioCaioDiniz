@@ -150,7 +150,7 @@ export function CubertoBtn({
           onTouchStart={() => setPressed(true)}
           onTouchEnd={() => setPressed(false)}
           onClick={handleClick}
-          style={{ position:"absolute", inset:0, background:"transparent", border:"none", cursor:"pointer", outline:"none", zIndex:40, transform:"translateZ(25px)", borderRadius:100, overflow:"hidden" }}
+          style={{ position:"absolute", inset:0, background:"transparent", border:"none", cursor:"pointer", zIndex:40, transform:"translateZ(25px)", borderRadius:100, overflow:"hidden" }}
           {...props}
         >
           <span style={{ position:"absolute", width:1, height:1, overflow:"hidden", clip:"rect(0 0 0 0)", whiteSpace:"nowrap" }}>{children}</span>
