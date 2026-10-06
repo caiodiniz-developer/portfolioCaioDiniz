@@ -12,7 +12,7 @@ import { SITE } from './src/lib/constants'
    Vercel serves a real file before applying the SPA rewrite, so
    /projects/<slug> gets its own HTML and the app boots from it as usual. */
 
-const STATIC_ROUTES = ['', '/about', '/projects', '/services', '/contact', '/guestbook', '/cv']
+const STATIC_ROUTES = ['', '/about', '/projects', '/services', '/contact', '/lab', '/cv']
 
 const esc = (s: string) =>
   s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
