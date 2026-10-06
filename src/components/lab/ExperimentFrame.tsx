@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { ArrowUpRight } from 'lucide-react'
 import { sourceUrl } from '@/data/lab'
@@ -14,6 +15,19 @@ export default function ExperimentFrame({ experiment, index, en, children }: {
   children: ReactNode
 }) {
   const setCursor = useCursorStore(s => s.setState)
+
+  /* Only the experiments near the viewport are mounted. Each one owns a
+     render loop — and one a WebGL context — so six running at once, five of
+     them off screen, was wasted work the whole time the page was open. */
+  const stageRef = useRef<HTMLDivElement>(null)
+  const [near, setNear] = useState(false)
+  useEffect(() => {
+    const el = stageRef.current
+    if (!el) return
+    const io = new IntersectionObserver(([entry]) => setNear(entry.isIntersecting), { rootMargin: '300px 0px' })
+    io.observe(el)
+    return () => io.disconnect()
+  }, [])
 
   return (
     <article id={experiment.id} className="lab-item">
@@ -37,7 +51,7 @@ export default function ExperimentFrame({ experiment, index, en, children }: {
       </div>
 
       <div className="lab-stage-wrap">
-        <div className="lab-stage">{children}</div>
+        <div ref={stageRef} className="lab-stage">{near && children}</div>
         <p className="lab-hint">{en ? experiment.hintEn : experiment.hintPt}</p>
       </div>
     </article>
