@@ -85,7 +85,7 @@ export default function MobileNav() {
                   size={20}
                   strokeWidth={isActive ? 2.2 : 1.6}
                   style={{
-                    color:      isActive ? '#ffffff' : 'rgba(255,255,255,0.28)',
+                    color:      isActive ? '#ffffff' : 'rgba(255,255,255,0.55)',
                     transition: 'color 0.2s',
                   }}
                 />
@@ -96,7 +96,7 @@ export default function MobileNav() {
                 fontWeight:    isActive ? 700 : 500,
                 letterSpacing: '0.08em',
                 textTransform: 'uppercase',
-                color:         isActive ? '#ffffff' : 'rgba(255,255,255,0.28)',
+                color:         isActive ? '#ffffff' : 'rgba(255,255,255,0.55)',
                 transition:    'color 0.2s',
                 position:      'relative',
                 zIndex:        1,
