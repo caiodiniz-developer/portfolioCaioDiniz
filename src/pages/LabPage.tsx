@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import type { ComponentType } from 'react'
+import { useLocation } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { experiments } from '@/data/lab'
 import ExperimentFrame from '@/components/lab/ExperimentFrame'
@@ -11,6 +12,7 @@ import CardMorphLab from '@/components/lab/CardMorphLab'
 import ScrollScrubLab from '@/components/lab/ScrollScrubLab'
 import { SITE } from '@/lib/constants'
 import { useLanguageStore } from '@/store/useLanguageStore'
+import { getLenis } from '@/hooks/useLenis'
 
 const E: [number, number, number, number] = [0.16, 1, 0.3, 1]
 
@@ -33,6 +35,22 @@ export default function LabPage() {
   }, [en])
 
   const shown = experiments.filter(e => STAGES[e.id])
+
+  /* /lab#css-cube lands on that experiment. The router resets scroll to the
+     top on every navigation, so this runs a beat later, once the page
+     transition has settled and the layout is final. */
+  const { hash } = useLocation()
+  useEffect(() => {
+    if (!hash) return
+    const t = setTimeout(() => {
+      const el = document.getElementById(decodeURIComponent(hash.slice(1)))
+      if (!el) return
+      const lenis = getLenis()
+      if (lenis) lenis.scrollTo(el, { offset: -96, duration: 1 })
+      else el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 450)
+    return () => clearTimeout(t)
+  }, [hash])
 
   return (
     <main style={{ background: '#0d0d0d', minHeight: '100vh' }}>
