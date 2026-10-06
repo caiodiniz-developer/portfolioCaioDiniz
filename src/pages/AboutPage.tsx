@@ -187,9 +187,9 @@ export default function AboutPage() {
 
       <Experience />
       {/* Someone reading the career section is the person most likely to want
-          the résumé and the guestbook. */}
+          the résumé, and then proof of the skills it lists — the Lab. */}
       <RouteCards
-        show={['cv', 'guestbook']}
+        show={['cv', 'lab']}
         headingPt="Continue por aqui"
         headingEn="Keep going"
       />

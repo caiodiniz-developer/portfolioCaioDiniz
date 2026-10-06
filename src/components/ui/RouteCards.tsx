@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import { useRef, useEffect } from 'react'
 import gsap from 'gsap'
 import ScrollTrigger from 'gsap/ScrollTrigger'
-import { FileText, BookOpen, ArrowUpRight } from 'lucide-react'
+import { FileText, FlaskConical, ArrowUpRight } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { useCursorStore } from '@/store/useCursorStore'
 import { useLanguageStore } from '@/store/useLanguageStore'
@@ -15,7 +15,7 @@ import { useLanguageStore } from '@/store/useLanguageStore'
  * "about" and "contact", where someone is deciding whether to hire.
  */
 
-export type RouteKey = 'cv' | 'guestbook'
+export type RouteKey = 'cv' | 'lab'
 
 interface RouteDef {
   path: string
@@ -39,13 +39,13 @@ const ROUTES: Record<RouteKey, RouteDef> = {
     tagPt: 'PDF',
     tagEn: 'PDF',
   },
-  guestbook: {
-    path: '/guestbook',
-    Icon: BookOpen,
-    titlePt: 'Livro de visitas',
-    titleEn: 'Guestbook',
-    descPt: 'Deixe um recado. Fica salvo de verdade, para quem passar depois de você.',
-    descEn: 'Leave a note. It really is saved, for whoever comes after you.',
+  lab: {
+    path: '/lab',
+    Icon: FlaskConical,
+    titlePt: 'Laboratório',
+    titleEn: 'Lab',
+    descPt: 'As técnicas deste site desmontadas em peças pequenas: mexa, leia como funciona, abra o código.',
+    descEn: 'The techniques behind this site taken apart into small pieces: play, read how it works, open the code.',
     tagPt: 'Interativo',
     tagEn: 'Interactive',
   },
