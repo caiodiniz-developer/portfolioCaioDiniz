@@ -17,7 +17,7 @@ export function allRoutes(): string[] {
     '/projects',
     '/services',
     '/contact',
-    '/guestbook',
+    '/lab',
     '/cv',
     ...projects.map(p => `/projects/${p.slug}`),
   ]
