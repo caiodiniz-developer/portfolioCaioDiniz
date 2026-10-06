@@ -4,11 +4,12 @@ import { useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
   ArrowUpRight, Copy, Check, FileText, Github, Languages, Linkedin,
-  MessageCircle, Search, CornerDownLeft, Sparkles, SunMoon,
+  MessageCircle, Search, CornerDownLeft, Sparkles, SunMoon, FlaskConical,
 } from 'lucide-react'
 import AskPanel from '@/components/AskPanel'
 import { getTheme, toggleTheme } from '@/lib/theme'
 import { projects } from '@/data/projects'
+import { experiments } from '@/data/lab'
 import { SITE } from '@/lib/constants'
 import { track } from '@/lib/analytics'
 import { useLanguageStore } from '@/store/useLanguageStore'
@@ -74,6 +75,11 @@ export default function CommandPalette() {
         id: `p:${p.slug}`, group: P, label: p.title, hint: p.type,
         keywords: `${p.stack.join(' ')} ${p.category}`,
         run: go(`/projects/${p.slug}`),
+      })),
+      ...experiments.map(x => ({
+        id: `l:${x.id}`, group: 'Lab', icon: <FlaskConical size={14} />,
+        label: en ? x.titleEn : x.titlePt, hint: x.tags[0], keywords: x.tags.join(' '),
+        run: go(`/lab#${x.id}`),
       })),
       { id: 'n:home',      group: N, label: en ? 'Home' : 'Início',               run: go('/') },
       { id: 'n:about',     group: N, label: en ? 'About' : 'Sobre',               run: go('/about') },
