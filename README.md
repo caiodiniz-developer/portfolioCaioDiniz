@@ -37,6 +37,7 @@ Rotas carregadas sob demanda, Three.js isolado na única página que usa, fontes
 ```bash
 npm install --legacy-peer-deps
 npm run dev        # localhost:5173
+npm run typecheck  # checa os tipos de src/, api/ e da config do Vite
 npm run build      # gera dist/ + páginas de preview + sitemap
 npm run og         # regenera as imagens de compartilhamento
 ```
