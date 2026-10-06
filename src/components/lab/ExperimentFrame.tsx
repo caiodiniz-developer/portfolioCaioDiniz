@@ -4,6 +4,7 @@ import { ArrowUpRight, Check, Link2 } from 'lucide-react'
 import { sourceUrl } from '@/data/lab'
 import type { LabExperiment } from '@/data/lab'
 import { useCursorStore } from '@/store/useCursorStore'
+import { track } from '@/lib/analytics'
 
 /* The shell every experiment sits in: number, title, the explanation on one
    side and the live "stage" on the other, with a hint and a link to the
@@ -23,6 +24,7 @@ export default function ExperimentFrame({ experiment, index, en, children }: {
   function copyLink() {
     const url = `${location.origin}/lab#${experiment.id}`
     navigator.clipboard?.writeText(url).then(() => {
+      track('lab-copy-link', { experiment: experiment.id })
       setCopied(true)
       setTimeout(() => setCopied(false), 1600)
     }).catch(() => {})
@@ -35,8 +37,18 @@ export default function ExperimentFrame({ experiment, index, en, children }: {
     if (!el) return
     const io = new IntersectionObserver(([entry]) => setNear(entry.isIntersecting), { rootMargin: '300px 0px' })
     io.observe(el)
-    return () => io.disconnect()
-  }, [])
+
+    // Separate, stricter observer for analytics: "seen" means at least half
+    // the stage was actually on screen, once per visit to the page.
+    const seen = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting) return
+      track('lab-view', { experiment: experiment.id })
+      seen.disconnect()
+    }, { threshold: 0.5 })
+    seen.observe(el)
+
+    return () => { io.disconnect(); seen.disconnect() }
+  }, [experiment.id])
 
   return (
     <article id={experiment.id} className="lab-item">
