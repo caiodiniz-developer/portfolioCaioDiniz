@@ -302,3 +302,15 @@
   animation: none;
   mix-blend-mode: normal;
 }
+
+/* ── Keyboard focus ──
+   One ring for the whole site. :focus-visible only matches keyboard (and
+   other non-pointer) focus, so mouse clicks stay clean. */
+:focus-visible {
+  outline: 2px solid #4ade80;
+  outline-offset: 3px;
+}
+/* Text fields already show a caret; a ring around the whole field is noise. */
+:is(input:not([type="range"]):not([type="checkbox"]):not([type="radio"]), textarea):focus-visible {
+  outline: none;
+}
