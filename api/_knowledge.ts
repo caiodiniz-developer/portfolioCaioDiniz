@@ -6,6 +6,7 @@ import { projects } from '../src/data/projects'
 import { experience } from '../src/data/experience'
 import { services } from '../src/data/services'
 import { skillCategories } from '../src/data/skills'
+import { experiments } from '../src/data/lab'
 import { SITE } from '../src/lib/constants'
 
 function projectBlock(p: (typeof projects)[number]): string {
@@ -38,6 +39,9 @@ export const KNOWLEDGE = [
   ``,
   `## Serviços oferecidos`,
   ...services.map(s => `- ${s.titlePt}: ${s.descriptionPt} (${s.benefitsPt.join(', ')})`),
+  ``,
+  `## Lab (/lab) — experimentos interativos, cada um isolando uma técnica usada no site`,
+  ...experiments.map(x => `- ${x.titlePt} (/lab#${x.id}) [${x.tags.join(', ')}]: ${x.notePt}`),
   ``,
   `## Projetos`,
   ...projects.map(projectBlock),
