@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import { experiments } from '@/data/lab'
 import ExperimentFrame from '@/components/lab/ExperimentFrame'
 import LiquidMetalLab from '@/components/lab/LiquidMetalLab'
+import MagneticFieldLab from '@/components/lab/MagneticFieldLab'
 import { SITE } from '@/lib/constants'
 import { useLanguageStore } from '@/store/useLanguageStore'
 
@@ -13,6 +14,7 @@ const E: [number, number, number, number] = [0.16, 1, 0.3, 1]
    stage. An id with no entry here simply isn't rendered. */
 const STAGES: Record<string, ComponentType> = {
   'liquid-metal': LiquidMetalLab,
+  'magnetic-field': MagneticFieldLab,
 }
 
 export default function LabPage() {

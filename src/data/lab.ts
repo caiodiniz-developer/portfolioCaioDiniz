@@ -35,6 +35,17 @@ export const experiments: LabExperiment[] = [
     tags: ['WebGL'],
     source: 'src/components/lab/LiquidMetalLab.tsx',
   },
+  {
+    id: 'magnetic-field',
+    titlePt: 'Campo magnético',
+    titleEn: 'Magnetic field',
+    notePt: 'Uma grade de pontos puxada pelo cursor, com a mesma curva dos elementos magnéticos do site: a força cai em linha reta até zero no limite do raio. Cada ponto persegue o alvo aos poucos em vez de saltar, e é isso que dá a inércia.',
+    noteEn: 'A grid of dots pulled by the pointer, using the same falloff as the site’s magnetic elements: strength drops linearly to zero at the edge of a radius. Each dot eases toward its target instead of snapping — that is where the inertia comes from.',
+    hintPt: 'Passe o cursor · no celular, arraste o dedo',
+    hintEn: 'Move the pointer · on touch, drag a finger',
+    tags: ['Canvas', 'Pointer'],
+    source: 'src/components/lab/MagneticFieldLab.tsx',
+  },
 ]
 
 export function sourceUrl(e: LabExperiment): string {
