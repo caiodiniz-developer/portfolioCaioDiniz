@@ -24,6 +24,7 @@ const NAV = [
   { path: '/projects',  pt: 'Projetos', en: 'Projects' },
   { path: '/services',  pt: 'Serviços', en: 'Services' },
   { path: '/contact',   pt: 'Contato',  en: 'Contact'  },
+  { path: '/lab',       pt: 'Lab',      en: 'Lab'      },
   { path: '/cv',        pt: 'Currículo',en: 'Résumé'   },
 ]
 
