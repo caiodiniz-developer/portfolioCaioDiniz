@@ -8,6 +8,7 @@ import MagneticFieldLab from '@/components/lab/MagneticFieldLab'
 import CircleRevealLab from '@/components/lab/CircleRevealLab'
 import CubeLab from '@/components/lab/CubeLab'
 import CardMorphLab from '@/components/lab/CardMorphLab'
+import ScrollScrubLab from '@/components/lab/ScrollScrubLab'
 import { SITE } from '@/lib/constants'
 import { useLanguageStore } from '@/store/useLanguageStore'
 
@@ -21,6 +22,7 @@ const STAGES: Record<string, ComponentType> = {
   'circle-reveal': CircleRevealLab,
   'css-cube': CubeLab,
   'card-morph': CardMorphLab,
+  'scroll-scrub': ScrollScrubLab,
 }
 
 export default function LabPage() {

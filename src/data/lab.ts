@@ -79,6 +79,17 @@ export const experiments: LabExperiment[] = [
     tags: ['View Transitions', 'CSS'],
     source: 'src/components/lab/CardMorphLab.tsx',
   },
+  {
+    id: 'scroll-scrub',
+    titlePt: 'Scroll como cabeçote',
+    titleEn: 'Scroll as the playhead',
+    notePt: 'O vídeo não toca: quem anda nele é a rolagem. O progresso é o quanto este quadro já atravessou a tela, convertido em número de quadro. Dois detalhes deixam liso: o arquivo foi codificado com todo quadro como keyframe, e o tempo só é escrito quando o quadro de destino muda — o scroll dispara bem mais vezes do que o vídeo tem quadros.',
+    noteEn: 'The video never plays: scrolling moves it. Progress is how far this frame has travelled across the screen, converted to a frame number. Two details keep it smooth: the file is encoded with every frame as a keyframe, and the time is only written when the target frame changes — scroll fires far more often than the clip has frames.',
+    hintPt: 'Role a página para cima e para baixo',
+    hintEn: 'Scroll the page up and down',
+    tags: ['Scroll'],
+    source: 'src/components/lab/ScrollScrubLab.tsx',
+  },
 ]
 
 export function sourceUrl(e: LabExperiment): string {
