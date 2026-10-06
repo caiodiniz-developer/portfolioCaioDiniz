@@ -6,6 +6,7 @@ import ExperimentFrame from '@/components/lab/ExperimentFrame'
 import LiquidMetalLab from '@/components/lab/LiquidMetalLab'
 import MagneticFieldLab from '@/components/lab/MagneticFieldLab'
 import CircleRevealLab from '@/components/lab/CircleRevealLab'
+import CubeLab from '@/components/lab/CubeLab'
 import { SITE } from '@/lib/constants'
 import { useLanguageStore } from '@/store/useLanguageStore'
 
@@ -17,6 +18,7 @@ const STAGES: Record<string, ComponentType> = {
   'liquid-metal': LiquidMetalLab,
   'magnetic-field': MagneticFieldLab,
   'circle-reveal': CircleRevealLab,
+  'css-cube': CubeLab,
 }
 
 export default function LabPage() {

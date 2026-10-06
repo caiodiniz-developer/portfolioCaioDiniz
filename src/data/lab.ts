@@ -57,6 +57,17 @@ export const experiments: LabExperiment[] = [
     tags: ['CSS', 'View Transitions'],
     source: 'src/components/lab/CircleRevealLab.tsx',
   },
+  {
+    id: 'css-cube',
+    titlePt: 'Cubo sem WebGL',
+    titleEn: 'A cube without WebGL',
+    notePt: 'Seis divs. Cada face é girada para o seu lado e empurrada para fora em meia aresta com translateZ, dentro de um pai com preserve-3d. Arrastar só muda dois números, os ângulos X e Y; ao soltar, a última velocidade continua girando o cubo e perde força a cada quadro. Isso é a inércia.',
+    noteEn: 'Six divs. Each face is rotated onto its side and pushed out by half the edge with translateZ, inside a parent with preserve-3d. Dragging only changes two numbers, the X and Y angles; on release the last velocity keeps turning it and decays every frame. That is the inertia.',
+    hintPt: 'Arraste para girar · setas do teclado também',
+    hintEn: 'Drag to spin · arrow keys too',
+    tags: ['CSS', '3D', 'Pointer'],
+    source: 'src/components/lab/CubeLab.tsx',
+  },
 ]
 
 export function sourceUrl(e: LabExperiment): string {
