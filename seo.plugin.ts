@@ -12,7 +12,17 @@ import { SITE } from './src/lib/constants'
    Vercel serves a real file before applying the SPA rewrite, so
    /projects/<slug> gets its own HTML and the app boots from it as usual. */
 
-const STATIC_ROUTES = ['', '/about', '/projects', '/services', '/contact', '/lab', '/cv']
+/* The fixed pages, with what a link preview of each should say. The home
+   page ('') keeps index.html as written. */
+const PAGES: Record<string, { title: string; description: string }> = {
+  '/about':    { title: 'Sobre', description: 'Quem é Caio Diniz: trajetória, stack e como ele trabalha.' },
+  '/projects': { title: 'Projetos', description: 'Todos os projetos de Caio Diniz — plataformas full stack, e-commerce, sites institucionais e experiências web.' },
+  '/services': { title: 'Serviços', description: 'O que Caio Diniz faz: UI/UX, desenvolvimento full stack e identidade visual.' },
+  '/contact':  { title: 'Contato', description: 'Fale com Caio Diniz sobre um projeto — WhatsApp, email ou agenda.' },
+  '/lab':      { title: 'Lab', description: 'Seis experimentos interativos, cada um isolando uma técnica: shader WebGL, canvas, View Transitions, CSS 3D e vídeo controlado pelo scroll.' },
+  '/cv':       { title: 'Currículo', description: 'Currículo de Caio Diniz, gerado a partir dos mesmos dados do portfólio.' },
+}
+const STATIC_ROUTES = ['', ...Object.keys(PAGES)]
 
 const esc = (s: string) =>
   s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
@@ -59,6 +69,20 @@ export function seoPlugin(): Plugin {
           image:       `${SITE.url}${image}`,
         })
         const dir = path.join(outDir, 'projects', p.slug)
+        fs.mkdirSync(dir, { recursive: true })
+        fs.writeFileSync(path.join(dir, 'index.html'), html)
+      }
+
+      for (const [route, page] of Object.entries(PAGES)) {
+        const og = `/og${route}.jpg`
+        const image = fs.existsSync(path.join(publicDir, og)) ? og : '/og-image.jpg'
+        const html = withMeta(shell, {
+          title:       `${page.title} — ${SITE.name}`,
+          description: page.description,
+          url:         `${SITE.url}${route}`,
+          image:       `${SITE.url}${image}`,
+        })
+        const dir = path.join(outDir, route)
         fs.mkdirSync(dir, { recursive: true })
         fs.writeFileSync(path.join(dir, 'index.html'), html)
       }
