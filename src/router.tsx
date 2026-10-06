@@ -19,6 +19,7 @@ const ServicesPage  = lazy(() => import("@/pages/ServicesPage"));
 const ContactPage   = lazy(() => import("@/pages/ContactPage"));
 const GuestbookPage = lazy(() => import("@/pages/GuestbookPage"));
 const CVPage        = lazy(() => import("@/pages/CVPage"));
+const LabPage       = lazy(() => import("@/pages/LabPage"));
 const Terminal      = lazy(() => import("@/components/animations/Terminal"));
 const LiveCursors   = lazy(() => import("@/components/LiveCursors"));
 
@@ -143,6 +144,7 @@ export const router = createBrowserRouter([
       { path: "contact", element: <ContactPage /> },
       { path: "guestbook",  element: <GuestbookPage /> },
       { path: "cv",         element: <CVPage /> },
+      { path: "lab",        element: <LabPage /> },
       { path: "*", element: <NotFound /> },
     ],
   },
