@@ -3,6 +3,7 @@ import type { ComponentType } from 'react'
 import { motion } from 'framer-motion'
 import { experiments } from '@/data/lab'
 import ExperimentFrame from '@/components/lab/ExperimentFrame'
+import LiquidMetalLab from '@/components/lab/LiquidMetalLab'
 import { SITE } from '@/lib/constants'
 import { useLanguageStore } from '@/store/useLanguageStore'
 
@@ -10,7 +11,9 @@ const E: [number, number, number, number] = [0.16, 1, 0.3, 1]
 
 /* id (from src/data/lab.ts) → the component that goes on that experiment's
    stage. An id with no entry here simply isn't rendered. */
-const STAGES: Record<string, ComponentType> = {}
+const STAGES: Record<string, ComponentType> = {
+  'liquid-metal': LiquidMetalLab,
+}
 
 export default function LabPage() {
   const en = useLanguageStore(s => s.lang) === 'en'
