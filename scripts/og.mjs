@@ -54,9 +54,28 @@ async function projectCard(p) {
   return out
 }
 
+// The Lab card: the magnetic-field experiment drawn as a still — a dot grid
+// leaning toward one point — instead of a screenshot.
+async function labCard() {
+  const gap = 34, cx = 860, cy = 300, reach = 230
+  let dots = ''
+  for (let y = 40; y < H; y += gap) for (let x = 560; x < W - 20; x += gap) {
+    const dx = cx - x, dy = cy - y, d = Math.hypot(dx, dy)
+    const pull = d < reach ? 1 - d / reach : 0
+    dots += `<circle cx="${(x + dx * pull * 0.42).toFixed(1)}" cy="${(y + dy * pull * 0.42).toFixed(1)}" r="${(1.8 + pull * 4).toFixed(1)}" fill="#fff" fill-opacity="${(0.18 + pull * 0.82).toFixed(2)}"/>`
+  }
+  const field = Buffer.from(`<svg width="${W}" height="${H}">${dots}</svg>`)
+  await sharp({ create: { width: W, height: H, channels: 3, background: '#0d0d0d' } })
+    .composite([{ input: field }, { input: textLayer('CAIO DINIZ', 'Lab', 'Seis experimentos interativos') }])
+    .jpeg({ quality: 84, mozjpeg: true })
+    .toFile(path.join(PUBLIC, 'og', 'lab.jpg'))
+}
+
 fs.mkdirSync(path.join(PUBLIC, 'og'), { recursive: true })
 await siteCard()
 console.log('og-image.jpg')
+await labCard()
+console.log('og/lab.jpg')
 for (const p of projects) {
   await projectCard(p)
   console.log(`og/${p.slug}.jpg`)
