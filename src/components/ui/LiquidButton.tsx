@@ -117,14 +117,17 @@ export function CubertoBtn({
   return (
     <div ref={wrapRef} className={`relative inline-block ${className}`} style={{ perspective:1000 }}>
       {/* measure span */}
-      <span ref={measureRef} aria-hidden style={{ position:"absolute", visibility:"hidden", whiteSpace:"nowrap", fontSize:11, fontWeight:700, letterSpacing:"0.12em", textTransform:"uppercase", pointerEvents:"none", top:0, left:0 }}>
+      <span ref={measureRef} aria-hidden style={{ position:"absolute", visibility:"hidden", display:"inline-flex", alignItems:"center", gap:6, whiteSpace:"nowrap", fontSize:11, fontWeight:700, letterSpacing:"0.12em", textTransform:"uppercase", pointerEvents:"none", top:0, left:0 }}>
         {children}
       </span>
 
       <div style={{ position:"relative", width, height:H, transformStyle:"preserve-3d", transition:"all .8s cubic-bezier(.34,1.56,.64,1)" }}>
         {/* label — visual only; the hit-area button below carries the accessible name */}
         <div aria-hidden style={{ position:"absolute", inset:0, display:"flex", alignItems:"center", justifyContent:"center", gap:6, zIndex:30, pointerEvents:"none", transform:"translateZ(20px)" }}>
-          <span style={{ fontSize:11, color:"#666", fontWeight:700, letterSpacing:"0.12em", textTransform:"uppercase", textShadow:"0 1px 2px rgba(0,0,0,.5)", whiteSpace:"nowrap" }}>
+          {/* inline-flex: Tailwind's preflight makes every <svg> display:block,
+              so an icon after the text dropped onto its own line. The hidden
+              measuring span above uses the same layout so the width matches. */}
+          <span style={{ display:"inline-flex", alignItems:"center", gap:6, fontSize:11, color:"#666", fontWeight:700, letterSpacing:"0.12em", textTransform:"uppercase", textShadow:"0 1px 2px rgba(0,0,0,.5)", whiteSpace:"nowrap" }}>
             {children}
           </span>
         </div>
