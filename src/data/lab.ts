@@ -68,6 +68,17 @@ export const experiments: LabExperiment[] = [
     tags: ['CSS', '3D', 'Pointer'],
     source: 'src/components/lab/CubeLab.tsx',
   },
+  {
+    id: 'card-morph',
+    titlePt: 'Card que vira página',
+    titleEn: 'A card that becomes the page',
+    notePt: 'A transição dos cards de projeto, sem a navegação. A miniatura e a imagem grande são dois elementos diferentes; dar o mesmo view-transition-name aos dois diz ao navegador que são “a mesma coisa”, e ele anima posição, tamanho e um fade entre as capturas de antes e depois. O nome só entra na miniatura clicada, na hora: ele precisa ser único na página.',
+    noteEn: 'The project-card transition, with the routing taken out. The thumbnail and the big image are two different elements; giving both the same view-transition-name tells the browser they are “the same thing”, and it animates position, size and a crossfade between its before/after snapshots. The name goes on the clicked thumbnail only, just in time: it must be unique on the page.',
+    hintPt: 'Clique num card · depois em Voltar',
+    hintEn: 'Click a card · then Back',
+    tags: ['View Transitions', 'CSS'],
+    source: 'src/components/lab/CardMorphLab.tsx',
+  },
 ]
 
 export function sourceUrl(e: LabExperiment): string {

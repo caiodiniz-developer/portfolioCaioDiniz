@@ -7,6 +7,7 @@ import LiquidMetalLab from '@/components/lab/LiquidMetalLab'
 import MagneticFieldLab from '@/components/lab/MagneticFieldLab'
 import CircleRevealLab from '@/components/lab/CircleRevealLab'
 import CubeLab from '@/components/lab/CubeLab'
+import CardMorphLab from '@/components/lab/CardMorphLab'
 import { SITE } from '@/lib/constants'
 import { useLanguageStore } from '@/store/useLanguageStore'
 
@@ -19,6 +20,7 @@ const STAGES: Record<string, ComponentType> = {
   'magnetic-field': MagneticFieldLab,
   'circle-reveal': CircleRevealLab,
   'css-cube': CubeLab,
+  'card-morph': CardMorphLab,
 }
 
 export default function LabPage() {
