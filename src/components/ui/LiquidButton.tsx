@@ -83,7 +83,7 @@ export function CubertoBtn({
       if (entries.some(e => e.isIntersecting)) { io?.disconnect(); enqueueShader(init); }
     }) : null;
     if (el) io!.observe(el);
-    return () => { alive = false; io?.disconnect(); mountRef.current?.destroy?.(); mountRef.current = null; };
+    return () => { alive = false; io?.disconnect(); mountRef.current?.dispose?.(); mountRef.current = null; };
   }, []);
 
   function handleMouseEnter(e: React.MouseEvent<HTMLButtonElement>) {
