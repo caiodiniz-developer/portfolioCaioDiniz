@@ -351,7 +351,6 @@ export default function DevAnatomy() {
               <ambientLight intensity={0.6} />
               <directionalLight position={[3, 5, 3]} intensity={1.1} />
               <directionalLight position={[-2, 2, -3]} intensity={0.35} color="#d0c8ff" />
-              <Environment preset="studio" />
               <OrbitControls
                 target={[0, TARGET_H * 0.50, 0]}
                 enableZoom={false}
@@ -363,7 +362,12 @@ export default function DevAnatomy() {
                 minPolarAngle={Math.PI * 0.1}
                 maxPolarAngle={Math.PI * 0.9}
               />
+              {/* Everything that loads something goes in here. <Environment>
+                  fetches an HDR; outside this boundary its suspension escaped
+                  the Canvas, and the route-level Suspense hid the whole page
+                  mid-entrance — which killed the hero's fade-in for good. */}
               <Suspense fallback={null}>
+                <Environment preset="studio" />
                 <HumanModel onOffset={handleOffset.current} />
               </Suspense>
               <DotProjector dotRefs={dotRefs} modelOffset={modelOffset} />
