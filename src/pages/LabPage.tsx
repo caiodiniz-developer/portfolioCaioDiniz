@@ -101,7 +101,9 @@ export default function LabPage() {
         .lab-h1 {
           margin: 0; color: #fff;
           font-family: 'Syne', sans-serif; font-weight: 900;
-          font-size: clamp(2.5rem, 7vw, 6rem); letter-spacing: -0.055em; line-height: 0.9;
+          /* Syne Black is very wide: 'desmontadas.' needs ~8.4vw per em to
+             fit a phone, so the floor is lower than the other page titles. */
+          font-size: clamp(1.7rem, 8.4vw, 6rem); letter-spacing: -0.055em; line-height: 0.9;
         }
         .lab-h1 span { color: rgba(255,255,255,0.22); }
         .lab-lead { margin: 0; max-width: 38rem; font-size: 0.95rem; line-height: 1.75; color: rgba(255,255,255,0.55); }
