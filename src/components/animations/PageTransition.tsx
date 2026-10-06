@@ -8,7 +8,7 @@ const ROUTE_NAMES: Record<string, string> = {
   '/projects':   'projects.tsx',
   '/services':   'services.tsx',
   '/contact':    'contact.tsx',
-  '/guestbook':  'guestbook.tsx',
+  '/lab':        'lab.tsx',
 }
 
 function IdeTab({ pathname }: { pathname: string }) {
