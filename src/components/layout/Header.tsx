@@ -11,7 +11,7 @@ import { usePaletteStore } from '@/store/usePaletteStore'
 import { isMac } from '@/components/CommandPalette'
 import ThemeToggle from '@/components/ThemeToggle'
 import { NAV_LINKS, SITE } from '@/lib/constants'
-import { CubertoBtn } from '@/components/sections/Hero'
+import { CubertoBtn } from '@/components/ui/LiquidButton'
 
 export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false)

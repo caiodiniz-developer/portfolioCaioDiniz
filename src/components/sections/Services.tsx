@@ -5,7 +5,7 @@ import { useT } from '@/hooks/useTranslation'
 import { useLanguageStore } from '@/store/useLanguageStore'
 import { services } from '@/data/services'
 import { useCursorStore } from '@/store/useCursorStore'
-import { CubertoBtn } from './Hero'
+import { CubertoBtn } from '@/components/ui/LiquidButton'
 
 const E: [number, number, number, number] = [0.16, 1, 0.3, 1]
 

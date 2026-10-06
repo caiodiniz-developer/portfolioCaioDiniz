@@ -9,7 +9,7 @@ import { projects } from '@/data/projects'
 import { useCursorStore } from '@/store/useCursorStore'
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
 import { track } from '@/lib/analytics'
-import { CubertoBtn } from './Hero'
+import { CubertoBtn } from '@/components/ui/LiquidButton'
 import HoverVideo from '@/components/projects/HoverVideo'
 import { morphNavigate, isPlainClick, prefetchProjectDetail } from '@/lib/morph'
 
