@@ -174,6 +174,7 @@ export default function LabPage() {
           color: rgba(255,255,255,0.6); text-decoration: none; transition: color 0.2s;
         }
         .lab-source:hover { color: #fff; }
+        .lab-copy-link { margin-left: 1.25rem; padding: 0; border: none; background: none; cursor: pointer; font-family: inherit; }
 
         .lab-stage-wrap { min-width: 0; }
         .lab-stage {
