@@ -26,7 +26,7 @@ const SOCIALS = [
 const MORE = [
   { path: '/cv',        pt: 'Currículo',        en: 'Résumé'    },
   { path: '/projects',  pt: 'Projetos',         en: 'Projects'  },
-  { path: '/guestbook', pt: 'Livro de visitas', en: 'Guestbook' },
+  { path: '/lab',       pt: 'Laboratório',      en: 'Lab'       },
 ]
 
 export default function CTASection() {
