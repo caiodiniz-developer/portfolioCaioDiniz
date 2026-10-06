@@ -1,4 +1,4 @@
-import { useLocation, Link } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { useLanguageStore } from '@/store/useLanguageStore'
 import { useCursorStore } from '@/store/useCursorStore'
 import { usePresentationStore } from '@/store/usePresentationStore'
@@ -32,9 +32,7 @@ export default function Footer() {
   const pt         = lang === 'pt'
   const setCursor  = useCursorStore((s) => s.setState)
   const presenting = usePresentationStore((s) => s.active)
-  const { pathname } = useLocation()
   const year       = new Date().getFullYear()
-  const isGuestbook = pathname === '/guestbook'
 
   function scrollToTop() {
     const lenis = getLenis()
@@ -47,8 +45,7 @@ export default function Footer() {
   return (
     <footer
       style={{
-        background: isGuestbook ? 'rgba(8,8,8,0.85)' : '#080808',
-        backdropFilter: isGuestbook ? 'blur(20px)' : undefined,
+        background: '#080808',
         borderTop: '1px solid rgba(255,255,255,0.05)',
         position: 'relative',
       }}
