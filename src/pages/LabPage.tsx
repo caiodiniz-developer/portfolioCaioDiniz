@@ -40,15 +40,16 @@ export default function LabPage() {
      top on every navigation, so this runs a beat later, once the page
      transition has settled and the layout is final. */
   const { hash } = useLocation()
+  function scrollToExperiment(id: string) {
+    const el = document.getElementById(id)
+    if (!el) return
+    const lenis = getLenis()
+    if (lenis) lenis.scrollTo(el, { offset: -96, duration: 1 })
+    else el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
   useEffect(() => {
     if (!hash) return
-    const t = setTimeout(() => {
-      const el = document.getElementById(decodeURIComponent(hash.slice(1)))
-      if (!el) return
-      const lenis = getLenis()
-      if (lenis) lenis.scrollTo(el, { offset: -96, duration: 1 })
-      else el.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    }, 450)
+    const t = setTimeout(() => scrollToExperiment(decodeURIComponent(hash.slice(1))), 450)
     return () => clearTimeout(t)
   }, [hash])
 
@@ -77,6 +78,20 @@ export default function LabPage() {
               : 'Cada peça abaixo isola uma técnica usada em algum lugar deste site. Brinque, leia como funciona, abra o código.'}
           </p>
         </motion.header>
+
+        {/* Index — the page is long; this is the way to one piece. */}
+        <nav className="lab-index" aria-label={en ? 'Experiments' : 'Experimentos'}>
+          {shown.map((x, i) => (
+            <a
+              key={x.id}
+              href={`#${x.id}`}
+              onClick={e => { e.preventDefault(); history.replaceState(null, '', `#${x.id}`); scrollToExperiment(x.id) }}
+            >
+              <span>{String(i + 1).padStart(2, '0')}</span>
+              {en ? x.titleEn : x.titlePt}
+            </a>
+          ))}
+        </nav>
 
         <div className="lab-list">
           {shown.map((experiment, i) => {
@@ -108,7 +123,21 @@ export default function LabPage() {
         .lab-h1 span { color: rgba(255,255,255,0.22); }
         .lab-lead { margin: 0; max-width: 38rem; font-size: 0.95rem; line-height: 1.75; color: rgba(255,255,255,0.55); }
 
-        .lab-list { margin-top: clamp(3rem,7vw,6rem); }
+        .lab-index { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: clamp(2rem,4vw,3rem); }
+        .lab-index a {
+          display: inline-flex; align-items: center; gap: 0.55rem;
+          padding: 0.55rem 0.95rem; border-radius: 999px;
+          border: 1px solid rgba(255,255,255,0.1);
+          font-size: 0.74rem; font-weight: 600; color: rgba(255,255,255,0.7);
+          text-decoration: none; transition: border-color 0.2s, color 0.2s, background 0.2s;
+        }
+        .lab-index a:hover { color: #fff; border-color: rgba(255,255,255,0.3); background: rgba(255,255,255,0.04); }
+        .lab-index span {
+          font-family: "JetBrains Mono","Fira Code",ui-monospace,monospace;
+          font-size: 0.62rem; color: rgba(255,255,255,0.45);
+        }
+
+        .lab-list { margin-top: clamp(2.5rem,5vw,4rem); }
         .lab-item {
           display: grid; gap: 1.75rem;
           padding: clamp(2.5rem,5vw,4rem) 0;
