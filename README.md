@@ -15,7 +15,10 @@ Portfólio pessoal — React 19, TypeScript, GSAP, Three.js.
 - **Vídeo no hover** — cada projeto toca alguns segundos do site real rodando. Gravados em headless direto das URLs de produção, 9 clipes somam 2,8 MB e só baixam no primeiro hover.
 - **Avatar 3D** na página Sobre, com zonas de habilidade projetadas sobre o modelo.
 - **Terminal secreto** — <kbd>Ctrl</kbd> + <kbd>`</kbd>. Tente `snake`.
-- **Livro de visitas** em Supabase, com moderação garantida por Row Level Security — o front não guarda segredo nenhum.
+- **[Lab](https://www.caiodiniz.dev.br/lab)** — seis experimentos, cada um isolando uma técnica do site: shader de metal líquido, campo magnético em canvas, revelação circular, cubo em CSS 3D, morph com View Transitions e vídeo controlado pelo scroll. Cada um linka o próprio código.
+- **Ctrl K** — paleta de comandos com busca em projetos, páginas e experimentos, e um assistente que responde perguntas sobre o meu trabalho a partir dos dados do próprio site.
+- **Modo claro** com revelação circular a partir do botão clicado.
+- **Cursores ao vivo** de outros visitantes na mesma página, via Supabase Realtime.
 - **Preview por projeto** — cada case study tem título e imagem próprios ao ser compartilhado no WhatsApp ou LinkedIn, gerados no build.
 
 ## Performance
@@ -38,7 +41,7 @@ npm run build      # gera dist/ + páginas de preview + sitemap
 npm run og         # regenera as imagens de compartilhamento
 ```
 
-Variáveis opcionais em [`.env.example`](.env.example). O banco do livro de visitas está em [`supabase/guestbook.sql`](supabase/guestbook.sql).
+Variáveis opcionais em [`.env.example`](.env.example) — o site roda sem nenhuma delas.
 
 ## Stack
 
