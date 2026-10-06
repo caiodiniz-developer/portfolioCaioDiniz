@@ -48,6 +48,9 @@ export default function MobileNav() {
               end={path === '/'}
               style={{
                 flex:           1,
+                // Without this a flex item can't shrink below its label's
+                // width, and the sixth tab was pushed off the screen.
+                minWidth:       0,
                 display:        'flex',
                 flexDirection:  'column',
                 alignItems:     'center',
