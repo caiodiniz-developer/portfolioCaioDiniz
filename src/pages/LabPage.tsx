@@ -149,7 +149,9 @@ export default function LabPage() {
         .lab-stage-wrap { min-width: 0; }
         .lab-stage {
           position: relative; overflow: hidden;
-          min-height: clamp(280px, 42vw, 440px);
+          /* Tall enough on phones that an experiment with a control panel
+             (liquid metal) still has room for the thing being controlled. */
+          min-height: clamp(380px, 42vw, 440px);
           border-radius: clamp(14px,2vw,20px);
           border: 1px solid rgba(255,255,255,0.08);
           background: #0a0a0a;
