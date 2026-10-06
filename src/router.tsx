@@ -1,4 +1,4 @@
-import { createBrowserRouter, Outlet, useLocation } from "react-router-dom";
+import { createBrowserRouter, Navigate, Outlet, useLocation } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import Header from "@/components/layout/Header";
@@ -17,7 +17,6 @@ const ProjectsPage  = lazy(() => import("@/pages/ProjectsPage"));
 const ProjectDetail = lazy(() => import("@/pages/ProjectDetail"));
 const ServicesPage  = lazy(() => import("@/pages/ServicesPage"));
 const ContactPage   = lazy(() => import("@/pages/ContactPage"));
-const GuestbookPage = lazy(() => import("@/pages/GuestbookPage"));
 const CVPage        = lazy(() => import("@/pages/CVPage"));
 const LabPage       = lazy(() => import("@/pages/LabPage"));
 const Terminal      = lazy(() => import("@/components/animations/Terminal"));
@@ -142,7 +141,8 @@ export const router = createBrowserRouter([
       { path: "projects/:slug", element: <ProjectDetail /> },
       { path: "services", element: <ServicesPage /> },
       { path: "contact", element: <ContactPage /> },
-      { path: "guestbook",  element: <GuestbookPage /> },
+      // The guestbook was replaced by the Lab; keep old links working.
+      { path: "guestbook",  element: <Navigate to="/lab" replace /> },
       { path: "cv",         element: <CVPage /> },
       { path: "lab",        element: <LabPage /> },
       { path: "*", element: <NotFound /> },
