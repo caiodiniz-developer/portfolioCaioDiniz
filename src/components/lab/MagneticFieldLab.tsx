@@ -46,6 +46,9 @@ export default function MagneticFieldLab() {
 
     function frame() {
       ctx!.clearRect(0, 0, w, h)
+      // Canvases are exempt from the light theme's inversion (like photos),
+      // so the dots have to pick their own ink: dark on light, light on dark.
+      const ink = document.documentElement.dataset.theme === 'light' ? '13,13,13' : '255,255,255'
       for (const d of dots) {
         const dx = pointer.x - d.hx, dy = pointer.y - d.hy
         const dist = Math.hypot(dx, dy)
@@ -60,7 +63,7 @@ export default function MagneticFieldLab() {
 
         ctx!.beginPath()
         ctx!.arc(d.x, d.y, 1.4 + pull * 2.6, 0, Math.PI * 2)
-        ctx!.fillStyle = `rgba(255,255,255,${0.2 + pull * 0.8})`
+        ctx!.fillStyle = `rgba(${ink},${0.2 + pull * 0.8})`
         ctx!.fill()
       }
       raf = requestAnimationFrame(frame)
