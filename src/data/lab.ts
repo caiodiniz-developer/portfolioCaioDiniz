@@ -46,6 +46,17 @@ export const experiments: LabExperiment[] = [
     tags: ['Canvas', 'Pointer'],
     source: 'src/components/lab/MagneticFieldLab.tsx',
   },
+  {
+    id: 'circle-reveal',
+    titlePt: 'Revelação circular',
+    titleEn: 'Circular reveal',
+    notePt: 'A troca de tema deste site, numa caixa. Duas cópias do mesmo conteúdo ficam empilhadas; o clique põe o outro tema por cima, recortado num círculo de raio zero no ponto clicado, e esse círculo cresce até cobrir o canto mais distante. No site real as duas “cópias” são as capturas de antes e depois que o navegador tira com a View Transitions API.',
+    noteEn: 'This site’s theme switch, in a box. Two copies of the same content are stacked; a click puts the other theme on top, clipped to a zero-radius circle at the click point, and the circle grows until it covers the farthest corner. On the real site the two “copies” are the before/after snapshots the browser takes with the View Transitions API.',
+    hintPt: 'Clique em qualquer ponto · Enter também funciona',
+    hintEn: 'Click anywhere · Enter works too',
+    tags: ['CSS', 'View Transitions'],
+    source: 'src/components/lab/CircleRevealLab.tsx',
+  },
 ]
 
 export function sourceUrl(e: LabExperiment): string {

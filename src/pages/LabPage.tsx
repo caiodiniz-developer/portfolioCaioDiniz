@@ -5,6 +5,7 @@ import { experiments } from '@/data/lab'
 import ExperimentFrame from '@/components/lab/ExperimentFrame'
 import LiquidMetalLab from '@/components/lab/LiquidMetalLab'
 import MagneticFieldLab from '@/components/lab/MagneticFieldLab'
+import CircleRevealLab from '@/components/lab/CircleRevealLab'
 import { SITE } from '@/lib/constants'
 import { useLanguageStore } from '@/store/useLanguageStore'
 
@@ -15,6 +16,7 @@ const E: [number, number, number, number] = [0.16, 1, 0.3, 1]
 const STAGES: Record<string, ComponentType> = {
   'liquid-metal': LiquidMetalLab,
   'magnetic-field': MagneticFieldLab,
+  'circle-reveal': CircleRevealLab,
 }
 
 export default function LabPage() {
